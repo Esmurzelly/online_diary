@@ -1,0 +1,118 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  password  String
+  name      String
+  surname   String?
+  avatarUrl String?
+  phone     String?
+  address   String?
+  parentIds String[] @db.ObjectId
+  parents   Parent[] @relation(fields: [parentIds], references: [id])
+  classId   String?   @db.ObjectId
+  class     Class?    @relation(fields: [classId], references: [id])
+  grades    Grade[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Teacher {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  email     String    @unique
+  password  String
+  name      String
+  surname   String
+  avatarUrl String?
+  phone     String?
+  address   String?
+  schoolId  String?    @db.ObjectId
+  school    School?    @relation(fields: [schoolId], references: [id])
+  subjects  Subject[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Admin {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Parent {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  email       String    @unique
+  password    String
+  name        String
+  surname     String
+  avatarUrl   String?
+  phone       String?
+  address     String?
+  childrenIds String[]  @db.ObjectId
+  children    Student[] @relation(fields: [childrenIds], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model School {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  phone     String
+  email     String
+  address   String
+  teachers  Teacher[]
+  classes   Class[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Class {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  num       Int
+  letter    String?
+  schoolId  String?    @db.ObjectId
+  school    School?    @relation(fields: [schoolId], references: [id])
+  subjects  Subject[]
+  students  Student[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Subject {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  teacher   Teacher? @relation(fields: [teacherId], references: [id])
+  teacherId String?  @db.ObjectId
+  classId   String?   @db.ObjectId
+  class     Class?    @relation(fields: [classId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  grades    Grade[]
+}
+
+model Grade {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  value     Int
+  date      DateTime
+  subjectId String?   @db.ObjectId
+  subject   Subject?  @relation(fields: [subjectId], references: [id])
+  studentId String?  @db.ObjectId
+  student   Student? @relation(fields: [studentId], references: [id])
+  comment   String?
+}
