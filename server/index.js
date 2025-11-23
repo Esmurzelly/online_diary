@@ -1,19 +1,30 @@
 import express from 'express';
-import { prisma } from './prisma/prisma-client.js';
-
+import cookieParser from 'cookie-parser';
+import fs from 'fs';
+import 'dotenv/config';
+import cors from 'cors';
+import serviceRouter from './routes/index.js'
 
 const app = express();
 
-app.get('/', (req, res) => {
-    res.send("Hello world")
-});
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use('/uploads', express.static('uploads'))
 
-app.listen(3000, () => {
-    console.log(`Example app listening on port 3000`);
-    const fetchData = async () => {
-        const allStudents = await prisma.student.findMany();
-        console.log('All students (null', JSON.stringify(allStudents));
-    }
+app.use('/api', serviceRouter);
 
-    fetchData();
+if(!fs.existsSync('uploads')) {
+    fs.mkdirSync('uploads');
+};
+
+const port = process.env.PORT || 3000;
+
+app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`);
 })
+
+app.get('/api', (req, res) => {
+    res.send("Hello world from server /api")
+});
