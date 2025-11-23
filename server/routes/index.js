@@ -1,7 +1,9 @@
 import express from 'express';
 import multer from 'multer';
-import { signInParent, signInStudent, signInTeacher, signUpParent, signUpStudent, signUpTeacher, updateParent, updateStudent, updateTeacher } from '../contorllers/auth.contorller.js';
+import { signInParent, signInStudent, signInTeacher, signUpParent, signUpStudent, signUpTeacher } from '../contorllers/auth.contorller.js';
 import { ckeckUser } from '../middleware/auth.js';
+import { updateParent, updateStudent, updateTeacher } from '../contorllers/user.controller.js';
+import { createSchool, updateSchoolTeachers } from '../contorllers/school.controller.js';
 
 const router = express.Router();
 const uploadDestionation = 'uploads';
@@ -28,6 +30,10 @@ router.put('/update-teacher/:id', ckeckUser, uploads.single("avatar"), updateTea
 // Routes parent
 router.post('/signup-parent', uploads.single("avatar"), signUpParent); // auth
 router.post('/signin-parent', signInParent);
-router.put('/update-parent/:id', ckeckUser, uploads.single("avatar"), updateParent)
+router.put('/update-parent/:id', ckeckUser, uploads.single("avatar"), updateParent);
+
+// Routes school
+router.post('/create-school', createSchool);
+router.put('/update-school-teacher', ckeckUser, updateSchoolTeachers);
 
 export default router;
