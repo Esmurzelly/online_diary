@@ -329,3 +329,54 @@ export const updateParent = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 }
+
+export const removeStudent = async (req, res) => {
+    const { userId } = req.body;
+
+    try {
+        const removedStudent = await prisma.student.delete({
+            where: {
+                id: userId
+            }
+        });
+
+        return res.status(200).json({ removedStudent, message: "Student was removed successfuly" });
+    } catch (error) {
+        console.log('Smth happened in removeStudent');
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+export const removeTeacher = async (req, res) => {
+    const { userId } = req.body;
+
+    try {
+        const removedTeacher = await prisma.teacher.delete({
+            where: {
+                id: userId
+            }
+        });
+
+        return res.status(200).json({ removedTeacher, message: "Teacher was removed successfuly" });
+    } catch (error) {
+        console.log('Smth happened in removeStudent');
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+export const removeParent = async (req, res) => {
+    const { userId } = req.body;
+
+    try {
+        const removedParent = await prisma.parent.delete({
+            where: {
+                id: userId
+            }
+        });
+
+        return res.status(200).json({ removedParent, message: "Parent was removed successfuly" });
+    } catch (error) {
+        console.log('Smth happened in removeStudent');
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}

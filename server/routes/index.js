@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import { signInParent, signInStudent, signInTeacher, signUpParent, signUpStudent, signUpTeacher } from '../contorllers/auth.contorller.js';
 import { ckeckUser } from '../middleware/auth.js';
-import { getAllUsers, getParentById, getStudentById, getTeacherById, getUserById, updateParent, updateStudent, updateTeacher } from '../contorllers/user.controller.js';
+import { getAllUsers, getParentById, getStudentById, getTeacherById, getUserById, removeParent, removeStudent, removeTeacher, updateParent, updateStudent, updateTeacher } from '../contorllers/user.controller.js';
 import { createSchool, getAllSchools, getSchoolById, updateSchoolClasses, updateSchoolTeachers } from '../contorllers/school.controller.js';
 import { addSubject, addTeacherToSubject, deleteTeacherFromSubject, removeSubject, updateSubject } from '../contorllers/subject.conroller.js';
 
@@ -24,19 +24,22 @@ router.get('/get-all-users', getAllUsers);
 router.get('/get-user-by-id', getUserById);
 router.post('/signup-student',uploads.single("avatar"), signUpStudent); // auth
 router.post('/signin-student', signInStudent);
-router.put('/update-student/:id', ckeckUser, uploads.single("avatar"), updateStudent)
+router.put('/update-student/:id', ckeckUser, uploads.single("avatar"), updateStudent);
+router.delete('/delete-student', removeStudent);
 
 // Routes teacher
 router.get('/get-teacher-by-id', getTeacherById);
 router.post('/signup-teacher', uploads.single("avatar"), signUpTeacher); // auth
 router.post('/signin-teacher', signInTeacher);
 router.put('/update-teacher/:id', ckeckUser, uploads.single("avatar"), updateTeacher)
+router.delete('/delete-teacher', removeTeacher);
 
 // Routes parent
 router.get('/get-parent-by-id', getParentById);
 router.post('/signup-parent', uploads.single("avatar"), signUpParent); // auth
 router.post('/signin-parent', signInParent);
 router.put('/update-parent/:id', ckeckUser, uploads.single("avatar"), updateParent);
+router.delete('/delete-parent', removeParent);
 
 // Routes school
 router.get('/get-all-schools', getAllSchools);
