@@ -35,20 +35,6 @@ export const addTeacherToSubject = async (req, res) => {
     }
 
     try {
-        // const teacherToSubject = await prisma.teacher.update({
-        //     where: {
-        //         id: teacherId
-        //     },
-        //     data: {
-        //         subjects: {
-        //             connect: {
-        //                 id: subjectId
-        //             }
-        //         }
-        //     }
-        // })
-
-
         const teacherToSubject = await prisma.subject.update({
             where: {
                 id: subjectId

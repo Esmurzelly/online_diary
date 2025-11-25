@@ -340,7 +340,7 @@ export const removeStudent = async (req, res) => {
             }
         });
 
-        return res.status(200).json({ removedStudent, message: "Student was removed successfuly" });
+        return res.status(200).json({ removedStudent: removedStudent, message: "Student was removed successfuly" });
     } catch (error) {
         console.log('Smth happened in removeStudent');
         res.status(500).json({ error: 'Internal server error' });

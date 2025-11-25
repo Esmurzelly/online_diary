@@ -5,6 +5,7 @@ import { ckeckUser } from '../middleware/auth.js';
 import { getAllUsers, getParentById, getStudentById, getTeacherById, getUserById, removeParent, removeStudent, removeTeacher, updateParent, updateStudent, updateTeacher } from '../contorllers/user.controller.js';
 import { createSchool, getAllSchools, getSchoolById, updateSchoolClasses, updateSchoolTeachers } from '../contorllers/school.controller.js';
 import { addSubject, addTeacherToSubject, deleteTeacherFromSubject, removeSubject, updateSubject } from '../contorllers/subject.conroller.js';
+import { addStudentToClass, removeStudentFromClass } from '../contorllers/class.controller.js';
 
 const router = express.Router();
 const uploadDestionation = 'uploads';
@@ -19,12 +20,14 @@ const storage = multer.diskStorage({
 const uploads = multer({ storage });
 
 // Routes student
-router.get('/get-student-by-id', getStudentById);
 router.get('/get-all-users', getAllUsers);
+router.get('/get-student-by-id', getStudentById);
 router.get('/get-user-by-id', getUserById);
 router.post('/signup-student',uploads.single("avatar"), signUpStudent); // auth
 router.post('/signin-student', signInStudent);
 router.put('/update-student/:id', ckeckUser, uploads.single("avatar"), updateStudent);
+router.put('/add-student-to-class', ckeckUser, addStudentToClass);
+router.put('/remove-student-from-class', ckeckUser, removeStudentFromClass)
 router.delete('/delete-student', removeStudent);
 
 // Routes teacher

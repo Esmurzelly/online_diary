@@ -229,3 +229,5 @@ export const signInParent = async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 }
+
+// export const google = async (req, res, next) => {}
