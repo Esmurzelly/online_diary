@@ -76,7 +76,7 @@ export const updateSchoolTeachers = async (req, res) => {
             },
             data: {
                 schoolId: schoolId
-            }
+            },
         });
 
         res.status(200).json({ data: updatedTeacher, message: "Teacher was added successfuly" });
@@ -87,18 +87,37 @@ export const updateSchoolTeachers = async (req, res) => {
 }
 
 export const updateSchoolClasses = async (req, res) => {
-    const { schoolId } = req.body;
+    const { schoolId, num, letter } = req.body;
+    const { id } = req.params;
 
-    if (!schoolId) {
+    if (!schoolId || !num || !letter) {
         return res.status(403).json({ error: "Choose the school" });
     }
 
-    try {
-        // const newClass = await prisma.class.create({
-        //     where: {
+    if (id !== req.user.userId) {
+        return res.status(403).json({ error: "No access" });
+    }
 
-        //     }
-        // })
+    const classes = [];
+
+    addClasses(classes, num, letter, LOW_SUBJECTS.concat(MEDIUM_SUBJECTS, HIGH_SUBJECTS));
+
+    try {
+        const newClass = await prisma.school.update({
+            where: {
+                id: schoolId
+            },
+            data: {
+                classes: {
+                    create: classes,
+                }
+            },
+            include: {
+                classes: true,
+            }
+        });
+
+        res.status(200).json({ data: newClass, message: "Class was added successfuly!" });
     } catch (error) {
         console.log('Smth happened in updateSchoolClasses', error);
         res.status(500).json({ error: 'Internal server error' });
