@@ -6,6 +6,7 @@ import { getAllUsers, getParentById, getStudentById, getTeacherById, getUserById
 import { createSchool, getAllSchools, getSchoolById, updateSchoolClasses, updateSchoolTeachers } from '../contorllers/school.controller.js';
 import { addSubject, addTeacherToSubject, deleteTeacherFromSubject, removeSubject, updateSubject } from '../contorllers/subject.conroller.js';
 import { addStudentToClass, removeStudentFromClass } from '../contorllers/class.controller.js';
+import { addParentToChild, removeParentFromChild } from '../contorllers/parent.controller.js';
 
 const router = express.Router();
 const uploadDestionation = 'uploads';
@@ -42,6 +43,8 @@ router.get('/get-parent-by-id', getParentById);
 router.post('/signup-parent', uploads.single("avatar"), signUpParent); // auth
 router.post('/signin-parent', signInParent);
 router.put('/update-parent/:id', ckeckUser, uploads.single("avatar"), updateParent);
+router.put('/add-parent-to-child', ckeckUser, addParentToChild);
+router.put('/remove-parent-from-child', ckeckUser, removeParentFromChild);
 router.delete('/delete-parent', removeParent);
 
 // Routes school
