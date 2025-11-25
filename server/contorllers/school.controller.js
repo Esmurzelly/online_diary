@@ -1,6 +1,43 @@
-import { HIGH_SUBJECTS, LOW_SUBJECTS, MEDIUM_SUBJECTS } from '../constants.js';
 import { prisma } from '../prisma/prisma-client.js'
 import { addClasses } from '../utils/addClasses.js';
+import { HIGH_SUBJECTS, LOW_SUBJECTS, MEDIUM_SUBJECTS } from '../constants.js';
+
+export const getAllSchools = async (req, res) => {
+    try {
+        const schools = await prisma.school.findMany({
+            include : {
+                classes: true,
+                teachers: true
+            }
+        });
+
+        return res.status(200).json({ allSchools: schools, message: "You have got all schools" })
+    } catch (error) {
+        console.log('Smth happened in getAllSchools', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+export const getSchoolById = async (req, res) => {
+    const { schoolId } = req.body;
+
+    try {
+        const schoolById = await prisma.school.findFirst({
+            where: {
+                id: schoolId
+            },
+            include: {
+                teachers: true,
+                classes: true
+            }
+        })
+
+        return res.status(200).json({ schoolById: schoolById, message: "You have got school" })
+    } catch (error) {
+        console.log('Smth happened in getSchoolById', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
 
 export const createSchool = async (req, res) => {
     const { title, phone, email, address } = req.body;
@@ -12,16 +49,6 @@ export const createSchool = async (req, res) => {
 
     try {
         const classes = [];
-
-        // const addClasses = (num, letter, typeOfSubject) => {
-        //     classes.push({
-        //         num: num,
-        //         letter: letter,
-        //         subjects: {
-        //             create: typeOfSubject.map(title => ({ title }))
-        //         }
-        //     });
-        // }
 
         for (let num = 1; num <= 11; num++) {
             if (num >= 1 && num <= 4) {

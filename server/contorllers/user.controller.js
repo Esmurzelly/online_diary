@@ -1,6 +1,107 @@
 import bcrypt, { hash } from 'bcryptjs';
 import { prisma } from '../prisma/prisma-client.js';
 
+export const getAllUsers = async (req, res) => {
+    try {
+        const allStudents = await prisma.student.findMany();
+        const allTeachers = await prisma.teacher.findMany();
+        const allParents = await prisma.parent.findMany();
+
+        return res.status(200).json({ users: [...allStudents, ...allTeachers, ...allParents], message: "You have got all users" });
+    } catch (error) {
+        console.error('Smt went wrong in getAllUsers', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+export const getUserById = async (req, res) => {
+    const { userId } = req.body;
+
+    if (!userId) {
+        return res.status(403).json({ error: "All fields are required" });
+    }
+
+    try {
+        const studentById = await prisma.student.findFirst({
+            where: {
+                id: userId
+            }
+        });
+        const teacherById = await prisma.teacher.findFirst({
+            where: {
+                id: userId
+            }
+        });
+        const parentById = await prisma.parent.findFirst({
+            where: {
+                id: userId
+            }
+        });
+
+        const user = studentById ? studentById : teacherById ? teacherById : parentById 
+
+        return res.status(200).json({ user: user, message: "You have got user by id" });
+    } catch (error) {
+        console.error('Smt went wrong in getUserById', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+
+}
+
+export const getStudentById = async (req, res) => {
+    const { userId } = req.body;
+
+    try {
+        const studentById = await prisma.student.findFirst({
+            where: {
+                id: userId
+            },
+            include: {
+                grades: true
+            }
+        });
+
+        return res.status(200).json({ student: studentById, message: "You have got student by id" });
+    } catch (error) {
+        console.error('Smt went wrong in getStudentById', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+export const getTeacherById = async (req, res) => {
+    const { userId } = req.body;
+
+    try {
+        const teacherById = await prisma.teacher.findFirst({
+            where: {
+                id: userId
+            }
+        });
+
+        return res.status(200).json({ teacher: teacherById, message: "You have got teacher by id" });
+    } catch (error) {
+        console.error('Smt went wrong in getStudentById', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+export const getParentById = async (req, res) => {
+    const { userId } = req.body;
+
+    try {
+        const parentById = await prisma.parent.findFirst({
+            where: {
+                id: userId
+            }
+        });
+
+        return res.status(200).json({ parent: parentById, message: "You have got parent by id" });
+    } catch (error) {
+        console.error('Smt went wrong in getStudentById', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
 export const updateStudent = async (req, res) => {
     const { id } = req.params;
 
