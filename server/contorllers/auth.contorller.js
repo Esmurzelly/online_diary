@@ -140,6 +140,30 @@ export const signUpParent = async (req, res) => {
     }
 }
 
+export const signUpAdmin = async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(403).json({ error: "Wrong credentials" })
+    }
+
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const user = await prisma.admin.create({
+            data: {
+                email: email,
+                password: hashedPassword,
+            }
+        });
+
+        return res.status(200).json({ user: { email: user.email } })
+    } catch (error) {
+        console.error('Smt went wrong in register', error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
+
 export const signInStudent = async (req, res) => {
     const { email, password } = req.body;
 
@@ -224,6 +248,38 @@ export const signInParent = async (req, res) => {
 
         const token = jwt.sign(({ userId: user.id }), process.env.SECRET_KEY, { expiresIn: '7d' });
         res.json({ user: user, token, message: "Login is successful" });
+    } catch (error) {
+        console.error('Smt went wrong in register', error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
+
+export const signInAdmin = async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(403).json({ error: 'All fields are required' });
+    };
+
+    try {
+        const user = await prisma.admin.findUnique({
+            where: {
+                email: email
+            }
+        });
+
+        if (!user) {
+            return res.status(403).json({ message: "Such user doesnt exist" })
+        }
+
+        const validPassword = bcrypt.compare(password, user.password);
+
+        if(!validPassword) {
+            return res.status(403).json({ message: "Wrong credentials" })
+        };
+
+        const token = jwt.sign(({ userId: user.id }), process.env.SECRET_KEY, { expiresIn: '7d' });
+        res.status(200).json({ user, token, message: "You logged in as Admin successfuly" })
     } catch (error) {
         console.error('Smt went wrong in register', error);
         res.status(500).json({ error: "Internal server error" });

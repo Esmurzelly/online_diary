@@ -177,8 +177,6 @@ export const updateGrade = async (req, res) => {
 
         const commonIdInSubject = teacher.subjects.filter(teacherSubject => student.class.subjects.some(studentSubject => teacherSubject.id === studentSubject.id));
 
-        console.log('commonIdInSubject', commonIdInSubject);
-
         if (commonIdInSubject.length === 0) {
             return res.status(403).json({ error: "No acccess. Different subjects" })
         }

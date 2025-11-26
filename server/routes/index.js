@@ -1,9 +1,9 @@
 import express from 'express';
 import multer from 'multer';
-import { signInParent, signInStudent, signInTeacher, signUpParent, signUpStudent, signUpTeacher } from '../contorllers/auth.contorller.js';
+import { signInAdmin, signInParent, signInStudent, signInTeacher, signUpAdmin, signUpParent, signUpStudent, signUpTeacher } from '../contorllers/auth.contorller.js';
 import { checkUser } from '../middleware/auth.js';
 import { getAllUsers, getParentById, getStudentById, getTeacherById, getUserById, removeParent, removeStudent, removeTeacher, updateParent, updateStudent, updateTeacher } from '../contorllers/user.controller.js';
-import { createSchool, getAllSchools, getSchoolById, updateSchoolClasses, updateSchoolTeachers } from '../contorllers/school.controller.js';
+import { createSchool, getAllSchools, getAllTeacherFromOneSchool, getSchoolById, updateSchoolClasses, updateSchoolTeachers } from '../contorllers/school.controller.js';
 import { addSubject, addTeacherToSubject, deleteTeacherFromSubject, removeSubject, updateSubject } from '../contorllers/subject.conroller.js';
 import { addStudentToClass, editClass, removeStudentFromClass } from '../contorllers/class.controller.js';
 import { addParentToChild, removeParentFromChild } from '../contorllers/parent.controller.js';
@@ -24,6 +24,8 @@ const uploads = multer({ storage });
 // Routes user
 router.get('/get-all-users', getAllUsers);
 router.get('/get-user-by-id/:id', getUserById);
+router.post('/signup-admin', signUpAdmin);
+router.post('/signin-admin', signInAdmin);
 
 // Routes student
 router.get('/get-student-by-id/:id', getStudentById);
@@ -39,6 +41,7 @@ router.get('/get-teacher-by-id/:id', getTeacherById);
 router.post('/signup-teacher', uploads.single("avatar"), signUpTeacher); // auth
 router.post('/signin-teacher', signInTeacher);
 router.put('/update-teacher/:id', checkUser, uploads.single("avatar"), updateTeacher)
+router.get('/get-teachers-from-school', checkUser, getAllTeacherFromOneSchool)
 router.delete('/delete-teacher/:id', removeTeacher);
 
 // Routes parent

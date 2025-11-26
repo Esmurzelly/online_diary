@@ -5,7 +5,7 @@ import { HIGH_SUBJECTS, LOW_SUBJECTS, MEDIUM_SUBJECTS } from '../constants.js';
 export const getAllSchools = async (req, res) => {
     try {
         const schools = await prisma.school.findMany({
-            include : {
+            include: {
                 classes: true,
                 teachers: true
             }
@@ -145,6 +145,27 @@ export const updateSchoolClasses = async (req, res) => {
         });
 
         res.status(200).json({ data: newClass, message: "Class was added successfuly!" });
+    } catch (error) {
+        console.log('Smth happened in updateSchoolClasses', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+export const getAllTeacherFromOneSchool = async (req, res) => {
+    const { schoolId } = req.body;
+
+    if (!schoolId) {
+        return res.status(403).json({ error: "Missing fields" })
+    }
+
+    try {
+        const teachersFromSchool = await prisma.teacher.findMany({
+            where: {
+                schoolId: schoolId
+            },
+        });
+
+        return res.status(200).json({ teachersFromSchool, message: "Here are teacher from the school" });
     } catch (error) {
         console.log('Smth happened in updateSchoolClasses', error);
         res.status(500).json({ error: 'Internal server error' });
