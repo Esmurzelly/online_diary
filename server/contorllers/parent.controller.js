@@ -40,6 +40,9 @@ export const addParentToChild = async (req, res) => {
                 parentIds: {
                     push: parentId
                 }
+            },
+            include: {
+                parents: true
             }
         });
 

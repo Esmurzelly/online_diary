@@ -1,5 +1,5 @@
-import bcrypt, { hash } from 'bcryptjs';
 import { prisma } from '../prisma/prisma-client.js';
+import bcrypt, { hash } from 'bcryptjs';
 
 export const getAllUsers = async (req, res) => {
     try {
@@ -15,30 +15,43 @@ export const getAllUsers = async (req, res) => {
 }
 
 export const getUserById = async (req, res) => {
-    const { userId } = req.body;
-
-    if (!userId) {
-        return res.status(403).json({ error: "All fields are required" });
-    }
+    const { id } = req.params;
 
     try {
         const studentById = await prisma.student.findFirst({
             where: {
-                id: userId
+                id,
+            },
+            include: {
+                grades: true,
+                parents: true,
+                class: {
+                    include: {
+                        subjects: true,
+                        school: true
+                    }
+                }
             }
         });
         const teacherById = await prisma.teacher.findFirst({
             where: {
-                id: userId
+                id,
+            },
+            include: {
+                subjects: true,
+                school: true,
             }
         });
         const parentById = await prisma.parent.findFirst({
             where: {
-                id: userId
+                id,
+            },
+            include: {
+                children: true
             }
         });
 
-        const user = studentById ? studentById : teacherById ? teacherById : parentById 
+        const user = studentById ? studentById : teacherById ? teacherById : parentById
 
         return res.status(200).json({ user: user, message: "You have got user by id" });
     } catch (error) {
@@ -49,12 +62,12 @@ export const getUserById = async (req, res) => {
 }
 
 export const getStudentById = async (req, res) => {
-    const { userId } = req.body;
+    const { id } = req.params;
 
     try {
         const studentById = await prisma.student.findFirst({
             where: {
-                id: userId
+                id: id
             },
             include: {
                 grades: true
@@ -69,12 +82,12 @@ export const getStudentById = async (req, res) => {
 }
 
 export const getTeacherById = async (req, res) => {
-    const { userId } = req.body;
+    const { id } = req.params;
 
     try {
         const teacherById = await prisma.teacher.findFirst({
             where: {
-                id: userId
+                id: id
             }
         });
 
@@ -86,12 +99,12 @@ export const getTeacherById = async (req, res) => {
 }
 
 export const getParentById = async (req, res) => {
-    const { userId } = req.body;
+    const { id } = req.params;
 
     try {
         const parentById = await prisma.parent.findFirst({
             where: {
-                id: userId
+                id: id
             }
         });
 
@@ -331,12 +344,12 @@ export const updateParent = async (req, res) => {
 }
 
 export const removeStudent = async (req, res) => {
-    const { userId } = req.body;
+    const { id } = req.params;
 
     try {
         const removedStudent = await prisma.student.delete({
             where: {
-                id: userId
+                id: id
             }
         });
 
@@ -348,12 +361,12 @@ export const removeStudent = async (req, res) => {
 }
 
 export const removeTeacher = async (req, res) => {
-    const { userId } = req.body;
+    const { id } = req.params;
 
     try {
         const removedTeacher = await prisma.teacher.delete({
             where: {
-                id: userId
+                id: id
             }
         });
 
@@ -365,12 +378,12 @@ export const removeTeacher = async (req, res) => {
 }
 
 export const removeParent = async (req, res) => {
-    const { userId } = req.body;
+    const { id } = req.params;
 
     try {
         const removedParent = await prisma.parent.delete({
             where: {
-                id: userId
+                id: id
             }
         });
 

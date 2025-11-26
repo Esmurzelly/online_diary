@@ -19,7 +19,7 @@ export const getAllSchools = async (req, res) => {
 }
 
 export const getSchoolById = async (req, res) => {
-    const { schoolId } = req.body;
+    const { schoolId } = req.params;
 
     try {
         const schoolById = await prisma.school.findFirst({
