@@ -3,7 +3,7 @@ import cookieParser from 'cookie-parser';
 import fs from 'fs';
 import 'dotenv/config';
 import cors from 'cors';
-import serviceRouter from './routes/index.js'
+import routes from './routes/index'
 
 const app = express();
 
@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use('/uploads', express.static('uploads'))
 
-app.use('/api', serviceRouter);
+app.use('/api', routes);
 
 if(!fs.existsSync('uploads')) {
     fs.mkdirSync('uploads');

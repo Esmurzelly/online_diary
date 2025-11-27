@@ -1,6 +1,7 @@
 import { prisma } from '../prisma/prisma-client.js'
 import { addClasses } from '../utils/addClasses.js';
 import { HIGH_SUBJECTS, LOW_SUBJECTS, MEDIUM_SUBJECTS } from '../constants.js';
+import { IClassCreateInput } from '../types.js';
 
 export const getAllSchools = async (req, res) => {
     try {
@@ -125,7 +126,7 @@ export const updateSchoolClasses = async (req, res) => {
         return res.status(403).json({ error: "No access" });
     }
 
-    const classes = [];
+    const classes: IClassCreateInput[] = [];
 
     addClasses(classes, num, letter, LOW_SUBJECTS.concat(MEDIUM_SUBJECTS, HIGH_SUBJECTS));
 
