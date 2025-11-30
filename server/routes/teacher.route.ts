@@ -2,8 +2,8 @@ import express from 'express';
 import multer from 'multer';
 import { checkUser } from '../middleware/auth';
 import { getTeacherById, removeTeacher, updateTeacher } from '../contorllers/user.controller';
-import { signInTeacher, signUpTeacher } from '../contorllers/auth.contorller';
 import { getAllTeacherFromOneSchool } from '../contorllers/school.controller';
+import { checkRole } from '../middleware/checkRole';
 
 const router = express.Router();
 
@@ -19,10 +19,8 @@ const storage = multer.diskStorage({
 const uploads = multer({ storage });
 
 router.get('/get-teacher-by-id/:id', getTeacherById);
-router.post('/signup-teacher', uploads.single("avatar"), signUpTeacher); // auth
-router.post('/signin-teacher', signInTeacher);
-router.put('/update-teacher/:id', checkUser, uploads.single("avatar"), updateTeacher)
-router.get('/get-teachers-from-school', checkUser, getAllTeacherFromOneSchool)
-router.delete('/delete-teacher/:id', removeTeacher);
+router.put('/update-teacher/:id', checkUser, uploads.single("avatar"), checkRole("ADMIN", "TEACHER"), updateTeacher);
+router.get('/get-teachers-from-school', checkUser, getAllTeacherFromOneSchool);
+router.delete('/delete-teacher/:id', checkUser, checkRole("ADMIN", "TEACHER"), removeTeacher);
 
 export default router;

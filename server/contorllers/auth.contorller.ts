@@ -1,15 +1,17 @@
-import bcrypt, { hash } from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import path from 'path';
-import fs from 'fs';
 import { fileURLToPath } from 'url';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../prisma/prisma-client.js';
+import { Request, Response } from 'express';
+import { IUserLoginRequest, IUserRegisterRequest } from '../types.js';
 
+// @ts-ignore
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = path.dirname(__filename); // avatar dirname - use if error
 
-export const signUpStudent = async (req, res) => {
-    const { email, password, name, surname, avatarUrl } = req.body;
+export const signUpStudent = async (req: Request, res: Response) => {
+    const { email, password, name, surname } = req.body as IUserRegisterRequest;
 
     if (!email || !password || !name || !surname) {
         return res.status(404).json({ error: 'All fields are required' });
@@ -42,18 +44,18 @@ export const signUpStudent = async (req, res) => {
             },
         });
 
-        res.json({
-            user: { email: student.email, name: student.name, surname: student.surname },
+        return res.json({
+            user: { email: student.email, name: student.name, surname: student.surname, avatarUrl: student.avatarUrl },
             message: "Signing up is successful!"
         });
     } catch (error) {
         console.error('Smt went wrong in register', error);
-        res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({ error: "Internal server error" });
     }
 }
 
-export const signUpTeacher = async (req, res) => {
-    const { email, password, name, surname } = req.body;
+export const signUpTeacher = async (req: Request, res: Response) => {
+    const { email, password, name, surname } = req.body as IUserRegisterRequest;
 
     if (!email || !password || !name || !surname) {
         return res.status(404).json({ error: 'All fields are required' });
@@ -71,7 +73,7 @@ export const signUpTeacher = async (req, res) => {
         }));
 
         if (existedTeacher) {
-            return res.status(400).json({ error: "Such teahcer is already registered" });
+            return res.status(400).json({ error: "Such teacher is already registered" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -86,18 +88,18 @@ export const signUpTeacher = async (req, res) => {
             }
         });
 
-        res.json({
-            user: { email: teacher.email, name: teacher.name, surname: teacher.surname },
+        return res.json({
+            user: { email: teacher.email, name: teacher.name, surname: teacher.surname, avatarUrl: teacher.avatarUrl },
             message: "Signing up is successful!"
         });
     } catch (error) {
         console.error('Smt went wrong in register', error);
-        res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({ error: "Internal server error" });
     }
 }
 
-export const signUpParent = async (req, res) => {
-    const { email, password, name, surname } = req.body;
+export const signUpParent = async (req: Request, res: Response) => {
+    const { email, password, name, surname } = req.body as IUserRegisterRequest;
 
     if (!email || !password || !name || !surname) {
         return res.status(404).json({ error: 'All fields are required' });
@@ -130,18 +132,18 @@ export const signUpParent = async (req, res) => {
             }
         });
 
-        res.json({
-            user: { email: parent.email, name: parent.name, surname: parent.surname },
+        return res.json({
+            user: { email: parent.email, name: parent.name, surname: parent.surname, avatarUrl: parent.avatarUrl },
             message: "Signing up is successful!"
         });
     } catch (error) {
         console.error('Smt went wrong in register', error);
-        res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({ error: "Internal server error" });
     }
 }
 
-export const signUpAdmin = async (req, res) => {
-    const { email, password } = req.body;
+export const signUpAdmin = async (req: Request, res: Response) => {
+    const { email, password } = req.body as { email: string, password: string };
 
     if (!email || !password) {
         return res.status(403).json({ error: "Wrong credentials" })
@@ -160,12 +162,12 @@ export const signUpAdmin = async (req, res) => {
         return res.status(200).json({ user: { email: user.email } })
     } catch (error) {
         console.error('Smt went wrong in register', error);
-        res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({ error: "Internal server error" });
     }
 }
 
-export const signInStudent = async (req, res) => {
-    const { email, password } = req.body;
+export const signInStudent = async (req: Request, res: Response) => {
+    const { email, password } = req.body as IUserLoginRequest;
 
     if (!email || !password) {
         return res.status(400).json({ error: 'All fields are required' });
@@ -186,16 +188,17 @@ export const signInStudent = async (req, res) => {
             return res.status(400).json({ error: "Invalid login or password" });
         };
 
-        const token = jwt.sign(({ userId: user.id }), process.env.SECRET_KEY, { expiresIn: '7d' });
-        res.json({ user: user, token, message: "Login is successful" });
+        // @ts-ignore
+        const token = jwt.sign(({ userId: user.id, role: "STUDENT" }), process.env.SECRET_KEY, { expiresIn: '7d' });
+        return res.json({ user: user, token, message: "Login is successful" });
     } catch (error) {
         console.error('Smt went wrong in register', error);
-        res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({ error: "Internal server error" });
     }
 }
 
-export const signInTeacher = async (req, res) => {
-    const { email, password } = req.body;
+export const signInTeacher = async (req: Request, res: Response) => {
+    const { email, password } = req.body as IUserLoginRequest;
 
     if (!email || !password) {
         return res.status(404).json({ error: 'All fields are required' });
@@ -216,16 +219,17 @@ export const signInTeacher = async (req, res) => {
             return res.status(400).json({ error: "Invalid login or password" });
         };
 
-        const token = jwt.sign(({ userId: user.id }), process.env.SECRET_KEY, { expiresIn: '7d' });
-        res.json({ user: user, token, message: "Login is successful" });
+        // @ts-ignore
+        const token = jwt.sign(({ userId: user.id, role: "TEACHER" }), process.env.SECRET_KEY, { expiresIn: '7d' });
+        return res.json({ user: user, token, message: "Login is successful" });
     } catch (error) {
         console.error('Smt went wrong in register', error);
-        res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({ error: "Internal server error" });
     }
 }
 
-export const signInParent = async (req, res) => {
-    const { email, password } = req.body;
+export const signInParent = async (req: Request, res: Response) => {
+    const { email, password } = req.body as IUserLoginRequest;
 
     if (!email || !password) {
         return res.status(404).json({ error: 'All fields are required' });
@@ -245,17 +249,18 @@ export const signInParent = async (req, res) => {
         if (!validPassword) {
             return res.status(400).json({ error: "Invalid login or password" });
         };
-
-        const token = jwt.sign(({ userId: user.id }), process.env.SECRET_KEY, { expiresIn: '7d' });
-        res.json({ user: user, token, message: "Login is successful" });
+        
+        // @ts-ignore
+        const token = jwt.sign(({ userId: user.id, role: "PARENT" }), process.env.SECRET_KEY, { expiresIn: '7d' });
+        return res.json({ user: user, token, message: "Login is successful" });
     } catch (error) {
         console.error('Smt went wrong in register', error);
-        res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({ error: "Internal server error" });
     }
 }
 
-export const signInAdmin = async (req, res) => {
-    const { email, password } = req.body;
+export const signInAdmin = async (req: Request, res: Response) => {
+    const { email, password } = req.body as { email: string, password: string };
 
     if (!email || !password) {
         return res.status(403).json({ error: 'All fields are required' });
@@ -274,15 +279,16 @@ export const signInAdmin = async (req, res) => {
 
         const validPassword = bcrypt.compare(password, user.password);
 
-        if(!validPassword) {
+        if (!validPassword) {
             return res.status(403).json({ message: "Wrong credentials" })
         };
 
-        const token = jwt.sign(({ userId: user.id }), process.env.SECRET_KEY, { expiresIn: '7d' });
-        res.status(200).json({ user, token, message: "You logged in as Admin successfuly" })
+        // @ts-ignore
+        const token = jwt.sign(({ userId: user.id, role: "ADMIN" }), process.env.SECRET_KEY, { expiresIn: '7d' });
+        return res.status(200).json({ user, token, message: "You logged in as Admin successfuly" })
     } catch (error) {
         console.error('Smt went wrong in register', error);
-        res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({ error: "Internal server error" });
     }
 }
 

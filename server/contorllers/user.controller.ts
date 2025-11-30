@@ -1,7 +1,9 @@
 import { prisma } from '../prisma/prisma-client.js';
-import bcrypt, { hash } from 'bcryptjs';
+import bcrypt from 'bcryptjs';
+import { Request, Response } from 'express';
+import { IParent, IStudent, ITeacher, IUserWithToken } from '../types.js';
 
-export const getAllUsers = async (req, res) => {
+export const getAllUsers = async (req: Request, res: Response) => {
     try {
         const allStudents = await prisma.student.findMany();
         const allTeachers = await prisma.teacher.findMany();
@@ -10,12 +12,12 @@ export const getAllUsers = async (req, res) => {
         return res.status(200).json({ users: [...allStudents, ...allTeachers, ...allParents], message: "You have got all users" });
     } catch (error) {
         console.error('Smt went wrong in getAllUsers', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
-export const getUserById = async (req, res) => {
-    const { id } = req.params;
+export const getUserById = async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
 
     try {
         const studentById = await prisma.student.findFirst({
@@ -33,6 +35,7 @@ export const getUserById = async (req, res) => {
                 }
             }
         });
+
         const teacherById = await prisma.teacher.findFirst({
             where: {
                 id,
@@ -42,6 +45,7 @@ export const getUserById = async (req, res) => {
                 school: true,
             }
         });
+
         const parentById = await prisma.parent.findFirst({
             where: {
                 id,
@@ -51,18 +55,20 @@ export const getUserById = async (req, res) => {
             }
         });
 
-        const user = studentById ? studentById : teacherById ? teacherById : parentById
+        const user = studentById ? studentById
+            : teacherById ? teacherById
+                : parentById
 
         return res.status(200).json({ user: user, message: "You have got user by id" });
     } catch (error) {
         console.error('Smt went wrong in getUserById', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 
 }
 
-export const getStudentById = async (req, res) => {
-    const { id } = req.params;
+export const getStudentById = async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
 
     try {
         const studentById = await prisma.student.findFirst({
@@ -77,12 +83,12 @@ export const getStudentById = async (req, res) => {
         return res.status(200).json({ student: studentById, message: "You have got student by id" });
     } catch (error) {
         console.error('Smt went wrong in getStudentById', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
-export const getTeacherById = async (req, res) => {
-    const { id } = req.params;
+export const getTeacherById = async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
 
     try {
         const teacherById = await prisma.teacher.findFirst({
@@ -94,12 +100,12 @@ export const getTeacherById = async (req, res) => {
         return res.status(200).json({ teacher: teacherById, message: "You have got teacher by id" });
     } catch (error) {
         console.error('Smt went wrong in getStudentById', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
-export const getParentById = async (req, res) => {
-    const { id } = req.params;
+export const getParentById = async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
 
     try {
         const parentById = await prisma.parent.findFirst({
@@ -111,31 +117,34 @@ export const getParentById = async (req, res) => {
         return res.status(200).json({ parent: parentById, message: "You have got parent by id" });
     } catch (error) {
         console.error('Smt went wrong in getStudentById', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
-export const updateStudent = async (req, res) => {
-    const { id } = req.params;
+export const updateStudent = async (
+    req: Request & { user?: IUserWithToken },
+    res: Response
+) => {
+    const { id } = req.params as { id: string };
 
     const { email,
         password,
         name,
         surname,
-        avatarUrl,
         phone,
         address,
         parentIds,
-    } = req.body;
+    } = req.body as IStudent;
 
-    let filePath;
+    let filePath: string | undefined;
+    let hashedPassword: string | undefined;
 
     if (req.file && req.file.path) {
         filePath = req.file.path;
     }
 
-    if (id !== req.user.userId) {
-        return res.status(403).json({ error: "No access" });
+    if (id !== req.user?.userId) {
+        return res.status(401).json({ error: "No access" });
     }
 
     try {
@@ -150,13 +159,17 @@ export const updateStudent = async (req, res) => {
                 where: { email }
             });
 
-            if (existedStudent || existedTeacher || existedParent || existedStudent && existedStudent.id !== id || existedTeacher && existedTeacher.id !== id || existedParent && existedParent.id !== id) {
-                res.status(403).json({ error: "User with such credentials is alraedy exists" });
+            if (
+                (existedStudent && existedStudent.id !== id) ||
+                (existedTeacher && existedTeacher.id !== id) ||
+                (existedParent && existedParent.id !== id)
+            ) {
+                return res.status(403).json({ error: "User with such credentials is alraedy exists" });
             }
         };
 
         if (password) {
-            var hashedPassword = await hash(password, 10);
+            hashedPassword = await bcrypt.hash(password, 10);
         }
 
         const updateUser = await prisma.student.update({
@@ -182,36 +195,39 @@ export const updateStudent = async (req, res) => {
             }
         });
 
-        res.status(200).json({ user: updateUser, message: "You have updated your profile successfuly" });
+        return res.status(200).json({ user: updateUser, message: "You have updated your profile successfuly" });
 
     } catch (error) {
         console.error('Smt went wrong in updating user', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
-export const updateTeacher = async (req, res) => {
+export const updateTeacher = async (
+    req: Request & { user?: IUserWithToken },
+    res: Response
+) => {
     const { id } = req.params;
 
     const { email,
         password,
         name,
         surname,
-        avatarUrl,
         phone,
         address,
         schoolId,
         subjects,
-    } = req.body;
+    } = req.body as ITeacher;
 
     let filePath;
+    let hashedPassword: string | undefined;
 
     if (req.file && req.file.path) {
         filePath = req.file.path;
     }
 
-    if (id !== req.user.userId) {
-        return res.status(403).json({ error: "No access" });
+    if (id !== req.user?.userId) {
+        return res.status(401).json({ error: "No access" });
     }
 
     try {
@@ -226,13 +242,17 @@ export const updateTeacher = async (req, res) => {
                 where: { email }
             });
 
-            if (existedStudent || existedTeacher || existedParent || existedStudent && existedStudent.id !== id || existedTeacher && existedTeacher.id !== id || existedParent && existedParent.id !== id) {
-                res.status(403).json({ error: "User with such credentials is alraedy exists" });
+            if (
+                (existedStudent && existedStudent.id !== id) ||
+                (existedTeacher && existedTeacher.id !== id) ||
+                (existedParent && existedParent.id !== id)
+            ) {
+                return res.status(403).json({ error: "User with such credentials is alraedy exists" });
             }
         };
 
         if (password) {
-            var hashedPassword = await hash(password, 10);
+            hashedPassword = await bcrypt.hash(password, 10);
         }
 
         const updateUser = await prisma.teacher.update({
@@ -246,6 +266,7 @@ export const updateTeacher = async (req, res) => {
                 address: address || undefined,
                 avatarUrl: filePath ? `/${filePath}` : undefined,
                 schoolId: schoolId || undefined,
+                // @ts-ignore
                 subjects: subjects || undefined,
             },
             select: {
@@ -260,35 +281,38 @@ export const updateTeacher = async (req, res) => {
             }
         });
 
-        res.status(200).json({ user: updateUser, message: "You have updated your profile successfuly" })
+        return res.status(200).json({ user: updateUser, message: "You have updated your profile successfuly" })
 
     } catch (error) {
         console.error('Smt went wrong in updating user', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
-export const updateParent = async (req, res) => {
+export const updateParent = async (
+    req: Request & { user?: IUserWithToken },
+    res: Response
+) => {
     const { id } = req.params;
 
     const { email,
         password,
         name,
         surname,
-        avatarUrl,
         phone,
         address,
         childrenIds,
-    } = req.body;
+    } = req.body as IParent;
 
     let filePath;
+    let hashedPassword: string | undefined;
 
     if (req.file && req.file.path) {
         filePath = req.file.path;
     }
 
-    if (id !== req.user.userId) {
-        return res.status(403).json({ error: "No access" });
+    if (id !== req.user?.userId) {
+        return res.status(401).json({ error: "No access" });
     }
 
     try {
@@ -303,13 +327,17 @@ export const updateParent = async (req, res) => {
                 where: { email }
             });
 
-            if (existedStudent || existedTeacher || existedParent || existedStudent && existedStudent.id !== id || existedTeacher && existedTeacher.id !== id || existedParent && existedParent.id !== id) {
-                res.status(403).json({ error: "User with such credentials is alraedy exists" });
+            if (
+                (existedStudent && existedStudent.id !== id) ||
+                (existedTeacher && existedTeacher.id !== id) ||
+                (existedParent && existedParent.id !== id)
+            ) {
+                return res.status(403).json({ error: "User with such credentials is alraedy exists" });
             }
         };
 
         if (password) {
-            var hashedPassword = await hash(password, 10);
+            hashedPassword = await bcrypt.hash(password, 10);
         }
 
         const updateUser = await prisma.parent.update({
@@ -335,16 +363,16 @@ export const updateParent = async (req, res) => {
             }
         });
 
-        res.status(200).json({ user: updateUser, message: "You have updated your profile successfuly" })
+        return res.status(200).json({ user: updateUser, message: "You have updated your profile successfuly" })
 
     } catch (error) {
         console.error('Smt went wrong in updating user', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
-export const removeStudent = async (req, res) => {
-    const { id } = req.params;
+export const removeStudent = async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
 
     try {
         const removedStudent = await prisma.student.delete({
@@ -355,13 +383,13 @@ export const removeStudent = async (req, res) => {
 
         return res.status(200).json({ removedStudent: removedStudent, message: "Student was removed successfuly" });
     } catch (error) {
-        console.log('Smth happened in removeStudent');
-        res.status(500).json({ error: 'Internal server error' });
+        console.log('Smth happened in removeStudent', error);
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
-export const removeTeacher = async (req, res) => {
-    const { id } = req.params;
+export const removeTeacher = async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
 
     try {
         const removedTeacher = await prisma.teacher.delete({
@@ -372,13 +400,13 @@ export const removeTeacher = async (req, res) => {
 
         return res.status(200).json({ removedTeacher, message: "Teacher was removed successfuly" });
     } catch (error) {
-        console.log('Smth happened in removeStudent');
-        res.status(500).json({ error: 'Internal server error' });
+        console.log('Smth happened in removeStudent', error);
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
-export const removeParent = async (req, res) => {
-    const { id } = req.params;
+export const removeParent = async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
 
     try {
         const removedParent = await prisma.parent.delete({
@@ -389,7 +417,25 @@ export const removeParent = async (req, res) => {
 
         return res.status(200).json({ removedParent, message: "Parent was removed successfuly" });
     } catch (error) {
-        console.log('Smth happened in removeStudent');
-        res.status(500).json({ error: 'Internal server error' });
+        console.log('Smth happened in removeStudent', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+export const getStudentsFromOneClass = async (req: Request, res: Response) => {
+    try {
+        const { classId } = req.body as { classId: string };
+
+        const students = await prisma.student.findMany({
+            where: {
+                classId: classId,
+            }
+        })
+
+        return res.status(200).json({ students, message: "You have found students successfuly" })
+    } catch (error) {
+        console.log('Smth happened in removeStudent', error);
+        return res.status(500).json({ error: 'Internal server error' });
+
     }
 }

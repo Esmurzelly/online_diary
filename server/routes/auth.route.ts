@@ -2,7 +2,6 @@ import express from 'express';
 import multer from 'multer';
 import { signInAdmin, signInParent, signInStudent, signInTeacher, signUpAdmin, signUpParent, signUpStudent, signUpTeacher } from '../contorllers/auth.contorller';
 
-
 const router = express.Router();
 
 const uploadDestionation = 'uploads';

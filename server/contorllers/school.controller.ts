@@ -1,9 +1,10 @@
 import { prisma } from '../prisma/prisma-client.js'
 import { addClasses } from '../utils/addClasses.js';
 import { HIGH_SUBJECTS, LOW_SUBJECTS, MEDIUM_SUBJECTS } from '../constants.js';
-import { IClassCreateInput } from '../types.js';
+import { IClassCreateInput, IUserWithToken } from '../types.js';
+import { Request, Response } from 'express';
 
-export const getAllSchools = async (req, res) => {
+export const getAllSchools = async (req: Request, res: Response) => {
     try {
         const schools = await prisma.school.findMany({
             include: {
@@ -15,12 +16,12 @@ export const getAllSchools = async (req, res) => {
         return res.status(200).json({ allSchools: schools, message: "You have got all schools" })
     } catch (error) {
         console.log('Smth happened in getAllSchools', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
-export const getSchoolById = async (req, res) => {
-    const { schoolId } = req.params;
+export const getSchoolById = async (req: Request, res: Response) => {
+    const { schoolId } = req.params as { schoolId: string };
 
     try {
         const schoolById = await prisma.school.findFirst({
@@ -36,20 +37,19 @@ export const getSchoolById = async (req, res) => {
         return res.status(200).json({ schoolById: schoolById, message: "You have got school" })
     } catch (error) {
         console.log('Smth happened in getSchoolById', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
-export const createSchool = async (req, res) => {
-    const { title, phone, email, address } = req.body;
+export const createSchool = async (req: Request, res: Response) => {
+    const { title, phone, email, address } = req.body as { title: string, phone: string, email: string, address: string };
 
     if (!title || !phone || !email || !address) {
         return res.status(403).json({ error: "All fields are required" });
     };
 
-
     try {
-        const classes = [];
+        const classes: IClassCreateInput[] = [];
 
         for (let num = 1; num <= 11; num++) {
             if (num >= 1 && num <= 4) {
@@ -83,52 +83,68 @@ export const createSchool = async (req, res) => {
             }
         });
 
-        res.status(200).json({ school })
+        return res.status(200).json({ school })
     } catch (error) {
         console.log('Smth happened in createSchool', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
-export const updateSchoolTeachers = async (req, res) => {
-    const { schoolId, teacherId } = req.body;
+export const updateSchoolTeachers = async (req: Request, res: Response) => {
+    const { schoolId, teacherId } = req.body as { schoolId: string, teacherId: string };
 
     if (!schoolId || !teacherId) {
         return res.status(403).json({ error: "Choose school and teacher" });
     }
 
     try {
-        const updatedTeacher = await prisma.teacher.update({
+        const updatedSchool = await prisma.teacher.update({
             where: {
                 id: teacherId
             },
             data: {
-                schoolId: schoolId
+                school: {
+                    connect: {
+                        id: schoolId
+                    }
+                }
             },
+            include: {
+                school: true
+            }
         });
 
-        res.status(200).json({ data: updatedTeacher, message: "Teacher was added successfuly" });
+        return res.status(200).json({ data: updatedSchool, message: "Teacher was added successfuly" });
     } catch (error) {
         console.log('Smth happened in updateShcoolTeachers', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
-export const updateSchoolClasses = async (req, res) => {
-    const { schoolId, num, letter } = req.body;
-    const { id } = req.params;
+export const updateSchoolClasses = async ( // add 1 Class with subjects in the school
+    req: Request & { user?: IUserWithToken },
+    res: Response
+) => {
+    const { schoolId, num, letter } = req.body as { schoolId: string, num: number, letter: string };
 
     if (!schoolId || !num || !letter) {
         return res.status(403).json({ error: "Choose the school" });
     }
 
-    if (id !== req.user.userId) {
-        return res.status(403).json({ error: "No access" });
-    }
-
     const classes: IClassCreateInput[] = [];
 
-    addClasses(classes, num, letter, LOW_SUBJECTS.concat(MEDIUM_SUBJECTS, HIGH_SUBJECTS));
+
+    if (num >= 1 && num <= 4) {
+        addClasses(classes, num, letter, LOW_SUBJECTS);
+    }
+
+    if (num >= 5 && num <= 8) {
+        addClasses(classes, num, letter, MEDIUM_SUBJECTS);
+    }
+
+    if (num >= 9 && num <= 11) {
+        addClasses(classes, num, letter, HIGH_SUBJECTS);
+    }
 
     try {
         const newClass = await prisma.school.update({
@@ -145,15 +161,15 @@ export const updateSchoolClasses = async (req, res) => {
             }
         });
 
-        res.status(200).json({ data: newClass, message: "Class was added successfuly!" });
+        return res.status(200).json({ data: newClass, message: "Class was added successfuly!" });
     } catch (error) {
         console.log('Smth happened in updateSchoolClasses', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
-export const getAllTeacherFromOneSchool = async (req, res) => {
-    const { schoolId } = req.body;
+export const getAllTeacherFromOneSchool = async (req: Request, res: Response) => {
+    const { schoolId } = req.body as { schoolId: string };
 
     if (!schoolId) {
         return res.status(403).json({ error: "Missing fields" })
@@ -169,6 +185,6 @@ export const getAllTeacherFromOneSchool = async (req, res) => {
         return res.status(200).json({ teachersFromSchool, message: "Here are teacher from the school" });
     } catch (error) {
         console.log('Smth happened in updateSchoolClasses', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }

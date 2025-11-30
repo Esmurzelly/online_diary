@@ -1,7 +1,22 @@
 import { prisma } from '../prisma/prisma-client.js';
+import { Request, Response } from 'express';
+import { IRequestGrade } from '../types.js';
 
-export const setGrade = async (req, res) => {
-    const { subjectId, studentId, teacherId, comment, value } = req.body;
+interface IRequestGradeSet extends IRequestGrade {
+    comment: string;
+    value: number
+}
+
+interface IRequestGradeUpdate extends IRequestGradeSet {
+    gradeId: string;
+}
+
+interface IRequestGradeRemove extends IRequestGrade {
+    gradeId: string;
+}
+
+export const setGrade = async (req: Request, res: Response) => {
+    const { subjectId, studentId, teacherId, comment, value } = req.body as IRequestGradeSet;
 
     if (!subjectId || !studentId || !value || !teacherId) {
         return res.status(403).json({ error: "Missing fields" })
@@ -34,24 +49,28 @@ export const setGrade = async (req, res) => {
             return res.status(403).json({ error: "No teacher found" })
         };
 
-        if (!student.class || !student.class.schoolId) {
-            return res.status(403).json({ error: "Student has no class" })
-        };
+        if (student) {
+            if (!student.class || !student.class.schoolId) {
+                return res.status(403).json({ error: "Student has no class" })
+            };
+        }
 
-        if (teacher.schoolId !== student.class.schoolId) {
-            return res.status(403).json({ error: "No acccess. Different schools" })
-        };
+        if (student && student.class) {
+            if (teacher.schoolId !== student.class.schoolId) {
+                return res.status(403).json({ error: "No acccess. Different schools" })
+            };
+        }
 
-        const commonIdInSubject = teacher.subjects.filter(teacherSubject =>
-            student.class.subjects.some(studentSubject => teacherSubject.id === studentSubject.id)
+        const commonIdInSubject = teacher.subjects.filter(teacherSubject => 
+                student?.class?.subjects.some(studentSubject => teacherSubject.id === studentSubject.id)
         );
 
         if (commonIdInSubject.length === 0) {
             return res.status(403).json({ error: "No acccess. Different subjects" })
         }
 
-        if (!commonIdInSubject.some(subEl => subEl.id === subjectId)) {
-            return res.status(403).json({ error: "Teacher doesnt teacht this subject" })
+        if (commonIdInSubject.some(subEl => subEl.id !== subjectId)) {
+            return res.status(403).json({ error: "Teacher doesn't teach this subject" })
         }
 
         const createdGrade = await prisma.grade.create({
@@ -72,12 +91,12 @@ export const setGrade = async (req, res) => {
 
     } catch (error) {
         console.error('Smt went wrong in setGrade', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
-export const removeGrade = async (req, res) => {
-    const { subjectId, studentId, teacherId, gradeId } = req.body;
+export const removeGrade = async (req: Request, res: Response) => {
+    const { subjectId, studentId, teacherId, gradeId } = req.body as IRequestGradeRemove;
 
     if (!subjectId || !studentId || !teacherId) {
         return res.status(403).json({ error: "Missing fields" })
@@ -110,11 +129,17 @@ export const removeGrade = async (req, res) => {
             return res.status(403).json({ error: "No teacher found" })
         }
 
-        if (!student.class || !student.class.schoolId) {
-            return res.status(403).json({ error: "Student has no class" })
-        };
+        if (student) {
+            if (!student.class || !student.class.schoolId) {
+                return res.status(403).json({ error: "Student has no class" })
+            };
+        }
 
-        const commonIdInSubject = teacher.subjects.filter(teacherSubject => student.class.subjects.some(studentSubject => teacherSubject.id === studentSubject.id));
+        const commonIdInSubject = teacher.subjects.filter(
+            teacherSubject => student?.class?.subjects.some(
+                studentSubject => teacherSubject.id === studentSubject.id
+            ) ?? false
+        );
 
         if (commonIdInSubject.length === 0) {
             return res.status(403).json({ error: "No acccess. Different subjects" })
@@ -133,12 +158,12 @@ export const removeGrade = async (req, res) => {
         return res.status(200).json({ grade: removedGrade, message: "Grade is removed successfuly" });
     } catch (error) {
         console.error('Smt went wrong in removeGrade', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
-export const updateGrade = async (req, res) => {
-    const { gradeId, value, comment, teacherId, studentId, subjectId } = req.body;
+export const updateGrade = async (req: Request, res: Response) => {
+    const { teacherId, studentId, subjectId, gradeId, value, comment } = req.body as IRequestGradeUpdate;
 
     if (!gradeId || !teacherId || !studentId || !subjectId) {
         return res.status(403).json({ error: "Missing fields" })
@@ -167,22 +192,32 @@ export const updateGrade = async (req, res) => {
             }
         });
 
-        if (teacher.schoolId !== student.class.schoolId) {
-            return res.status(403).json({ error: "No acccess. Different schools" })
-        };
-
-        if (!student.class || !student.class.schoolId) {
-            return res.status(403).json({ error: "Student has no class" })
-        };
-
-        const commonIdInSubject = teacher.subjects.filter(teacherSubject => student.class.subjects.some(studentSubject => teacherSubject.id === studentSubject.id));
-
-        if (commonIdInSubject.length === 0) {
-            return res.status(403).json({ error: "No acccess. Different subjects" })
+        if (teacher && student && student.class) {
+            if (teacher.schoolId !== student.class.schoolId) {
+                return res.status(403).json({ error: "No acccess. Different schools" })
+            };
         }
 
-        if (!commonIdInSubject.some(subEl => subEl.id === subjectId)) {
-            return res.status(403).json({ error: "Teacher doesnt teacht this subject" })
+        if (student) {
+            if (!student.class || !student.class.schoolId) {
+                return res.status(403).json({ error: "Student has no class" })
+            };
+        }
+
+        if (teacher && student && student.class) {
+            const commonIdInSubject = teacher.subjects.filter(
+                teacherSubject => student.class?.subjects.some( // or student.class!.subjects - to tell TypeScript that it's definitely not null
+                    studentSubject => teacherSubject.id === studentSubject.id
+                ) ?? false
+            );
+
+            if (commonIdInSubject.length === 0) {
+                return res.status(403).json({ error: "No acccess. Different subjects" })
+            }
+
+            if (!commonIdInSubject.some(subEl => subEl.id === subjectId)) {
+                return res.status(403).json({ error: "Teacher doesnt teacht this subject" })
+            }
         }
 
         const updatedGrade = await prisma.grade.update({
@@ -199,14 +234,12 @@ export const updateGrade = async (req, res) => {
         return res.status(200).json({ updatedGrade, message: "The Grade was updated successfuly" });
     } catch (error) {
         console.error('Smt went wrong in updateGrade', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
-
-
-export const getGradesFromSubject = async (req, res) => {
-    const { subjectId } = req.body;
+export const getGradesFromSubject = async (req: Request, res: Response) => {
+    const { subjectId } = req.body as { subjectId: string };
 
     if (!subjectId) {
         return res.status(403).json({ error: "Subject is not defined" });
@@ -230,6 +263,6 @@ export const getGradesFromSubject = async (req, res) => {
         return res.status(200).json({ currentSubject, message: "ok" })
     } catch (error) {
         console.error('Smt went wrong in getGradesFromClass', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }

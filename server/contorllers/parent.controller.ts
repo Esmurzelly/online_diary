@@ -1,7 +1,8 @@
 import { prisma } from '../prisma/prisma-client.js';
+import { Request, Response } from 'express'
 
-export const addParentToChild = async (req, res) => {
-    const { parentId, studentId } = req.body;
+export const addParentToChild = async (req: Request, res: Response) => {
+    const { parentId, studentId } = req.body as { parentId: string, studentId: string };
 
     if (!parentId || !studentId) {
         return res.status(403).json({ error: "All fields are required" });
@@ -14,7 +15,7 @@ export const addParentToChild = async (req, res) => {
             }
         })
 
-        if (parent.childrenIds.includes(studentId)) {
+        if (parent && parent.childrenIds.includes(studentId)) {
             return res.status(403).json({ error: "Student is already linked to parent" });
         }
 
@@ -58,11 +59,11 @@ export const addParentToChild = async (req, res) => {
         return res.status(200).json({ result, message: "Parent is linked to child" });
     } catch (error) {
         console.error('Smt went wrong in addParentToChild', error);
-        res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({ error: "Internal server error" });
     }
 }
 
-export const removeParentFromChild = async (req, res) => {
+export const removeParentFromChild = async (req: Request, res: Response) => {
     const { parentId, studentId } = req.body;
 
     if (!parentId || !studentId) {
@@ -76,7 +77,7 @@ export const removeParentFromChild = async (req, res) => {
             }
         })
 
-        const updatedChildrenIds = parent.childrenIds.filter(item => item !== studentId);
+        const updatedChildrenIds = parent?.childrenIds.filter(item => item !== studentId);
 
         const parentToChild = await prisma.parent.update({
             where: {
@@ -93,7 +94,7 @@ export const removeParentFromChild = async (req, res) => {
         return res.status(200).json({ parentToChild, message: "Parent is linked to child" });
     } catch (error) {
         console.error('Smt went wrong in addParentToChild', error);
-        res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({ error: "Internal server error" });
     }
 }
 

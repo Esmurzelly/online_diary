@@ -1,12 +1,13 @@
 import { prisma } from '../prisma/prisma-client.js'
+import { Request, Response } from 'express';
 
-export const addSubject = async (req, res) => {
-    const { title, classId, teacherId } = req.body;
+export const addSubject = async (req: Request, res: Response) => {
+    const { title, classId, teacherId } = req.body as { title: string, classId: string, teacherId: string };
 
     if (!title || !classId || !teacherId) {
         return res.status(403).json({ error: "All fields are required" });
     }
-    
+
     try {
         const newSubject = await prisma.subject.create({
             data: {
@@ -20,15 +21,15 @@ export const addSubject = async (req, res) => {
             }
         })
 
-        res.status(200).json({ subject: newSubject, message: "New subject was added successfuly" });
+        return res.status(200).json({ subject: newSubject, message: "New subject was added successfuly" });
     } catch (error) {
         console.log('Smth happened in addSubject', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
-export const addTeacherToSubject = async (req, res) => {
-    const { teacherId, subjectId } = req.body;
+export const addTeacherToSubject = async (req: Request, res: Response) => {
+    const { teacherId, subjectId } = req.body as { teacherId: string, subjectId: string };
 
     if (!teacherId || !subjectId) {
         return res.status(403).json({ error: "All fields are required" });
@@ -52,15 +53,15 @@ export const addTeacherToSubject = async (req, res) => {
             }
         });
 
-        res.status(200).json({ teacherToSubject: teacherToSubject, message: "Teacher was assigned successfully" });
+        return res.status(200).json({ teacherToSubject: teacherToSubject, message: "Teacher was assigned successfully" });
     } catch (error) {
         console.log('Smth happened in addTeacherToSubject', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
-export const deleteTeacherFromSubject = async (req, res) => {
-    const { teacherId, subjectId } = req.body;
+export const deleteTeacherFromSubject = async (req: Request, res: Response) => {
+    const { teacherId, subjectId } = req.body as { teacherId: string, subjectId: string };
 
     if (!teacherId || !subjectId) {
         return res.status(403).json({ error: "All fields are required" });
@@ -80,15 +81,15 @@ export const deleteTeacherFromSubject = async (req, res) => {
             }
         });
 
-        res.status(200).json({ removedSubjectFromTeacher: removedSubjectFromTeacher, message: "Teacher was removed successfully" });
+        return res.status(200).json({ removedSubjectFromTeacher: removedSubjectFromTeacher, message: "Teacher was removed successfully" });
     } catch (error) {
         console.log('Smth happened in deleteTeacherFromSubject', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
-export const removeSubject = async (req, res) => {
-    const { subjectId } = req.body;
+export const removeSubject = async (req: Request, res: Response) => {
+    const { subjectId } = req.body as { subjectId: string };
 
     if (!subjectId) {
         return res.status(403).json({ error: "All fields are required" });
@@ -101,15 +102,15 @@ export const removeSubject = async (req, res) => {
             },
         });
 
-        res.status(200).json({ subject: removedSubject, message: "Subject was removed successfuly" });
+        return res.status(200).json({ subject: removedSubject, message: "Subject was removed successfuly" });
     } catch (error) {
         console.log('Smth happened in removeSubject', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
-export const updateSubject = async (req, res) => {
-    const { newTitle, subjectId, teacherId, classId } = req.body;
+export const updateSubject = async (req: Request, res: Response) => {
+    const { newTitle, subjectId, teacherId, classId } = req.body as { newTitle: string, subjectId: string, teacherId: string, classId: string };
 
     if (!newTitle || !subjectId) {
         return res.status(403).json({ error: "All fields are required" });
@@ -131,9 +132,9 @@ export const updateSubject = async (req, res) => {
             }
         });
 
-        res.status(200).json({ updatedSubject: updatedSubject, message: "Subject was updated successfuly" });
+        return res.status(200).json({ updatedSubject: updatedSubject, message: "Subject was updated successfuly" });
     } catch (error) {
         console.log('Smth happened in updateSubject', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }

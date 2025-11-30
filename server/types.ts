@@ -97,6 +97,8 @@ export interface IUserRegisterRequest {
   email: string;
   password: string;
   name: string;
+  surname: string,
+  avatarUrl?: string | null
 }
 
 export interface IUserLoginRequest {
@@ -110,4 +112,18 @@ export interface IClassCreateInput {
   subjects: {
     create: { title: string }[];
   };
+}
+
+export interface IUserWithToken {
+  id?: string;
+  userId: string;
+  role: string;
+  iat: number;
+  exp: number;
+}
+
+export interface IRequestGrade {
+  subjectId: string;
+  studentId: string;
+  teacherId: string;
 }
