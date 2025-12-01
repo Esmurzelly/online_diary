@@ -1,0 +1,47 @@
+version: '3.8'
+services:
+  server:
+    build: server/
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: "mongodb://monty:pass@db:27017/mydatabase?authSource=admin&replicaSet=rs0&directConnection=true"
+      SECRET_KEY: "jndlf34r34refyub3wefyuh"
+    restart: unless-stopped
+    command: sh -c "sleep 15 && npx prisma db push --skip-generate && npm run dev"
+
+  db:
+    image: mongo:5.0
+    command: >
+      bash -c '
+      mongod --replSet rs0 --bind_ip_all &
+      MONGO_PID=$$!;
+      sleep 10;
+      mongo --quiet --eval "
+        try {
+          rs.status();
+          print(\"Replica set already initiated\");
+        } catch (err) {
+          rs.initiate({
+            _id: \"rs0\",
+            members: [{ _id: 0, host: \"localhost:27017\" }]
+          });
+          print(\"Replica set initiated\");
+        }
+      ";
+      wait $$MONGO_PID
+      '
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: monty
+      MONGO_INITDB_ROOT_PASSWORD: pass
+      MONGO_INITDB_DATABASE: mydatabase
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
