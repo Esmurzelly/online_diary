@@ -5,12 +5,13 @@ services:
     ports:
       - '3000:3000'
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
-      DATABASE_URL: "mongodb://monty:pass@db:27017/mydatabase?authSource=admin&replicaSet=rs0&directConnection=true"
-      SECRET_KEY: "jndlf34r34refyub3wefyuh"
+      DATABASE_URL: ${DATABASE_URL}
+      SECRET_KEY: ${SECRET_KEY}
     restart: unless-stopped
-    command: sh -c "sleep 15 && npx prisma db push --skip-generate && npm run dev"
+    command: sh -c "npx prisma db push --skip-generate && npm run dev"
 
   db:
     image: mongo:5.0
@@ -36,9 +37,15 @@ services:
     ports:
       - '27017:27017'
     environment:
-      MONGO_INITDB_ROOT_USERNAME: monty
-      MONGO_INITDB_ROOT_PASSWORD: pass
-      MONGO_INITDB_DATABASE: mydatabase
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     restart: unless-stopped
     volumes:
       - mongo-data:/data/db
