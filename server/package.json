@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "type": "module",
+  "sourceType": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx watch ./index.ts",
-    "postinstall": "prisma generate"
+    "prisma:generate": "prisma generate"
   },
   "keywords": [],
   "author": "",
@@ -20,15 +21,9 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongodb": "^7.0.0",
     "multer": "^2.0.2"
   },
   "devDependencies": {
-    "@types/cookie-parser": "^1.4.10",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.5",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/multer": "^2.0.0",
     "@types/node": "^24.10.1",
     "prisma": "6.19",
     "tsx": "^4.20.6",
