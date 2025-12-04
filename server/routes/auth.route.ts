@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { signInAdmin, signInParent, signInStudent, signInTeacher, signUpAdmin, signUpParent, signUpStudent, signUpTeacher } from '../contorllers/auth.contorller';
+import { logout, signInAdmin, signInParent, signInStudent, signInTeacher, signUpAdmin, signUpParent, signUpStudent, signUpTeacher } from '../contorllers/auth.contorller';
 
 const router = express.Router();
 
@@ -23,5 +23,6 @@ router.post('/signup-parent', uploads.single("avatar"), signUpParent);
 router.post('/signin-parent', signInParent);
 router.post('/signup-admin', signUpAdmin);
 router.post('/signin-admin', signInAdmin);
+router.post('/logout', logout);
 
 export default router;

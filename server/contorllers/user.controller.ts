@@ -439,3 +439,38 @@ export const getStudentsFromOneClass = async (req: Request, res: Response) => {
 
     }
 }
+
+export const getMe = async (
+    req: Request & { userId?: string },
+    res: Response
+) => {
+    if (!req.userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    try {
+        const userId = req.userId;
+
+        const student = await prisma.student.findFirst({
+            where: { id: userId },
+            include: { grades: true, parents: true, class: { include: { subjects: true, school: true } } }
+        });
+
+        const teacher = await prisma.teacher.findFirst({
+            where: { id: userId },
+            include: { subjects: true, school: true }
+        });
+
+        const parent = await prisma.parent.findFirst({
+            where: { id: userId },
+            include: { children: true }
+        });
+
+        const user = student ?? teacher ?? parent;
+
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        return res.status(200).json({ user, message: "You are in system" });
+    } catch (error) {
+        console.error("Error in getMe:", error);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+};

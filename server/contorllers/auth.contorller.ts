@@ -292,4 +292,16 @@ export const signInAdmin = async (req: Request, res: Response) => {
     }
 }
 
+export const logout = async (req: Request, res: Response) => {
+    try {
+        return res
+            .clearCookie('access_token')
+            .status(200)
+            .json("You have been signed out")
+    } catch (error) {
+        console.error('Smt went wrong in logout', error);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+}
+
 // export const google = async (req, res, next) => {}

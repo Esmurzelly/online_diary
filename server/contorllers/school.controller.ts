@@ -133,7 +133,6 @@ export const updateSchoolClasses = async ( // add 1 Class with subjects in the s
 
     const classes: IClassCreateInput[] = [];
 
-
     if (num >= 1 && num <= 4) {
         addClasses(classes, num, letter, LOW_SUBJECTS);
     }
