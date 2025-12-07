@@ -1,10 +1,10 @@
 import { combineReducers } from "@reduxjs/toolkit";
-import studentReducer from '@/redux/user/studentSlice';
+import userReducer from '@/redux/user/userSlice';
 import authReducer from '@/redux/auth/authSlice';
 
 export const rootReducer = combineReducers({
     auth: authReducer,
-    student: studentReducer,
+    user: userReducer,
 })
 
 export type RootState = ReturnType<typeof rootReducer>

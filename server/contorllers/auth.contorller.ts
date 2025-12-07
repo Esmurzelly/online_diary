@@ -115,6 +115,7 @@ export const signUpTeacher = async (req: Request, res: Response) => {
             })
             .json({
                 user: { email: teacher.email, name: teacher.name, surname: teacher.surname, avatarUrl: teacher.avatarUrl },
+                token,
                 message: "Signing up is successful!"
             });
     } catch (error) {
@@ -171,6 +172,7 @@ export const signUpParent = async (req: Request, res: Response) => {
             })
             .json({
                 user: { email: parent.email, name: parent.name, surname: parent.surname, avatarUrl: parent.avatarUrl },
+                token,
                 message: "Signing up is successful!"
             });
     } catch (error) {

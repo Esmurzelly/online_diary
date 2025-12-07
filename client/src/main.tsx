@@ -1,7 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import App from './App.tsx'
 import { Provider } from 'react-redux'
 import { persistor, store } from './redux/store.ts'
 import { PersistGate } from 'redux-persist/integration/react'
@@ -9,6 +8,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Auth from './pages/auth/index.tsx'
 import Layout from './components/items/layout/layout.tsx'
 import Home from './pages/home/index.tsx'
+import { ToastContainer } from 'react-toastify'
 
 
 const router = createBrowserRouter([
@@ -31,10 +31,11 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <PersistGate persistor={persistor}>
-      <Provider store={store}>
+    <Provider store={store}>
+      <PersistGate persistor={persistor}>
         <RouterProvider router={router} />
-      </Provider>
-    </PersistGate>
+        <ToastContainer />
+      </PersistGate>
+    </Provider>
   </StrictMode>,
 )

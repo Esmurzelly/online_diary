@@ -6,16 +6,28 @@ export interface User {
     avatarUrl?: string | null;
     phone?: string | null;
     address?: string | null,
-    parentIds?: [],
-    classId?: string | null,
     createdAt: Date | string | null,
     updatedAt: Date | string | null
+}
+
+export interface Student extends User {
+    parentIds?: [],
+    classId?: string | null,
+}
+
+export interface Teacher extends User {
+    schoolId?: string | null;
+}
+
+export interface Parent extends User {
+    childrenIds?: string[];
 }
 
 export interface AuthCredentials {
     email: string;
     password: string;
 }
+
 
 export interface RegisterData extends AuthCredentials {
     name: string;

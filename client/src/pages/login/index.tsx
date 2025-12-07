@@ -6,39 +6,56 @@ import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '@/redux/store';
 import { useSelector } from 'react-redux';
 import type { RootState } from '@/redux/rootReducer';
-import { loginStudent } from '@/redux/user/studentSlice';
+import { loginParent, loginStudent, loginTeacher } from '@/redux/user/userSlice';
+import { toast } from 'react-toastify'
+import { Button } from '@/components/ui/button';
 
-type Props = {}
+type Props = {
+    role: 'student' | 'teacher' | 'parent' | 'admin';
+}
 
 type FormValues = {
     email: string;
     password: string;
 }
 
-const LoginComponent = (props: Props) => {
+const LoginComponent = ({ role }: Props) => {
     const {
         handleSubmit,
         register,
         formState: { errors }
     } = useForm<FormValues>();
 
+    console.log(role)
+
     const isAuth = useSelector((state: RootState) => state.auth.token);
+    const message = useSelector((state: RootState) => state.user.message);
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
         try {
+            if(message) toast(message);
             if (isAuth) navigate('/');
         } catch (error) {
             console.log(`error in useEffect - ${error}`)
         }
-    }, [navigate, isAuth]);
+    }, [navigate, isAuth, message]);
 
     const handleSubmitForm: SubmitHandler<FormValues> = async (data) => {
         try {
-            const res = await dispatch(loginStudent(data));
-
-            console.log('res from handleSubmit', res);
+            if (role === 'student') {
+                const res = await dispatch(loginStudent(data));
+                console.log('res from handleSubmit - student', res);
+            }
+            if (role === 'teacher') {
+                const res = await dispatch(loginTeacher(data));
+                console.log('res from handleSubmit - teacher', res);
+            }
+            if (role === 'parent') {
+                const res = await dispatch(loginParent(data));
+                console.log('res from handleSubmit - parent', res);
+            }
         } catch (error) {
             console.log(`error in handleSubmit - ${error}`);
         }
@@ -47,7 +64,6 @@ const LoginComponent = (props: Props) => {
     return (
         <form onSubmit={handleSubmit(handleSubmitForm)}>
             <h1>Login</h1>
-
             <div>
                 <label htmlFor="email">Email:</label>
                 <input
@@ -66,7 +82,7 @@ const LoginComponent = (props: Props) => {
                 {errors.password && <span>{errors.password.message}</span>}
             </div>
 
-            <input type="submit" />
+            <input disabled={role === undefined || !role} type="submit" />
         </form>
     )
 }
