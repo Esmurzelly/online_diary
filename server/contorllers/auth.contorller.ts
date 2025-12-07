@@ -44,10 +44,23 @@ export const signUpStudent = async (req: Request, res: Response) => {
             },
         });
 
-        return res.json({
-            user: { email: student.email, name: student.name, surname: student.surname, avatarUrl: student.avatarUrl },
-            message: "Signing up is successful!"
-        });
+        const token = jwt.sign(
+            { userId: student.id, role: "student" },
+            process.env.SECRET_KEY!,
+            { expiresIn: "7d" }
+        )
+
+        return res
+            .cookie("access_token", token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax"
+            })
+            .json({
+                user: { email: student.email, name: student.name, surname: student.surname, avatarUrl: student.avatarUrl },
+                token,
+                message: "Signing up is successful!"
+            });
     } catch (error) {
         console.error('Smt went wrong in register', error);
         return res.status(500).json({ error: "Internal server error" });
@@ -88,10 +101,22 @@ export const signUpTeacher = async (req: Request, res: Response) => {
             }
         });
 
-        return res.json({
-            user: { email: teacher.email, name: teacher.name, surname: teacher.surname, avatarUrl: teacher.avatarUrl },
-            message: "Signing up is successful!"
-        });
+        const token = jwt.sign(
+            { userId: teacher.id, role: "teacher" },
+            process.env.SECRET_KEY!,
+            { expiresIn: "7d" }
+        )
+
+        return res
+            .cookie("access_token", token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax"
+            })
+            .json({
+                user: { email: teacher.email, name: teacher.name, surname: teacher.surname, avatarUrl: teacher.avatarUrl },
+                message: "Signing up is successful!"
+            });
     } catch (error) {
         console.error('Smt went wrong in register', error);
         return res.status(500).json({ error: "Internal server error" });
@@ -132,10 +157,22 @@ export const signUpParent = async (req: Request, res: Response) => {
             }
         });
 
-        return res.json({
-            user: { email: parent.email, name: parent.name, surname: parent.surname, avatarUrl: parent.avatarUrl },
-            message: "Signing up is successful!"
-        });
+        const token = jwt.sign(
+            { userId: parent.id, role: "parent" },
+            process.env.SECRET_KEY!,
+            { expiresIn: "7d" }
+        )
+
+        return res
+            .cookie("access_token", token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax"
+            })
+            .json({
+                user: { email: parent.email, name: parent.name, surname: parent.surname, avatarUrl: parent.avatarUrl },
+                message: "Signing up is successful!"
+            });
     } catch (error) {
         console.error('Smt went wrong in register', error);
         return res.status(500).json({ error: "Internal server error" });
@@ -159,7 +196,16 @@ export const signUpAdmin = async (req: Request, res: Response) => {
             }
         });
 
-        return res.status(200).json({ user: { email: user.email } })
+        const token = jwt.sign(
+            { userId: user.id, role: "user" },
+            process.env.SECRET_KEY!,
+            { expiresIn: "7d" }
+        )
+
+        return res.status(200).json({
+            user: { email: user.email },
+            token,
+        })
     } catch (error) {
         console.error('Smt went wrong in register', error);
         return res.status(500).json({ error: "Internal server error" });
@@ -249,7 +295,7 @@ export const signInParent = async (req: Request, res: Response) => {
         if (!validPassword) {
             return res.status(400).json({ error: "Invalid login or password" });
         };
-        
+
         // @ts-ignore
         const token = jwt.sign(({ userId: user.id, role: "PARENT" }), process.env.SECRET_KEY, { expiresIn: '7d' });
         return res.json({ user: user, token, message: "Login is successful" });

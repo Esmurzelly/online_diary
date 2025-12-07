@@ -9,7 +9,8 @@ const Layout = (props: Props) => {
     <>
         <Header />
 
-        <div className="flex max-w-7xl mx-auto mt-10"> {/* container */}
+        <div className="flex flex-col items-start max-w-7xl mx-auto mt-10"> {/* container */}
+            <h2>above the Outlet</h2>
             <Outlet />
         </div>
     </>

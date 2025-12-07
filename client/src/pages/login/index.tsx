@@ -1,12 +1,16 @@
-import React, { useState } from 'react'
-import { useForm } from 'react-hook-form';
+import React, { useEffect, useState } from 'react'
+import { useForm, type SubmitErrorHandler, type SubmitHandler } from 'react-hook-form';
 import { Input } from "@/components/ui/input"
-import { useLazyCurrentQuery, useSigninStudentMutation } from '@/app/services/authApi';
+// import { useLazyCurrentQuery, useSigninStudentMutation } from '@/app/services/authApi';
 import { useNavigate } from 'react-router-dom';
+import { useAppDispatch } from '@/redux/store';
+import { useSelector } from 'react-redux';
+import type { RootState } from '@/redux/rootReducer';
+import { loginStudent } from '@/redux/user/studentSlice';
 
 type Props = {}
 
-type Login = {
+type FormValues = {
     email: string;
     password: string;
 }
@@ -14,46 +18,52 @@ type Login = {
 const LoginComponent = (props: Props) => {
     const {
         handleSubmit,
-        control,
         register,
         formState: { errors }
-    } = useForm<Login>({
-        mode: "onChange",
-        reValidateMode: "onBlur",
-        defaultValues: {
-            email: "",
-            password: ""
-        }
-    });
+    } = useForm<FormValues>();
 
-    const [login, { isLoading }] = useSigninStudentMutation();
+    const isAuth = useSelector((state: RootState) => state.auth.token);
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const [error, setError] = useState('');
-    const [triggerCurrentQuery] = useLazyCurrentQuery();
 
-    const onSubmit = async (data: Login) => {
+    useEffect(() => {
         try {
-            await login(data).unwrap();
-            await triggerCurrentQuery().unwrap();
-            navigate('/');
+            if (isAuth) navigate('/');
         } catch (error) {
-            console.log('error in onSubmit in Login', error);
+            console.log(`error in useEffect - ${error}`)
+        }
+    }, [navigate, isAuth]);
+
+    const handleSubmitForm: SubmitHandler<FormValues> = async (data) => {
+        try {
+            const res = await dispatch(loginStudent(data));
+
+            console.log('res from handleSubmit', res);
+        } catch (error) {
+            console.log(`error in handleSubmit - ${error}`);
         }
     }
 
     return (
-        <form className='flex flex-col gap-4' onSubmit={handleSubmit(onSubmit)}>
-            <div className="flex flex-row gap-2">
-                <label htmlFor="">Email: </label>
-                <input type="email" {...register("email", { required: true, maxLength: 20 })} />
-                {errors.email?.types?.required && <p>This field is required</p>}
-                {errors.email?.types?.maxLength && <p>Not more than 20 symbols</p>}
-            </div>
-            <div className="flex flex-row gap-2">
-                <label htmlFor="">Password: </label>
-                <input type="password" {...register("password", { required: true, maxLength: 20 })} />
-                {errors.password?.types?.required && <p>This field is required</p>}
-                {errors.password?.types?.maxLength && <p>Not more than 20 symbols</p>}
+        <form onSubmit={handleSubmit(handleSubmitForm)}>
+            <h1>Login</h1>
+
+            <div>
+                <label htmlFor="email">Email:</label>
+                <input
+                    {...register("email", { required: "Email is required" })}
+                    type="email"
+                    id="email"
+                />
+                {errors.email && <span>{errors.email.message}</span>}
+
+                <label htmlFor="password">Password:</label>
+                <input
+                    {...register("password", { required: "Password is required" })}
+                    type="password"
+                    id="password"
+                />
+                {errors.password && <span>{errors.password.message}</span>}
             </div>
 
             <input type="submit" />

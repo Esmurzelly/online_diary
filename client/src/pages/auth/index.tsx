@@ -1,10 +1,57 @@
 import React from 'react'
+import LoginComponent from '../login'
+import { Button } from "@/components/ui/button"
+import RegisterComponent from '../register'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 
 type Props = {}
 
 const Auth = (props: Props) => {
   return (
-    <div>Auth page</div>
+    <div className="flex w-full max-w-sm flex-col gap-6">
+      <Tabs defaultValue="account">
+        <TabsList>
+          <TabsTrigger value="account">Login</TabsTrigger>
+          <TabsTrigger value="password">Register</TabsTrigger>
+        </TabsList>
+        <TabsContent value="account">
+          <Card>
+            <CardHeader>
+              <CardTitle>Login</CardTitle>
+              <CardDescription>
+                Make changes to your account here. Click save when you&apos;re
+                done.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-6">
+              <LoginComponent />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="password">
+          <Card>
+            <CardHeader>
+              <CardTitle>Register</CardTitle>
+              <CardDescription>
+                Change your password here. After saving, you&apos;ll be logged
+                out.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-6">
+              <RegisterComponent />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   )
 }
 
