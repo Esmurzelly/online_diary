@@ -22,10 +22,10 @@ import {
 
 type Props = {}
 
-type Role = 'student' | 'teacher' | 'parent' | 'admin';
+type Role = 'student' | 'teacher' | 'parent' | 'admin' | 'none';
 
 const Auth = (props: Props) => {
-  const [role, setRole] = useState<Role>('student');
+  const [role, setRole] = useState<Role>('none');
 
   const handleChange = (state: Role) => {
     setRole(state)
@@ -33,11 +33,12 @@ const Auth = (props: Props) => {
 
   return (
     <>
-      <Select onValueChange={handleChange}>
+      <Select defaultValue='none' onValueChange={handleChange}>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Role" />
         </SelectTrigger>
         <SelectContent>
+          <SelectItem value="none">Choose the role</SelectItem>
           <SelectItem value="student">student</SelectItem>
           <SelectItem value="teacher">teacher</SelectItem>
           <SelectItem value="parent">parent</SelectItem>

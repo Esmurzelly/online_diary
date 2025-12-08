@@ -20,7 +20,7 @@ const uploads = multer({ storage });
 
 router.get('/get-student-by-id/:id', getStudentById);
 router.get('/get-students-from-one-class', getStudentsFromOneClass);
-router.put('/update-student/:id', checkUser, uploads.single("avatar"), checkRole("STUDENT", "ADMIN"), updateStudent);
+router.put('/update-student/:id', checkUser, checkRole("STUDENT", "ADMIN"), uploads.single("avatar"), updateStudent);
 router.put('/add-student-to-class', checkUser, checkRole("ADMIN", "TEACHER"), addStudentToClass);
 router.put('/remove-student-from-class', checkUser, checkRole("ADMIN", "TEACHER"), removeStudentFromClass);
 router.delete('/delete-student/:id', checkUser, checkRole("ADMIN", "STUDENT"), removeStudent);

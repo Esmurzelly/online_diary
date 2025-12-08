@@ -136,6 +136,9 @@ export const updateStudent = async (
         parentIds,
     } = req.body as IStudent;
 
+    console.log('id from server', id);
+    console.log('req.body from server', req.body);
+
     let filePath: string | undefined;
     let hashedPassword: string | undefined;
 
@@ -185,6 +188,7 @@ export const updateStudent = async (
                 parentIds: parentIds || undefined,
             },
             select: {
+                id: true,
                 email: true,
                 name: true,
                 surname: true,
@@ -270,6 +274,7 @@ export const updateTeacher = async (
                 subjects: subjects || undefined,
             },
             select: {
+                id: true,
                 email: true,
                 name: true,
                 surname: true,
@@ -353,6 +358,7 @@ export const updateParent = async (
                 childrenIds: childrenIds || undefined
             },
             select: {
+                id: true,
                 email: true,
                 name: true,
                 surname: true,

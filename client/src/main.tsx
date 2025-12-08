@@ -9,6 +9,7 @@ import Auth from './pages/auth/index.tsx'
 import Layout from './components/items/layout/layout.tsx'
 import Home from './pages/home/index.tsx'
 import { ToastContainer } from 'react-toastify'
+import Profile from './pages/profile.tsx/index.tsx'
 
 
 const router = createBrowserRouter([
@@ -23,6 +24,10 @@ const router = createBrowserRouter([
       {
         path: "/home",
         element: <Home />
+      },
+      {
+        path: "/profile",
+        element: <Profile />
       }
     ]
   }

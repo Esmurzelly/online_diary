@@ -4,6 +4,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from 'axios';
 import { BASE_URL } from "@/constants";
 import { setToken } from "../auth/authSlice";
+import api from "@/utils/axios";
 
 type Role = 'student' | 'teacher' | 'parent' | 'admin';
 
@@ -175,6 +176,24 @@ export const getMe = createAsyncThunk(
     }
 );
 
+export const updateStudent = createAsyncThunk(
+    'user/updateStudent',
+    async ({formData, id}: { formData: FormData, id: string | undefined }, { rejectWithValue }) => {
+        console.log(`link - ${BASE_URL}/students/update-student/${id}`)
+        try {
+            const { data } = await api.put(`${BASE_URL}/students/update-student/${id}`, formData, {
+                headers: { "Content-Type": "multipart/form-data" }
+            });
+
+            console.log('data from updateStudent Slice', data);
+
+            return data;
+        } catch (error: any) {
+            return rejectWithValue({ message: error.message || "smth weng wrong in updateUser - student" })
+        }
+    }
+)
+
 export const studentSlice = createSlice({
     name: "user",
     initialState,
@@ -288,6 +307,20 @@ export const studentSlice = createSlice({
                 state.loading = false;
             })
             .addCase(getMe.rejected, (state, action) => {
+                state.loading = false;
+                state.message = action.error.message
+            })
+
+            .addCase(updateStudent.pending, (state, action) => {
+                state.loading = true;
+                state.message = "Loading..."
+            })
+            .addCase(updateStudent.fulfilled, (state, action) => {
+                state.message = action.payload.message;
+                state.currentUser = action.payload.user;
+                state.loading = false;
+            })
+            .addCase(updateStudent.rejected, (state, action) => {
                 state.loading = false;
                 state.message = action.error.message
             })

@@ -11,7 +11,7 @@ import { toast } from 'react-toastify';
 
 
 type Props = {
-    role: 'student' | 'teacher' | 'parent' | 'admin';
+    role: 'student' | 'teacher' | 'parent' | 'admin' | 'none';
 }
 
 type FormValues = {
@@ -45,21 +45,18 @@ const RegisterComponent = ({ role }: Props) => {
     const handleSubmitForm: SubmitHandler<FormValues> = async (data) => {
         console.log('data', data)
         try {
-            if (role === 'student') {
-                const res = await dispatch(registerStudent(data));
-                console.log('res from handleSubmit - student', res);
-                console.log(role);
-            }
-            if (role === 'teacher') {
-                const res = await dispatch(registerTeacher(data));
-                console.log('res from handleSubmit - teacher', res);
-                console.log(role);
-
-            }
-            if (role === 'parent') {
-                const res = await dispatch(registerParent(data));
-                console.log('res from handleSubmit - parent', res);
-                console.log(role);
+            switch (role) {
+                case 'student':
+                    await dispatch(registerStudent(data));
+                    break;
+                case 'teacher':
+                    await dispatch(registerTeacher(data));
+                    break;
+                case 'parent':
+                    await dispatch(registerParent(data));
+                    break;
+                default:
+                    return toast.error("Choose the role")
             }
         } catch (error) {
             console.log(`error in handleSubmit - ${error}`);

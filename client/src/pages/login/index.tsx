@@ -1,17 +1,14 @@
-import React, { useEffect, useState } from 'react'
-import { useForm, type SubmitErrorHandler, type SubmitHandler } from 'react-hook-form';
-import { Input } from "@/components/ui/input"
-// import { useLazyCurrentQuery, useSigninStudentMutation } from '@/app/services/authApi';
+import React, { useEffect } from 'react'
+import { useForm, type SubmitHandler } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '@/redux/store';
 import { useSelector } from 'react-redux';
 import type { RootState } from '@/redux/rootReducer';
 import { loginParent, loginStudent, loginTeacher } from '@/redux/user/userSlice';
 import { toast } from 'react-toastify'
-import { Button } from '@/components/ui/button';
 
 type Props = {
-    role: 'student' | 'teacher' | 'parent' | 'admin';
+    role: 'none' | 'student' | 'teacher' | 'parent' | 'admin';
 }
 
 type FormValues = {
@@ -26,8 +23,6 @@ const LoginComponent = ({ role }: Props) => {
         formState: { errors }
     } = useForm<FormValues>();
 
-    console.log(role)
-
     const isAuth = useSelector((state: RootState) => state.auth.token);
     const message = useSelector((state: RootState) => state.user.message);
     const dispatch = useAppDispatch();
@@ -35,7 +30,7 @@ const LoginComponent = ({ role }: Props) => {
 
     useEffect(() => {
         try {
-            if(message) toast(message);
+            if (message) toast(message);
             if (isAuth) navigate('/');
         } catch (error) {
             console.log(`error in useEffect - ${error}`)
@@ -44,17 +39,18 @@ const LoginComponent = ({ role }: Props) => {
 
     const handleSubmitForm: SubmitHandler<FormValues> = async (data) => {
         try {
-            if (role === 'student') {
-                const res = await dispatch(loginStudent(data));
-                console.log('res from handleSubmit - student', res);
-            }
-            if (role === 'teacher') {
-                const res = await dispatch(loginTeacher(data));
-                console.log('res from handleSubmit - teacher', res);
-            }
-            if (role === 'parent') {
-                const res = await dispatch(loginParent(data));
-                console.log('res from handleSubmit - parent', res);
+            switch (role) {
+                case 'student':
+                    await dispatch(loginStudent(data));
+                    break;
+                case 'teacher':
+                    await dispatch(loginTeacher(data));
+                    break;
+                case 'parent':
+                    await dispatch(loginParent(data));
+                    break;
+                default:
+                    return toast.error("Choose the role")
             }
         } catch (error) {
             console.log(`error in handleSubmit - ${error}`);

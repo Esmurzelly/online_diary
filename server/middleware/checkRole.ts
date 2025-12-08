@@ -6,7 +6,7 @@ export const checkRole = (...allowRoles: string[]) => {
         const user = req.user;
 
         if (!user) {
-            return res.status(401).json({ error: "Unauthorized" });
+            return res.status(401).json({ error: "Unauthorized - checkRole" });
         }
 
         if(!allowRoles.includes(user.role)) {
