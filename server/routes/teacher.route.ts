@@ -19,8 +19,9 @@ const storage = multer.diskStorage({
 const uploads = multer({ storage });
 
 router.get('/get-teacher-by-id/:id', getTeacherById);
-router.put('/update-teacher/:id', checkUser, uploads.single("avatar"), checkRole("ADMIN", "TEACHER"), updateTeacher);
+router.put('/update-teacher/:id', checkUser, checkRole("admin", "teacher"), uploads.single("avatar"), updateTeacher);
+// router.put('/update-teacher/:id', checkUser, uploads.single("avatar"), updateTeacher);
 router.get('/get-teachers-from-school', checkUser, getAllTeacherFromOneSchool);
-router.delete('/delete-teacher/:id', checkUser, checkRole("ADMIN", "TEACHER"), removeTeacher);
+router.delete('/delete-teacher/:id', checkUser, checkRole("admin", "teacher"), removeTeacher);
 
 export default router;

@@ -2,6 +2,12 @@ import { prisma } from '../prisma/prisma-client.js';
 import bcrypt from 'bcryptjs';
 import { Request, Response } from 'express';
 import { IParent, IStudent, ITeacher, IUserWithToken } from '../types.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+
+const __filename = fileURLToPath(import.meta.url); // from file:///C:/Projects/app/src/controllers/userController.js to C:\Projects\app\src\controllers\userController.js
+const __dirname = path.dirname(__filename); // remove file's name, only path - C:\Projects\app\src\controllers
 
 export const getAllUsers = async (req: Request, res: Response) => {
     try {
@@ -136,9 +142,6 @@ export const updateStudent = async (
         parentIds,
     } = req.body as IStudent;
 
-    console.log('id from server', id);
-    console.log('req.body from server', req.body);
-
     let filePath: string | undefined;
     let hashedPassword: string | undefined;
 
@@ -225,33 +228,46 @@ export const updateTeacher = async (
 
     let filePath;
     let hashedPassword: string | undefined;
+    const avatarName = `${name}_${Date.now()}.png`;
+    const uploadDir = path.join(__dirname, '../uploads');
+
+    if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true })
+    };
 
     if (req.file && req.file.path) {
-        filePath = req.file.path;
+        const oldPath = req.file.path;
+        const newPath = path.join(uploadDir, avatarName);
+
+        fs.renameSync(oldPath, newPath);
+        filePath = `/uploads/${avatarName}`;
     }
 
     if (id !== req.user?.userId) {
         return res.status(401).json({ error: "No access" });
     }
 
-    try {
-        if (email) {
-            const existedStudent = await prisma.student.findFirst({
-                where: { email }
-            });
-            const existedTeacher = await prisma.teacher.findFirst({
-                where: { email }
-            });
-            const existedParent = await prisma.parent.findFirst({
-                where: { email }
-            });
+    console.log('avatarName', avatarName);
+    console.log('uploadDir', uploadDir);
 
-            if (
-                (existedStudent && existedStudent.id !== id) ||
-                (existedTeacher && existedTeacher.id !== id) ||
-                (existedParent && existedParent.id !== id)
-            ) {
-                return res.status(403).json({ error: "User with such credentials is alraedy exists" });
+    try {
+        if (email && email.trim() !== "") {
+            const existedStudent = await prisma.student.findFirst({ where: { email } });
+            const existedTeacher = await prisma.teacher.findFirst({ where: { email } });
+            const existedParent = await prisma.parent.findFirst({ where: { email } });
+
+            const existedUser = existedStudent ?? existedTeacher ?? existedParent;
+
+
+            console.log('==============================================');
+            console.log('id from server (params) - updateTeacher', id);
+            console.log('id from server (req.user.userId) - updateTeacher', req.user?.userId);
+            console.log('existedUser.id - updateTeacher', existedUser?.id);
+            console.log('req.body from server - updateTeacher', req.body);
+
+
+            if (existedUser && existedUser.id !== id) {
+                return res.status(403).json({ error: "User with such credentials already exists" });
             }
         };
 
@@ -268,7 +284,7 @@ export const updateTeacher = async (
                 surname: surname || undefined,
                 phone: phone || undefined,
                 address: address || undefined,
-                avatarUrl: filePath ? `/${filePath}` : undefined,
+                avatarUrl: filePath ? filePath : undefined,
                 schoolId: schoolId || undefined,
                 // @ts-ignore
                 subjects: subjects || undefined,

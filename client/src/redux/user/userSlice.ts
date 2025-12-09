@@ -6,22 +6,22 @@ import { BASE_URL } from "@/constants";
 import { setToken } from "../auth/authSlice";
 import api from "@/utils/axios";
 
-type Role = 'student' | 'teacher' | 'parent' | 'admin';
+type Role = 'student' | 'teacher' | 'parent' | 'admin' | 'none';
 
 interface InitialState {
-    user: Student | Teacher | Parent | null;
+    users: Student[] | Teacher[] | Parent[] | null;
     currentUser: User | null;
     message?: string | null;
     loading: boolean,
-    role: Role | null
+    role: Role,
 }
 
 const initialState: InitialState = {
-    user: null,
+    users: null,
     currentUser: null,
     message: null,
     loading: false,
-    role: null
+    role: "none"
 };
 
 export const registerStudent = createAsyncThunk(
@@ -40,7 +40,7 @@ export const registerStudent = createAsyncThunk(
                 dispatch(setToken(data.token));
             }
 
-            console.log('data from register asyncThunk', data);
+            console.log('data from register student - asyncThunk', data);
 
             return data;
         } catch (error: any) {
@@ -168,7 +168,7 @@ export const getMe = createAsyncThunk(
     async () => {
         try {
             const { data } = await axios.get(`${BASE_URL}/users/get-me`);
-            
+
             return data;
         } catch (error) {
             console.log(`error is ${error}`);
@@ -176,18 +176,40 @@ export const getMe = createAsyncThunk(
     }
 );
 
-export const updateStudent = createAsyncThunk(
-    'user/updateStudent',
-    async ({formData, id}: { formData: FormData, id: string | undefined }, { rejectWithValue }) => {
-        console.log(`link - ${BASE_URL}/students/update-student/${id}`)
+export const updateUser = createAsyncThunk(
+    'user/updateUser',
+    async ({ formData, id, role }: { formData: FormData, id: string | undefined, role: Role }, { rejectWithValue }) => {
+        console.log('before start in slice', [...formData.entries()], id, role); // ok!
+        // console.log(`link - ${BASE_URL}/students/update-student/${id}`) // ok!
         try {
-            const { data } = await api.put(`${BASE_URL}/students/update-student/${id}`, formData, {
-                headers: { "Content-Type": "multipart/form-data" }
-            });
+            switch (role) {
+                case 'student':
+                    const { data: studentData } = await api.put(`${BASE_URL}/students/update-student/${id}`, formData, {
+                        headers: { "Content-Type": "multipart/form-data" }
+                    });
 
-            console.log('data from updateStudent Slice', data);
+                    console.log('data from updateUser Slice - student', studentData);
+                    return studentData;
 
-            return data;
+                case 'teacher':
+                    const { data: teacherData } = await api.put(`${BASE_URL}/teachers/update-teacher/${id}`, formData, {
+                        headers: { "Content-Type": "multipart/form-data" }
+                    });
+
+                    console.log('data from updateUser Slice - teacher', teacherData);
+                    return teacherData;
+
+                case 'parent':
+                    const { data: parentData } = await api.put(`${BASE_URL}/parents/update-parent/${id}`, formData, {
+                        headers: { "Content-Type": "multipart/form-data" }
+                    });
+
+                    console.log('data from updateUser Slice - parent', parentData);
+                    return parentData;
+                default:
+                    throw new Error("Invalid role in switch case");
+            }
+
         } catch (error: any) {
             return rejectWithValue({ message: error.message || "smth weng wrong in updateUser - student" })
         }
@@ -311,16 +333,16 @@ export const studentSlice = createSlice({
                 state.message = action.error.message
             })
 
-            .addCase(updateStudent.pending, (state, action) => {
+            .addCase(updateUser.pending, (state, action) => {
                 state.loading = true;
                 state.message = "Loading..."
             })
-            .addCase(updateStudent.fulfilled, (state, action) => {
+            .addCase(updateUser.fulfilled, (state, action) => {
                 state.message = action.payload.message;
                 state.currentUser = action.payload.user;
                 state.loading = false;
             })
-            .addCase(updateStudent.rejected, (state, action) => {
+            .addCase(updateUser.rejected, (state, action) => {
                 state.loading = false;
                 state.message = action.error.message
             })

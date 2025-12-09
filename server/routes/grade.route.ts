@@ -5,8 +5,8 @@ import { checkRole } from '../middleware/checkRole';
 
 const router = express.Router();
 
-router.post('/create-grade', checkUser, checkRole("TEACHER", "ADMIN"), setGrade);
-router.put('/update-grade', checkUser, checkRole("TEACHER", "ADMIN"), updateGrade);
-router.delete('/remove-grade', checkUser, checkRole("TEACHER", "ADMIN"), removeGrade);
+router.post('/create-grade', checkUser, checkRole("teacher", "admin"), setGrade);
+router.put('/update-grade', checkUser, checkRole("teacher", "admin"), updateGrade);
+router.delete('/remove-grade', checkUser, checkRole("teacher", "admin"), removeGrade);
 
 export default router;

@@ -5,10 +5,10 @@ import { checkRole } from '../middleware/checkRole';
 
 const router = express.Router();
 
-router.put('/create-new-subject', checkUser, checkRole("ADMIN", "TEACHER"), addSubject);
-router.put('/teacher-to-subject', checkUser, checkRole("ADMIN", "TEACHER"), addTeacherToSubject);
-router.put('/delete-teacher-from-subject', checkUser, checkRole("ADMIN", "TEACHER"), deleteTeacherFromSubject);
-router.put('/update-subject', checkUser, checkRole("ADMIN", "TEACHER"), updateSubject);
-router.delete('/delete-subject', checkUser, checkRole("ADMIN"), removeSubject);
+router.put('/create-new-subject', checkUser, checkRole("admin", "teacher"), addSubject);
+router.put('/teacher-to-subject', checkUser, checkRole("admin", "teacher"), addTeacherToSubject);
+router.put('/delete-teacher-from-subject', checkUser, checkRole("admin", "teacher"), deleteTeacherFromSubject);
+router.put('/update-subject', checkUser, checkRole("admin", "teacher"), updateSubject);
+router.delete('/delete-subject', checkUser, checkRole("admin"), removeSubject);
 
 export default router;

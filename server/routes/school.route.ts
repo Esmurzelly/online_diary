@@ -7,8 +7,8 @@ const router = express.Router();
 
 router.get('/get-all-schools', getAllSchools);
 router.get('/get-school-by-id/:schoolId', getSchoolById);
-router.post('/create-school', checkUser, checkRole("ADMIN"), createSchool);
-router.put('/update-school-teacher', checkUser, checkRole("ADMIN", "TEACHER"), updateSchoolTeachers);
-router.put('/update-school-class', checkUser, checkRole("ADMIN"), updateSchoolClasses);
+router.post('/create-school', checkUser, checkRole("admin"), createSchool);
+router.put('/update-school-teacher', checkUser, checkRole("admin", "teacher"), updateSchoolTeachers);
+router.put('/update-school-class', checkUser, checkRole("admin"), updateSchoolClasses);
 
 export default router;

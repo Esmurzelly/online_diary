@@ -57,7 +57,7 @@ export const signUpStudent = async (req: Request, res: Response) => {
                 sameSite: "lax"
             })
             .json({
-                user: { email: student.email, name: student.name, surname: student.surname, avatarUrl: student.avatarUrl },
+                user: { id: student.id, email: student.email, name: student.name, surname: student.surname, avatarUrl: student.avatarUrl },
                 token,
                 message: "Signing up is successful!"
             });
@@ -114,7 +114,7 @@ export const signUpTeacher = async (req: Request, res: Response) => {
                 sameSite: "lax"
             })
             .json({
-                user: { email: teacher.email, name: teacher.name, surname: teacher.surname, avatarUrl: teacher.avatarUrl },
+                user: { id: teacher.id, email: teacher.email, name: teacher.name, surname: teacher.surname, avatarUrl: teacher.avatarUrl },
                 token,
                 message: "Signing up is successful!"
             });
@@ -171,7 +171,7 @@ export const signUpParent = async (req: Request, res: Response) => {
                 sameSite: "lax"
             })
             .json({
-                user: { email: parent.email, name: parent.name, surname: parent.surname, avatarUrl: parent.avatarUrl },
+                user: { id: parent.id, email: parent.email, name: parent.name, surname: parent.surname, avatarUrl: parent.avatarUrl },
                 token,
                 message: "Signing up is successful!"
             });
@@ -205,7 +205,7 @@ export const signUpAdmin = async (req: Request, res: Response) => {
         )
 
         return res.status(200).json({
-            user: { email: user.email },
+            user: { email: user.email, id: user.id },
             token,
         })
     } catch (error) {

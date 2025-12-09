@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { RootState } from '@/redux/rootReducer';
 import { useSelector } from 'react-redux';
 import {
@@ -11,13 +11,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { useAppDispatch } from '@/redux/store';
-import { updateStudent } from '@/redux/user/userSlice';
+import { updateUser } from '@/redux/user/userSlice';
+import { toast } from 'react-toastify';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 type Props = {}
 
 type FormValues = {
     email: string;
     name: string;
+    password: string;
     surname: string;
     phone: string | undefined | null;
     address: string | undefined | null;
@@ -25,7 +28,7 @@ type FormValues = {
 }
 
 const Profile = (props: Props) => {
-    const { currentUser, role } = useSelector((state: RootState) => state.user);
+    const { currentUser, role, message } = useSelector((state: RootState) => state.user);
     const {
         handleSubmit,
         register,
@@ -35,14 +38,13 @@ const Profile = (props: Props) => {
         defaultValues: {
             name: currentUser?.name,
             surname: currentUser?.surname,
+            password: "",
             email: currentUser?.email,
             phone: currentUser?.phone,
             address: currentUser?.address
         }
     });
     const dispatch = useAppDispatch();
-
-    console.log('currentUser?.id', currentUser?.id);
 
     // const [name, setName] = useState(currentUser?.name);
     // const [surname, setSurname] = useState(currentUser?.surname);
@@ -64,6 +66,7 @@ const Profile = (props: Props) => {
 
         if (selectedFile) {
             reader.readAsDataURL(selectedFile);
+            setSelectedFile(selectedFile);
         }
 
         // reader.onload = (readerEvent) => {
@@ -75,6 +78,12 @@ const Profile = (props: Props) => {
         console.log('selectedFile', selectedFile)
         console.log('filePicekerRef', filePicekerRef);
     }
+
+    useEffect(() => {
+        if (message) {
+            toast(message)
+        }
+    }, [message]);
 
     const handleSubmitForm: SubmitHandler<FormValues> = async () => {
         try {
@@ -88,19 +97,22 @@ const Profile = (props: Props) => {
             if (selectedFile) {
                 formData.append("avatar", selectedFile);
             }
+            if (watch('password') && watch('password').length > 0) {
+                formData.append("password", watch('password'));
+            }
 
-            console.log("FORMDATA from client ->", [...formData.entries()]);
+            // console.log("FORMDATA from client ->", [...formData.entries()]); // ok!
 
-            const res = await dispatch(updateStudent({ formData, id: currentUser?.id }));
+            console.log('selectedFile', selectedFile);
+
+            const res = await dispatch(updateUser({ formData, id: currentUser?.id, role }));
             console.log('res from form in client', res);
         } catch (error) {
             console.log(`error in handleSubmit - ${error}`);
         }
     }
 
-    console.log('currentUser', currentUser);
-
-    if(!currentUser?.id) {
+    if (!currentUser?.id) {
         return <h1>Loading...</h1>
     }
 
@@ -111,7 +123,10 @@ const Profile = (props: Props) => {
             <div className="flex flex-col items-start gap-2">
                 {
                     currentUser?.avatarUrl
-                        ? <img src={`http://localhost:3000/${currentUser?.avatarUrl}`} alt="avatarUrl" />
+                        ? <Avatar>
+                            <AvatarImage src={`http://localhost:3000${currentUser?.avatarUrl}`} />
+                            <AvatarFallback>avatarUrl</AvatarFallback>
+                        </Avatar>
                         : "No image"
                 }
 
@@ -145,6 +160,17 @@ const Profile = (props: Props) => {
                                         defaultValue={currentUser?.name}
                                         className="col-span-2 h-8"
                                         {...register("name")}
+                                    />
+                                </div>
+                                <div className="grid grid-cols-3 items-center gap-4">
+                                    <Label htmlFor="password">Password</Label>
+                                    <Input
+                                        id="password"
+                                        type='text'
+                                        defaultValue={''}
+                                        className="col-span-2 h-8"
+                                        {...register("password")}
+                                    // onChange={(e) => setPassword(e.target.value)}
                                     />
                                 </div>
                                 <div className="grid grid-cols-3 items-center gap-4">

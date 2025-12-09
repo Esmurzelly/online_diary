@@ -19,9 +19,9 @@ const storage = multer.diskStorage({
 const uploads = multer({ storage });
 
 router.get('/get-parent-by-id/:id', getParentById);
-router.put('/update-parent/:id', checkUser, uploads.single("avatar"), checkRole("PARENT", "ADMIN"), updateParent);
-router.put('/add-parent-to-child', checkUser, checkRole("PARENT", "STUDENT", "ADMIN"), addParentToChild);
-router.put('/remove-parent-from-child', checkUser, checkRole("PARENT", "STUDENT", "ADMIN"), removeParentFromChild);
-router.delete('/delete-parent/:id', checkUser, checkRole("PARENT", "ADMIN"), removeParent);
+router.put('/update-parent/:id', checkUser, uploads.single("avatar"), checkRole("parent", "admin"), updateParent);
+router.put('/add-parent-to-child', checkUser, checkRole("parent", "student", "admin"), addParentToChild);
+router.put('/remove-parent-from-child', checkUser, checkRole("parent", "student", "admin"), removeParentFromChild);
+router.delete('/delete-parent/:id', checkUser, checkRole("parent", "admin"), removeParent);
 
 export default router;

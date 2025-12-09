@@ -6,7 +6,7 @@ import { checkRole } from '../middleware/checkRole';
 
 const router = express.Router();
 
-router.put('/edit-class', checkUser, checkRole("TEACHER", "ADMIN"), editClass);
+router.put('/edit-class', checkUser, checkRole("teacher", "admin"), editClass);
 router.get('/get-grades-from-class', getGradesFromSubject);
 router.delete('/remove-class', classRemove);
 
