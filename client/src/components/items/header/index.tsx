@@ -24,9 +24,11 @@ const Header = (props: Props) => {
     navigate('/auth')
   }
 
-  if (!tokenValue) {
-    navigate('/auth')
-  }
+  useEffect(() => {
+    if (!tokenValue) {
+      navigate('/auth')
+    }
+  }, [tokenValue])
 
   return (
     <div className='flex flex-row w-screen justify-between'>

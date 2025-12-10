@@ -14,6 +14,7 @@ const Layout = (props: Props) => {
       <Header />
 
       <Button onClick={() => navigate('/home')}>Home</Button>
+      <Button onClick={() => navigate('/profile')}>Profile</Button>
 
       <div className="flex flex-col items-start max-w-7xl mx-auto mt-10"> {/* container */}
         <h2>above the Outlet</h2>

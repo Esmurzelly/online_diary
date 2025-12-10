@@ -24,11 +24,11 @@ const initialState: InitialState = {
     role: "none"
 };
 
-export const registerStudent = createAsyncThunk(
+export const registerUser = createAsyncThunk(
     'user/registerStudent',
-    async ({ name, email, password, surname }: { name: string, email: string, password: string, surname: string }, { rejectWithValue, dispatch }) => {
+    async ({ name, email, password, surname, role }: { name: string, email: string, password: string, surname: string, role: string }, { rejectWithValue, dispatch }) => {
         try {
-            const { data } = await axios.post(`${BASE_URL}/auth/signup-student`, {
+            const { data } = await axios.post(`${BASE_URL}/auth/signup-${role}`, {
                 name,
                 email,
                 password,
@@ -36,11 +36,10 @@ export const registerStudent = createAsyncThunk(
             });
 
             if (data) {
-                window.localStorage.setItem("access_token", data.token);
                 dispatch(setToken(data.token));
             }
 
-            console.log('data from register student - asyncThunk', data);
+            console.log('data from register any of them - asyncThunk', data);
 
             return data;
         } catch (error: any) {
@@ -49,112 +48,20 @@ export const registerStudent = createAsyncThunk(
     }
 );
 
-export const registerTeacher = createAsyncThunk(
-    'user/registerTeacher',
-    async ({ name, email, password, surname }: { name: string, email: string, password: string, surname: string }, { rejectWithValue, dispatch }) => {
+export const loginUser = createAsyncThunk(
+    'user/loginUser',
+    async ({ email, password, role }: { email: string, password: string, role: string }, { rejectWithValue, dispatch }) => {
         try {
-            const { data } = await axios.post(`${BASE_URL}/auth/signup-teacher`, {
-                name,
-                email,
-                password,
-                surname
-            });
-
-            if (data) {
-                window.localStorage.setItem("access_token", data.token);
-                dispatch(setToken(data.token));
-            }
-
-            console.log('data from register asyncThunk - teacher', data);
-
-            return data;
-        } catch (error: any) {
-            return rejectWithValue({ message: error.message || 'Smth weng wrong in register student' })
-        }
-    }
-);
-
-export const registerParent = createAsyncThunk(
-    'user/registerParent',
-    async ({ name, email, password, surname }: { name: string, email: string, password: string, surname: string }, { rejectWithValue, dispatch }) => {
-        try {
-            const { data } = await axios.post(`${BASE_URL}/auth/signup-parent`, {
-                name,
-                email,
-                password,
-                surname
-            });
-
-            if (data) {
-                window.localStorage.setItem("access_token", data.token);
-                dispatch(setToken(data.token));
-            }
-
-            console.log('data from register asyncThunk - teacher', data);
-
-            return data;
-        } catch (error: any) {
-            return rejectWithValue({ message: error.message || 'Smth weng wrong in register student' })
-        }
-    }
-);
-
-export const loginStudent = createAsyncThunk(
-    'user/loginStudent',
-    async ({ email, password }: { email: string, password: string }, { rejectWithValue, dispatch }) => {
-        try {
-            const { data } = await axios.post(`${BASE_URL}/auth/signin-student`, {
+            const { data } = await axios.post(`${BASE_URL}/auth/signin-${role}`, {
                 email,
                 password
             });
 
             if (data.token) {
-                window.localStorage.setItem("access_token", data.token);
-                dispatch(setToken(data.token));
-            }
-            return data;
-        } catch (error: any) {
-            return rejectWithValue({ message: error.message || "smth weng wrong in login student" })
-        }
-    }
-);
-
-export const loginTeacher = createAsyncThunk(
-    'user/loginTeacher',
-    async ({ email, password }: { email: string, password: string }, { rejectWithValue, dispatch }) => {
-        try {
-            const { data } = await axios.post(`${BASE_URL}/auth/signin-teacher`, {
-                email,
-                password
-            });
-
-            if (data.token) {
-                window.localStorage.setItem("access_token", data.token);
                 dispatch(setToken(data.token));
             }
 
-            console.log('data loginTeacher from asyncThunk', data)
-
-            return data;
-        } catch (error: any) {
-            return rejectWithValue({ message: error.message || "smth weng wrong in login student" })
-        }
-    }
-);
-
-export const loginParent = createAsyncThunk(
-    'user/loginParent',
-    async ({ email, password }: { email: string, password: string }, { rejectWithValue, dispatch }) => {
-        try {
-            const { data } = await axios.post(`${BASE_URL}/auth/signin-parent`, {
-                email,
-                password
-            });
-
-            if (data.token) {
-                window.localStorage.setItem("access_token", data.token);
-                dispatch(setToken(data.token));
-            }
+            console.log('data from logInUser', data);
 
             return data;
         } catch (error: any) {
@@ -179,37 +86,12 @@ export const getMe = createAsyncThunk(
 export const updateUser = createAsyncThunk(
     'user/updateUser',
     async ({ formData, id, role }: { formData: FormData, id: string | undefined, role: Role }, { rejectWithValue }) => {
-        console.log('before start in slice', [...formData.entries()], id, role); // ok!
-        // console.log(`link - ${BASE_URL}/students/update-student/${id}`) // ok!
         try {
-            switch (role) {
-                case 'student':
-                    const { data: studentData } = await api.put(`${BASE_URL}/students/update-student/${id}`, formData, {
-                        headers: { "Content-Type": "multipart/form-data" }
-                    });
+            const { data } = await api.put(`${BASE_URL}/${role}s/update-${role}/${id}`, formData, {
+                headers: { "Content-Type": "multipart/form-data" }
+            });
 
-                    console.log('data from updateUser Slice - student', studentData);
-                    return studentData;
-
-                case 'teacher':
-                    const { data: teacherData } = await api.put(`${BASE_URL}/teachers/update-teacher/${id}`, formData, {
-                        headers: { "Content-Type": "multipart/form-data" }
-                    });
-
-                    console.log('data from updateUser Slice - teacher', teacherData);
-                    return teacherData;
-
-                case 'parent':
-                    const { data: parentData } = await api.put(`${BASE_URL}/parents/update-parent/${id}`, formData, {
-                        headers: { "Content-Type": "multipart/form-data" }
-                    });
-
-                    console.log('data from updateUser Slice - parent', parentData);
-                    return parentData;
-                default:
-                    throw new Error("Invalid role in switch case");
-            }
-
+            return data;
         } catch (error: any) {
             return rejectWithValue({ message: error.message || "smth weng wrong in updateUser - student" })
         }
@@ -228,100 +110,36 @@ export const studentSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(registerStudent.pending, (state, action) => {
+            .addCase(registerUser.pending, (state, action) => {
                 state.loading = true;
-                state.message = "Loading...";
             })
-            .addCase(registerStudent.fulfilled, (state, action) => {
+            .addCase(registerUser.fulfilled, (state, action) => {
                 state.currentUser = action.payload.user;
                 state.loading = false;
                 state.message = action.payload.message;
-                state.role = "student";
+                state.role = action.payload.role;
             })
-            .addCase(registerStudent.rejected, (state, action) => {
+            .addCase(registerUser.rejected, (state, action) => {
                 state.loading = false;
                 state.message = action.error.message;
             })
 
-            .addCase(registerTeacher.pending, (state, action) => {
+            .addCase(loginUser.pending, (state, action) => {
                 state.loading = true;
-                state.message = "Loading...";
             })
-            .addCase(registerTeacher.fulfilled, (state, action) => {
-                state.currentUser = action.payload.user;
-                state.loading = false;
-                state.message = action.payload.message;
-                state.role = "teacher";
-            })
-            .addCase(registerTeacher.rejected, (state, action) => {
-                state.loading = false;
-                state.message = action.error.message
-            })
-
-            .addCase(registerParent.pending, (state, action) => {
-                state.loading = true;
-                state.message = "Loading..."
-            })
-            .addCase(registerParent.fulfilled, (state, action) => {
-                state.currentUser = action.payload.user;
-                state.loading = false;
-                state.message = action.payload.message;
-                state.role = "parent";
-            })
-            .addCase(registerParent.rejected, (state, action) => {
-                state.loading = false;
-                state.message = action.error.message
-            })
-
-            .addCase(loginStudent.pending, (state, action) => {
-                state.loading = true;
-                state.message = "Loading..."
-            })
-            .addCase(loginStudent.fulfilled, (state, action) => {
+            .addCase(loginUser.fulfilled, (state, action) => {
                 state.message = action.payload.message;
                 state.currentUser = action.payload.user;
                 state.loading = false;
-                state.role = "student";
+                state.role = action.payload.role;
             })
-            .addCase(loginStudent.rejected, (state, action) => {
-                state.loading = false;
-                state.message = action.error.message
-            })
-
-            .addCase(loginTeacher.pending, (state, action) => {
-                state.loading = true;
-                state.message = "Loading..."
-            })
-            .addCase(loginTeacher.fulfilled, (state, action) => {
-                state.message = action.payload.message;
-                console.log('action.payload from extra reducer', action.payload)
-                state.currentUser = action.payload.user;
-                state.loading = false;
-                state.role = "teacher";
-            })
-            .addCase(loginTeacher.rejected, (state, action) => {
-                state.loading = false;
-                state.message = action.error.message
-            })
-
-            .addCase(loginParent.pending, (state, action) => {
-                state.loading = true;
-                state.message = "Loading..."
-            })
-            .addCase(loginParent.fulfilled, (state, action) => {
-                state.message = action.payload.message;
-                state.currentUser = action.payload.user;
-                state.loading = false;
-                state.role = "parent";
-            })
-            .addCase(loginParent.rejected, (state, action) => {
+            .addCase(loginUser.rejected, (state, action) => {
                 state.loading = false;
                 state.message = action.error.message
             })
 
             .addCase(getMe.pending, (state, action) => {
                 state.loading = true;
-                state.message = "Loading..."
             })
             .addCase(getMe.fulfilled, (state, action) => {
                 state.message = action.payload.message;
@@ -335,7 +153,6 @@ export const studentSlice = createSlice({
 
             .addCase(updateUser.pending, (state, action) => {
                 state.loading = true;
-                state.message = "Loading..."
             })
             .addCase(updateUser.fulfilled, (state, action) => {
                 state.message = action.payload.message;

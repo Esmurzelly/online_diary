@@ -59,6 +59,7 @@ export const signUpStudent = async (req: Request, res: Response) => {
             .json({
                 user: { id: student.id, email: student.email, name: student.name, surname: student.surname, avatarUrl: student.avatarUrl },
                 token,
+                role: "student",
                 message: "Signing up is successful!"
             });
     } catch (error) {
@@ -116,6 +117,7 @@ export const signUpTeacher = async (req: Request, res: Response) => {
             .json({
                 user: { id: teacher.id, email: teacher.email, name: teacher.name, surname: teacher.surname, avatarUrl: teacher.avatarUrl },
                 token,
+                role: "teacher",
                 message: "Signing up is successful!"
             });
     } catch (error) {
@@ -173,6 +175,7 @@ export const signUpParent = async (req: Request, res: Response) => {
             .json({
                 user: { id: parent.id, email: parent.email, name: parent.name, surname: parent.surname, avatarUrl: parent.avatarUrl },
                 token,
+                role: "parent",
                 message: "Signing up is successful!"
             });
     } catch (error) {
@@ -206,7 +209,9 @@ export const signUpAdmin = async (req: Request, res: Response) => {
 
         return res.status(200).json({
             user: { email: user.email, id: user.id },
+            role: "admin",
             token,
+            message: "Signing up is successful!"
         })
     } catch (error) {
         console.error('Smt went wrong in register', error);
@@ -236,9 +241,9 @@ export const signInStudent = async (req: Request, res: Response) => {
             return res.status(400).json({ error: "Invalid login or password" });
         };
 
-        // @ts-ignore
-        const token = jwt.sign(({ userId: user.id, role: "STUDENT" }), process.env.SECRET_KEY, { expiresIn: '7d' });
-        return res.json({ user: user, token, message: "Login is successful" });
+        // @ts-ignore // role changes lowerCase!
+        const token = jwt.sign(({ userId: user.id, role: "student" }), process.env.SECRET_KEY, { expiresIn: '7d' });
+        return res.json({ user: user, role: "student", token, message: "Login is successful" });
     } catch (error) {
         console.error('Smt went wrong in register', error);
         return res.status(500).json({ error: "Internal server error" });
@@ -269,7 +274,7 @@ export const signInTeacher = async (req: Request, res: Response) => {
 
         // @ts-ignore
         const token = jwt.sign(({ userId: user.id, role: "TEACHER" }), process.env.SECRET_KEY, { expiresIn: '7d' });
-        return res.json({ user: user, token, message: "Login is successful" });
+        return res.json({ user: user, role: "teacher", token, message: "Login is successful" });
     } catch (error) {
         console.error('Smt went wrong in register', error);
         return res.status(500).json({ error: "Internal server error" });
@@ -300,7 +305,7 @@ export const signInParent = async (req: Request, res: Response) => {
 
         // @ts-ignore
         const token = jwt.sign(({ userId: user.id, role: "PARENT" }), process.env.SECRET_KEY, { expiresIn: '7d' });
-        return res.json({ user: user, token, message: "Login is successful" });
+        return res.json({ user: user, role: "parent", token, message: "Login is successful" });
     } catch (error) {
         console.error('Smt went wrong in register', error);
         return res.status(500).json({ error: "Internal server error" });
@@ -333,7 +338,7 @@ export const signInAdmin = async (req: Request, res: Response) => {
 
         // @ts-ignore
         const token = jwt.sign(({ userId: user.id, role: "ADMIN" }), process.env.SECRET_KEY, { expiresIn: '7d' });
-        return res.status(200).json({ user, token, message: "You logged in as Admin successfuly" })
+        return res.status(200).json({ user, role: "admin", token, message: "You logged in as Admin successfuly" })
     } catch (error) {
         console.error('Smt went wrong in register', error);
         return res.status(500).json({ error: "Internal server error" });

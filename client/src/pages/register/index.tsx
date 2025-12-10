@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '@/redux/store';
 import { useSelector } from 'react-redux';
 import type { RootState } from '@/redux/rootReducer';
-import { registerParent, registerStudent, registerTeacher } from '@/redux/user/userSlice';
+import { registerUser } from '@/redux/user/userSlice';
 import { toast } from 'react-toastify';
 
 
@@ -43,21 +43,14 @@ const RegisterComponent = ({ role }: Props) => {
     }, [navigate, isAuth, message]);
 
     const handleSubmitForm: SubmitHandler<FormValues> = async (data) => {
-        console.log('data', data)
         try {
-            switch (role) {
-                case 'student':
-                    await dispatch(registerStudent(data));
-                    break;
-                case 'teacher':
-                    await dispatch(registerTeacher(data));
-                    break;
-                case 'parent':
-                    await dispatch(registerParent(data));
-                    break;
-                default:
-                    return toast.error("Choose the role")
-            }
+            await dispatch(registerUser({
+                email: data.email,
+                name: data.name,
+                password: data.password,
+                surname: data.surname,
+                role
+            }))
         } catch (error) {
             console.log(`error in handleSubmit - ${error}`);
         }

@@ -28,7 +28,6 @@ export interface AuthCredentials {
     password: string;
 }
 
-
 export interface RegisterData extends AuthCredentials {
     name: string;
 }

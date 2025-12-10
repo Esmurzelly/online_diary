@@ -46,12 +46,6 @@ const Profile = (props: Props) => {
     });
     const dispatch = useAppDispatch();
 
-    // const [name, setName] = useState(currentUser?.name);
-    // const [surname, setSurname] = useState(currentUser?.surname);
-    // const [email, setEmail] = useState(currentUser?.email);
-    // const [phone, setPhone] = useState(currentUser?.phone);
-    // const [address, setAddress] = useState(currentUser?.address);
-
     const filePicekerRef = useRef<HTMLInputElement>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -60,9 +54,9 @@ const Profile = (props: Props) => {
     };
 
 
-    const handleAvatarChange = (e) => {
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const reader = new FileReader();
-        const selectedFile = e.target.files[0];
+        const selectedFile = e.target.files?.[0];
 
         if (selectedFile) {
             reader.readAsDataURL(selectedFile);
@@ -124,7 +118,7 @@ const Profile = (props: Props) => {
                 {
                     currentUser?.avatarUrl
                         ? <Avatar>
-                            <AvatarImage src={`http://localhost:3000${currentUser?.avatarUrl}`} />
+                            <AvatarImage src={`http://localhost:3000/${currentUser?.avatarUrl}`} />
                             <AvatarFallback>avatarUrl</AvatarFallback>
                         </Avatar>
                         : "No image"
