@@ -10,7 +10,7 @@ import Layout from './components/items/layout/layout.tsx'
 import Home from './pages/home/index.tsx'
 import { ToastContainer } from 'react-toastify'
 import Profile from './pages/profile.tsx/index.tsx'
-
+import 'react-toastify/dist/ReactToastify.css';
 
 const router = createBrowserRouter([
   {

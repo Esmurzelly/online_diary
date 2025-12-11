@@ -1,7 +1,7 @@
 import { prisma } from '../prisma/prisma-client.js';
 import bcrypt from 'bcryptjs';
 import { Request, Response } from 'express';
-import { IParent, IStudent, ITeacher, IUserWithToken } from '../types.js';
+import { IAdmin, IParent, IStudent, ITeacher, IUserWithToken } from '../types.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
@@ -145,8 +145,23 @@ export const updateStudent = async (
     let filePath: string | undefined;
     let hashedPassword: string | undefined;
 
+    const avatarName = `${name}_${Date.now()}.png`;
+    const uploadDir = path.join(__dirname, '../uploads');
+
+    if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true })
+    };
+
     if (req.file && req.file.path) {
-        filePath = req.file.path;
+        const oldPath = req.file.path;
+        const newPath = path.join(uploadDir, avatarName);
+
+        fs.renameSync(oldPath, newPath);
+        filePath = `/uploads/${avatarName}`;
+
+        console.log('oldPath', oldPath);
+        console.log('newPath', newPath);
+        console.log('filePath', filePath);
     }
 
     if (id !== req.user?.userId) {
@@ -155,22 +170,15 @@ export const updateStudent = async (
 
     try {
         if (email) {
-            const existedStudent = await prisma.student.findFirst({
-                where: { email }
-            });
-            const existedTeacher = await prisma.teacher.findFirst({
-                where: { email }
-            });
-            const existedParent = await prisma.parent.findFirst({
-                where: { email }
-            });
+            const existedStudent = await prisma.student.findFirst({ where: { email } });
+            const existedTeacher = await prisma.teacher.findFirst({ where: { email } });
+            const existedParent = await prisma.parent.findFirst({ where: { email } });
+            const existedAdmin = await prisma.admin.findFirst({ where: { email } });
 
-            if (
-                (existedStudent && existedStudent.id !== id) ||
-                (existedTeacher && existedTeacher.id !== id) ||
-                (existedParent && existedParent.id !== id)
-            ) {
-                return res.status(403).json({ error: "User with such credentials is alraedy exists" });
+            const existedUser = existedStudent ?? existedTeacher ?? existedParent ?? existedAdmin;
+
+            if (existedUser && existedUser.id !== id) {
+                return res.status(403).json({ error: "User with such credentials already exists" });
             }
         };
 
@@ -187,7 +195,7 @@ export const updateStudent = async (
                 address: address || undefined,
                 phone: phone || undefined,
                 password: hashedPassword || undefined,
-                avatarUrl: filePath ? `/${filePath}` : undefined,
+                avatarUrl: filePath ? filePath : undefined,
                 parentIds: parentIds || undefined,
             },
             select: {
@@ -203,7 +211,6 @@ export const updateStudent = async (
         });
 
         return res.status(200).json({ user: updateUser, message: "You have updated your profile successfuly" });
-
     } catch (error) {
         console.error('Smt went wrong in updating user', error);
         return res.status(500).json({ error: 'Internal server error' });
@@ -228,6 +235,7 @@ export const updateTeacher = async (
 
     let filePath;
     let hashedPassword: string | undefined;
+
     const avatarName = `${name}_${Date.now()}.png`;
     const uploadDir = path.join(__dirname, '../uploads');
 
@@ -246,25 +254,20 @@ export const updateTeacher = async (
     if (id !== req.user?.userId) {
         return res.status(401).json({ error: "No access" });
     }
-
-    console.log('avatarName', avatarName);
-    console.log('uploadDir', uploadDir);
-
     try {
         if (email && email.trim() !== "") {
             const existedStudent = await prisma.student.findFirst({ where: { email } });
             const existedTeacher = await prisma.teacher.findFirst({ where: { email } });
             const existedParent = await prisma.parent.findFirst({ where: { email } });
+            const existedAdmin = await prisma.admin.findFirst({ where: { email } });
 
-            const existedUser = existedStudent ?? existedTeacher ?? existedParent;
+            const existedUser = existedStudent ?? existedTeacher ?? existedParent ?? existedAdmin;
 
-
-            console.log('==============================================');
-            console.log('id from server (params) - updateTeacher', id);
-            console.log('id from server (req.user.userId) - updateTeacher', req.user?.userId);
-            console.log('existedUser.id - updateTeacher', existedUser?.id);
-            console.log('req.body from server - updateTeacher', req.body);
-
+            // console.log('==============================================');
+            // console.log('id from server (params) - updateTeacher', id);
+            // console.log('id from server (req.user.userId) - updateTeacher', req.user?.userId);
+            // console.log('existedUser.id - updateTeacher', existedUser?.id);
+            // console.log('req.body from server - updateTeacher', req.body);
 
             if (existedUser && existedUser.id !== id) {
                 return res.status(403).json({ error: "User with such credentials already exists" });
@@ -303,7 +306,6 @@ export const updateTeacher = async (
         });
 
         return res.status(200).json({ user: updateUser, message: "You have updated your profile successfuly" })
-
     } catch (error) {
         console.error('Smt went wrong in updating user', error);
         return res.status(500).json({ error: 'Internal server error' });
@@ -328,9 +330,24 @@ export const updateParent = async (
     let filePath;
     let hashedPassword: string | undefined;
 
+    const avatarName = `${name}_${Date.now()}.png`;
+    const uploadDir = path.join(__dirname, '../uploads');
+
+    if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true })
+    };
+
     if (req.file && req.file.path) {
-        filePath = req.file.path;
+        const oldPath = req.file.path;
+        const newPath = path.join(uploadDir, avatarName);
+
+        fs.renameSync(oldPath, newPath);
+        filePath = `/uploads/${avatarName}`;
     }
+
+    // if (req.file && req.file.path) {
+    //     filePath = req.file.path;
+    // }
 
     if (id !== req.user?.userId) {
         return res.status(401).json({ error: "No access" });
@@ -338,23 +355,17 @@ export const updateParent = async (
 
     try {
         if (email) {
-            const existedStudent = await prisma.student.findFirst({
-                where: { email }
-            });
-            const existedTeacher = await prisma.teacher.findFirst({
-                where: { email }
-            });
-            const existedParent = await prisma.parent.findFirst({
-                where: { email }
-            });
+            const existedStudent = await prisma.student.findFirst({ where: { email } });
+            const existedTeacher = await prisma.teacher.findFirst({ where: { email } });
+            const existedParent = await prisma.parent.findFirst({ where: { email } });
+            const existedAdmin = await prisma.admin.findFirst({ where: { email } });
 
-            if (
-                (existedStudent && existedStudent.id !== id) ||
-                (existedTeacher && existedTeacher.id !== id) ||
-                (existedParent && existedParent.id !== id)
-            ) {
-                return res.status(403).json({ error: "User with such credentials is alraedy exists" });
+            const existedUser = existedStudent ?? existedTeacher ?? existedParent ?? existedAdmin;
+
+            if (existedUser && existedUser.id !== id) {
+                return res.status(403).json({ error: "User with such credentials already exists" });
             }
+
         };
 
         if (password) {
@@ -393,17 +404,102 @@ export const updateParent = async (
     }
 }
 
+export const updateAdmin = async (
+    req: Request & { user?: IUserWithToken },
+    res: Response
+) => {
+    const { id } = req.params;
+
+    const { email,
+        password,
+        name,
+        surname,
+        phone,
+        address,
+    } = req.body as IAdmin;
+
+    let filePath;
+    let hashedPassword: string | undefined;
+
+    const avatarName = `${name}_${Date.now()}.png`;
+    const uploadDir = path.join(__dirname, '../uploads');
+
+    if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true })
+    };
+
+    if (req.file && req.file.path) {
+        const oldPath = req.file.path;
+        const newPath = path.join(uploadDir, avatarName);
+
+        fs.renameSync(oldPath, newPath);
+        filePath = `/uploads/${avatarName}`;
+    }
+
+    // if (req.file && req.file.path) {
+    //     filePath = req.file.path;
+    // }
+
+    if (id !== req.user?.userId) {
+        return res.status(401).json({ error: "No access" });
+    }
+
+    try {
+        if (email) {
+            const existedStudent = await prisma.student.findFirst({ where: { email } });
+            const existedTeacher = await prisma.teacher.findFirst({ where: { email } });
+            const existedParent = await prisma.parent.findFirst({ where: { email } });
+            const existedAdmin = await prisma.admin.findFirst({ where: { email } });
+
+            const existedUser = existedStudent ?? existedTeacher ?? existedParent ?? existedAdmin;
+
+            if (existedUser && existedUser.id !== id) {
+                return res.status(403).json({ error: "User with such credentials already exists" });
+            }
+
+        };
+
+        if (password) {
+            hashedPassword = await bcrypt.hash(password, 10);
+        }
+
+        const updateUser = await prisma.parent.update({
+            where: { id },
+            data: {
+                email: email || undefined,
+                password: hashedPassword || undefined,
+                name: name || undefined,
+                surname: surname || undefined,
+                phone: phone || undefined,
+                address: address || undefined,
+                avatarUrl: filePath ? filePath : undefined,
+            },
+            select: {
+                id: true,
+                email: true,
+                name: true,
+                surname: true,
+                phone: true,
+                address: true,
+                avatarUrl: true,
+            }
+        });
+
+        return res.status(200).json({ user: updateUser, message: "You have updated your profile successfuly" })
+
+    } catch (error) {
+        console.error('Smt went wrong in updating user', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
 export const removeStudent = async (req: Request, res: Response) => {
     const { id } = req.params as { id: string };
 
     try {
-        const removedStudent = await prisma.student.delete({
-            where: {
-                id: id
-            }
-        });
-
-        return res.status(200).json({ removedStudent: removedStudent, message: "Student was removed successfuly" });
+        const removedStudent = await prisma.student.delete({ where: { id: id } });
+        
+        return res.status(200).json({ removedStudent: removedStudent, message: `Student ${removedStudent.name} ${removedStudent.surname} was removed successfuly` });
     } catch (error) {
         console.log('Smth happened in removeStudent', error);
         return res.status(500).json({ error: 'Internal server error' });
@@ -414,13 +510,9 @@ export const removeTeacher = async (req: Request, res: Response) => {
     const { id } = req.params as { id: string };
 
     try {
-        const removedTeacher = await prisma.teacher.delete({
-            where: {
-                id: id
-            }
-        });
+        const removedTeacher = await prisma.teacher.delete({ where: { id: id } });
 
-        return res.status(200).json({ removedTeacher, message: "Teacher was removed successfuly" });
+        return res.status(200).json({ removedTeacher, message: `Teacher ${removedTeacher.name} ${removedTeacher.surname} was removed successfuly` });
     } catch (error) {
         console.log('Smth happened in removeStudent', error);
         return res.status(500).json({ error: 'Internal server error' });
@@ -431,13 +523,22 @@ export const removeParent = async (req: Request, res: Response) => {
     const { id } = req.params as { id: string };
 
     try {
-        const removedParent = await prisma.parent.delete({
-            where: {
-                id: id
-            }
-        });
+        const removedParent = await prisma.parent.delete({ where: { id: id } });
 
-        return res.status(200).json({ removedParent, message: "Parent was removed successfuly" });
+        return res.status(200).json({ removedParent, message: `Parent ${removedParent.name} ${removedParent.surname} was removed successfuly` });
+    } catch (error) {
+        console.log('Smth happened in removeStudent', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+export const removeAdmin = async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
+
+    try {
+        const removedAdmin = await prisma.admin.delete({ where: { id: id } });
+
+        return res.status(200).json({ removedAdmin, message: `Admin email: ${removedAdmin.email} was removed successfuly` });
     } catch (error) {
         console.log('Smth happened in removeStudent', error);
         return res.status(500).json({ error: 'Internal server error' });
@@ -463,13 +564,13 @@ export const getStudentsFromOneClass = async (req: Request, res: Response) => {
 }
 
 export const getMe = async (
-    req: Request & { userId?: string },
+    req: Request & { user?: IUserWithToken },
     res: Response
 ) => {
-    if (!req.userId) return res.status(401).json({ error: 'Unauthorized' });
+    if (!req.user?.userId) return res.status(401).json({ error: 'Unauthorized' });
 
     try {
-        const userId = req.userId;
+        const userId = req.user?.userId;
 
         const student = await prisma.student.findFirst({
             where: { id: userId },
@@ -486,7 +587,11 @@ export const getMe = async (
             include: { children: true }
         });
 
-        const user = student ?? teacher ?? parent;
+        const admin = await prisma.admin.findFirst({
+            where: { id: userId },
+        });
+
+        const user = student ?? teacher ?? parent ?? admin;
 
         if (!user) return res.status(404).json({ error: "User not found" });
 

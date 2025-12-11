@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import LoginComponent from '../login'
 import { Button } from "@/components/ui/button"
 import RegisterComponent from '../register'
@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { toast } from 'react-toastify'
 
 type Props = {}
 
@@ -28,7 +29,8 @@ const Auth = (props: Props) => {
   const [role, setRole] = useState<Role>('none');
 
   const handleChange = (state: Role) => {
-    setRole(state)
+    setRole(state);
+    toast.info(`role is ${state}`)
   }
 
   return (
@@ -42,6 +44,7 @@ const Auth = (props: Props) => {
           <SelectItem value="student">student</SelectItem>
           <SelectItem value="teacher">teacher</SelectItem>
           <SelectItem value="parent">parent</SelectItem>
+          <SelectItem value="admin">admin</SelectItem>
         </SelectContent>
       </Select>
 

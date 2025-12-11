@@ -38,6 +38,10 @@ const LoginComponent = ({ role }: Props) => {
     }, [navigate, isAuth, message]);
 
     const handleSubmitForm: SubmitHandler<FormValues> = async (data) => {
+        if (role === 'none') {
+            toast.info("Choose the role")
+        }
+        
         try {
             await dispatch(loginUser({ email: data.email, password: data.password, role }));
         } catch (error) {
@@ -66,7 +70,7 @@ const LoginComponent = ({ role }: Props) => {
                 {errors.password && <span>{errors.password.message}</span>}
             </div>
 
-            <input disabled={role === undefined || !role} type="submit" />
+            <input disabled={!role || role === undefined} type="submit" />
         </form>
     )
 }

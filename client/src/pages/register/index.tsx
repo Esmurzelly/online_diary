@@ -43,6 +43,10 @@ const RegisterComponent = ({ role }: Props) => {
     }, [navigate, isAuth, message]);
 
     const handleSubmitForm: SubmitHandler<FormValues> = async (data) => {
+        if (role === 'none') {
+            toast.info("Choose the role")
+        }
+
         try {
             await dispatch(registerUser({
                 email: data.email,
@@ -62,21 +66,25 @@ const RegisterComponent = ({ role }: Props) => {
                 <h1>Register</h1>
 
                 <div className='flex flex-col'>
-                    <label htmlFor="name">Name:</label>
-                    <input
-                        {...register("name", { required: "Name is required" })}
-                        type="text"
-                        id="name"
-                    />
-                    {errors.name && <span>{errors.name.message}</span>}
+                    {role !== 'admin' &&
+                        <>
+                            <label htmlFor="name">Name:</label>
+                            <input
+                                {...register("name", { required: "Name is required" })}
+                                type="text"
+                                id="name"
+                            />
+                            {errors.name && <span>{errors.name.message}</span>}
 
-                    <label htmlFor="surname">Surname:</label>
-                    <input
-                        {...register("surname", { required: "Surname is required" })}
-                        type="text"
-                        id="surname"
-                    />
-                    {errors.surname && <span>{errors.surname.message}</span>}
+                            <label htmlFor="surname">Surname:</label>
+                            <input
+                                {...register("surname", { required: "Surname is required" })}
+                                type="text"
+                                id="surname"
+                            />
+                            {errors.surname && <span>{errors.surname.message}</span>}
+                        </>
+                    }
 
                     <label htmlFor="email">Email:</label>
                     <input

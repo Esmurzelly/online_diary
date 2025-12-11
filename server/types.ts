@@ -47,6 +47,19 @@ export interface IParent {
   updatedAt: Date;
 }
 
+export interface IAdmin {
+  id: string;
+  email: string;
+  password: string;
+  name: string;
+  surname?: string | null;
+  avatarUrl?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface ISchool {
   id: string;
   title: string;

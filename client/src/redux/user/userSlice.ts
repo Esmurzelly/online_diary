@@ -1,9 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { Parent, Student, Teacher, User } from "@/types";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import axios from 'axios';
 import { BASE_URL } from "@/constants";
-import { setToken } from "../auth/authSlice";
+import { clearToken, setToken } from "../auth/authSlice";
 import api from "@/utils/axios";
 
 type Role = 'student' | 'teacher' | 'parent' | 'admin' | 'none';
@@ -28,7 +27,7 @@ export const registerUser = createAsyncThunk(
     'user/registerStudent',
     async ({ name, email, password, surname, role }: { name: string, email: string, password: string, surname: string, role: string }, { rejectWithValue, dispatch }) => {
         try {
-            const { data } = await axios.post(`${BASE_URL}/auth/signup-${role}`, {
+            const { data } = await api.post(`${BASE_URL}/auth/signup-${role}`, {
                 name,
                 email,
                 password,
@@ -52,7 +51,7 @@ export const loginUser = createAsyncThunk(
     'user/loginUser',
     async ({ email, password, role }: { email: string, password: string, role: string }, { rejectWithValue, dispatch }) => {
         try {
-            const { data } = await axios.post(`${BASE_URL}/auth/signin-${role}`, {
+            const { data } = await api.post(`${BASE_URL}/auth/signin-${role}`, {
                 email,
                 password
             });
@@ -74,11 +73,11 @@ export const getMe = createAsyncThunk(
     'user/getMe',
     async () => {
         try {
-            const { data } = await axios.get(`${BASE_URL}/users/get-me`);
+            const { data } = await api.get(`${BASE_URL}/users/get-me`);
 
             return data;
         } catch (error) {
-            console.log(`error is ${error}`);
+            console.log(`error is in getMe asyncThunk ${error}`);
         }
     }
 );
@@ -93,10 +92,38 @@ export const updateUser = createAsyncThunk(
 
             return data;
         } catch (error: any) {
-            return rejectWithValue({ message: error.message || "smth weng wrong in updateUser - student" })
+            return rejectWithValue({ message: error.message || "smth weng wrong in updateUser" })
         }
     }
-)
+);
+
+export const removeUser = createAsyncThunk(
+    'user/removeUser',
+    async ({ id, role }: { id: string | undefined, role: string }, { rejectWithValue, dispatch }) => {
+        try {
+            const { data } = await api.delete(`${BASE_URL}/${role}s/delete-${role}/${id}`);
+            dispatch(clearToken());
+
+            return data;
+        } catch (error: any) {
+            return rejectWithValue({ message: error.message || "smth weng wrong in removeUser" })
+        }
+    }
+);
+
+export const getAllUsers = createAsyncThunk(
+    'user/getAllUsers',
+    async (_, { rejectWithValue }) => {
+        try {
+            const { data } = await api.get(`${BASE_URL}/users/get-all-users`);
+
+            console.log('data from get all users', data)
+            return data;
+        } catch (error: any) {
+            return rejectWithValue({ message: error.message || "smth weng wrong in removeUser" })
+        }
+    }
+);
 
 export const studentSlice = createSlice({
     name: "user",
@@ -160,6 +187,32 @@ export const studentSlice = createSlice({
                 state.loading = false;
             })
             .addCase(updateUser.rejected, (state, action) => {
+                state.loading = false;
+                state.message = action.error.message
+            })
+
+            .addCase(removeUser.pending, (state, action) => {
+                state.loading = true;
+            })
+            .addCase(removeUser.fulfilled, (state, action) => {
+                state.message = action.payload.message;
+                state.currentUser = null;
+                state.loading = false;
+            })
+            .addCase(removeUser.rejected, (state, action) => {
+                state.loading = false;
+                state.message = action.error.message
+            })
+
+            .addCase(getAllUsers.pending, (state, action) => {
+                state.loading = true;
+            })
+            .addCase(getAllUsers.fulfilled, (state, action) => {
+                state.message = action.payload.message;
+                state.users = action.payload.users;
+                state.loading = false;
+            })
+            .addCase(getAllUsers.rejected, (state, action) => {
                 state.loading = false;
                 state.message = action.error.message
             })

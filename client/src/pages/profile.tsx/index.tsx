@@ -11,9 +11,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { useAppDispatch } from '@/redux/store';
-import { updateUser } from '@/redux/user/userSlice';
+import { updateUser, removeUser, getAllUsers } from '@/redux/user/userSlice';
 import { toast } from 'react-toastify';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useNavigate } from 'react-router-dom';
 
 type Props = {}
 
@@ -28,7 +29,7 @@ type FormValues = {
 }
 
 const Profile = (props: Props) => {
-    const { currentUser, role, message } = useSelector((state: RootState) => state.user);
+    const { currentUser, role, message, users } = useSelector((state: RootState) => state.user);
     const {
         handleSubmit,
         register,
@@ -45,6 +46,8 @@ const Profile = (props: Props) => {
         }
     });
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+    const [showUsers, setShowUsers] = useState<boolean>(false);
 
     const filePicekerRef = useRef<HTMLInputElement>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -69,8 +72,8 @@ const Profile = (props: Props) => {
         //     }
         // };
 
-        console.log('selectedFile', selectedFile)
-        console.log('filePicekerRef', filePicekerRef);
+        // console.log('selectedFile', selectedFile) // ok!
+        // console.log('filePicekerRef', filePicekerRef); // ok!
     }
 
     useEffect(() => {
@@ -78,6 +81,22 @@ const Profile = (props: Props) => {
             toast(message)
         }
     }, [message]);
+
+    const handleDeleteUser = async () => {
+        try {
+            const res = await dispatch(removeUser({ id: currentUser?.id, role }));
+            console.log('res from client - remvoeUser', res);
+            
+            if(res.payload?.message === "Request failed with status code 404") {
+                console.log("ERRRORORROOR")
+                return;
+            }
+
+            navigate('/auth');
+        } catch (error) {
+            console.log(`error in handleDeleteUser - ${error}`);
+        }
+    }
 
     const handleSubmitForm: SubmitHandler<FormValues> = async () => {
         try {
@@ -96,29 +115,37 @@ const Profile = (props: Props) => {
             }
 
             // console.log("FORMDATA from client ->", [...formData.entries()]); // ok!
-
-            console.log('selectedFile', selectedFile);
+            // console.log('selectedFile', selectedFile); // ok!
 
             const res = await dispatch(updateUser({ formData, id: currentUser?.id, role }));
             console.log('res from form in client', res);
         } catch (error) {
             console.log(`error in handleSubmit - ${error}`);
         }
+    };
+
+    const handleFetchUsers = async () => {
+        try {
+            const res = await dispatch(getAllUsers());
+            console.log('res from all users', res);
+            setShowUsers(state => !state);
+        } catch (error) {
+            console.log(`error in handleFetchUsers - ${error}`);
+        }
     }
 
-    if (!currentUser?.id) {
+
+    if (!currentUser) {
         return <h1>Loading...</h1>
     }
 
     return (
-        <div className='min-w-screen flex justify-center items-center'>
-            {/* <h1>Your profile:</h1> */}
-
+        <div className='min-w-screen flex flex-col justify-center items-center gap-3'>
             <div className="flex flex-col items-start gap-2">
                 {
                     currentUser?.avatarUrl
                         ? <Avatar>
-                            <AvatarImage src={`http://localhost:3000/${currentUser?.avatarUrl}`} />
+                            <AvatarImage src={`http://localhost:3000${currentUser?.avatarUrl}`} />
                             <AvatarFallback>avatarUrl</AvatarFallback>
                         </Avatar>
                         : "No image"
@@ -164,7 +191,6 @@ const Profile = (props: Props) => {
                                         defaultValue={''}
                                         className="col-span-2 h-8"
                                         {...register("password")}
-                                    // onChange={(e) => setPassword(e.target.value)}
                                     />
                                 </div>
                                 <div className="grid grid-cols-3 items-center gap-4">
@@ -206,21 +232,13 @@ const Profile = (props: Props) => {
                                     />
                                 </div>
                                 <div className="grid grid-cols-3 items-center gap-4">
-                                    <Label htmlFor="avatar">Avatar</Label> {/* change avatar */}
+                                    <Label htmlFor="avatar">Avatar</Label>
                                     <Button onClick={handleAvatarClick}>Change avatar</Button>
-                                    {/* <Input
-                                        id="avatar"
-                                        className="hidden"
-                                        ref={filePicekerRef}
-                                        type='file'
-                                        accept='image/*'
-                                    /> */}
                                     <input
                                         type="file"
                                         accept="image/*"
                                         hidden
                                         ref={filePicekerRef}
-                                        // onChange={handleAvatarChange}
                                         onChange={handleAvatarChange}
                                     />
                                 </div>
@@ -229,8 +247,17 @@ const Profile = (props: Props) => {
                         </div>
                     </PopoverContent>
                 </Popover>
-                <input disabled={role === undefined || !role} type="submit" />
+                <input disabled={role === undefined || role === 'none' || role === null || !role} type="submit" />
+
             </form>
+            <Button onClick={handleDeleteUser} variant={'destructive'}>Delete my account</Button>
+            <Button onClick={handleFetchUsers} variant={'outline'}>Show users</Button>
+
+            <ul className="bg-red-400 w-5xl flex flex-col gap-3">
+                {showUsers && users?.map(userEl => <li>
+                    <span>{userEl.name} - {userEl.email}</span>
+                </li>)}
+            </ul>
         </div>
     )
 }

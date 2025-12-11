@@ -9,11 +9,6 @@ export const checkRole = (...allowRoles: string[]) => {
             return res.status(401).json({ error: "Unauthorized - checkRole" });
         }
 
-        // console.log('user from CheckRole', user); // returns userId and role (from route)
-        // console.log('allowRoles from CheckRole', allowRoles); // list of roles
-        // console.log('role of current User from CheckRole', user.role); // currentUser's role
-        // console.log('Does allowRoles include user.role?', allowRoles.includes(user.role)); // boolean
-
         if(
             !allowRoles.includes(user.role) 
             && !allowRoles.includes(user.role.toUpperCase())

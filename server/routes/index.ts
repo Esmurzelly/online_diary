@@ -8,6 +8,7 @@ import classRoutes from "./class.route";
 import subjectRoutes from "./subject.route";
 import gradeRoutes from "./grade.route";
 import userRoutes from "./user.route";
+import adminRoute from "./admin.route";
 
 
 const router = express.Router();
@@ -21,5 +22,6 @@ router.use("/classes", classRoutes);
 router.use("/subjects", subjectRoutes);
 router.use("/grades", gradeRoutes);
 router.use("/users", userRoutes);
+router.use("/admins", adminRoute);
 
 export default router;
