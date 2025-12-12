@@ -45,3 +45,19 @@ export interface AuthState {
     error: string | null;
     isAuthenticated: boolean;
 }
+
+export interface IClass {
+    id: string;
+    letter: string;
+    num: number;
+    schoolId: string
+}
+
+export interface ISchool {
+    id: string;
+    title: string;
+    phone: string;
+    email: string;
+    address: string;
+    classes: IClass[]
+}

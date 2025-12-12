@@ -11,10 +11,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { useAppDispatch } from '@/redux/store';
-import { updateUser, removeUser, getAllUsers } from '@/redux/user/userSlice';
+import { updateUser, removeUser, getAllUsers, removeUserByAdmin } from '@/redux/user/userSlice';
 import { toast } from 'react-toastify';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 type Props = {}
 
@@ -86,8 +86,8 @@ const Profile = (props: Props) => {
         try {
             const res = await dispatch(removeUser({ id: currentUser?.id, role }));
             console.log('res from client - remvoeUser', res);
-            
-            if(res.payload?.message === "Request failed with status code 404") {
+
+            if (res.payload?.message === "Request failed with status code 404") {
                 console.log("ERRRORORROOR")
                 return;
             }
@@ -127,10 +127,18 @@ const Profile = (props: Props) => {
     const handleFetchUsers = async () => {
         try {
             const res = await dispatch(getAllUsers());
-            console.log('res from all users', res);
             setShowUsers(state => !state);
         } catch (error) {
             console.log(`error in handleFetchUsers - ${error}`);
+        }
+    }
+
+    const handleDeleteUserByAdmin = async ({ id }: { id: string | undefined }) => {
+        try {
+            await dispatch(removeUserByAdmin({ id }));
+            dispatch(getAllUsers());
+        } catch (error) {
+            console.log(`error in handleDeleteUserByAdmin - ${error}`);
         }
     }
 
@@ -251,11 +259,16 @@ const Profile = (props: Props) => {
 
             </form>
             <Button onClick={handleDeleteUser} variant={'destructive'}>Delete my account</Button>
-            <Button onClick={handleFetchUsers} variant={'outline'}>Show users</Button>
+
+            {role === 'admin' && <Button className='p-3' onClick={handleFetchUsers} variant={'outline'}>{showUsers ? "Hide" : "Show"} users</Button>}
 
             <ul className="bg-red-400 w-5xl flex flex-col gap-3">
-                {showUsers && users?.map(userEl => <li>
-                    <span>{userEl.name} - {userEl.email}</span>
+                {showUsers && users?.map(userEl => <li key={userEl.id} className='flex flex-row items-center justify-between gap-4'>
+                    <Link to={`http://localhost:5173/profile/${userEl.id}`}>
+                        <span>{userEl.name} - {userEl.email}</span>
+                    </Link>
+
+                    <Button onClick={() => handleDeleteUserByAdmin({ id: userEl.id })} className='w-[100px]'>Delete user</Button>
                 </li>)}
             </ul>
         </div>

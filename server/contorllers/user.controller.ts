@@ -24,7 +24,7 @@ export const getAllUsers = async (req: Request, res: Response) => {
 
 export const getUserById = async (req: Request, res: Response) => {
     const { id } = req.params as { id: string };
-
+    
     try {
         const studentById = await prisma.student.findFirst({
             where: {
@@ -498,7 +498,7 @@ export const removeStudent = async (req: Request, res: Response) => {
 
     try {
         const removedStudent = await prisma.student.delete({ where: { id: id } });
-        
+
         return res.status(200).json({ removedStudent: removedStudent, message: `Student ${removedStudent.name} ${removedStudent.surname} was removed successfuly` });
     } catch (error) {
         console.log('Smth happened in removeStudent', error);
@@ -542,6 +542,40 @@ export const removeAdmin = async (req: Request, res: Response) => {
     } catch (error) {
         console.log('Smth happened in removeStudent', error);
         return res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+export const removeUserById = async (req: Request, res: Response) => {
+    const { id } = req.body;
+
+    try {
+        const allStudents = await prisma.student.findFirst({ where: { id } });
+        const allTeachers = await prisma.teacher.findFirst({ where: { id } });
+        const allParents = await prisma.parent.findFirst({ where: { id } });
+
+        if(allStudents) {
+            const removedUser = await prisma.student.delete({
+                where: { id }
+            });
+            return res.status(200).json({removedUser, message: `student ${removedUser.name} was deleted successfuly`})
+        }
+
+        if(allTeachers) {
+            const removedUser = await prisma.teacher.delete({
+                where: { id }
+            });
+            return res.status(200).json({removedUser, message: `teacher ${removedUser.name} was deleted successfuly`})
+        }
+
+        if(allParents) {
+            const removedUser = await prisma.parent.delete({
+                where: { id }
+            });
+            return res.status(200).json({removedUser, message: `parent ${removedUser.name} was deleted successfuly`})
+        }
+    } catch (error) {
+        console.log('Smth happened in removeUserById', error);
+        return res.status(500).json({ error: `Internal server error, ${error}` });
     }
 }
 

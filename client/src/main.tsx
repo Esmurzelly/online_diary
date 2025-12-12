@@ -7,10 +7,13 @@ import { PersistGate } from 'redux-persist/integration/react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Auth from './pages/auth/index.tsx'
 import Layout from './components/items/layout/layout.tsx'
+import UserProfile from './pages/userProfile/index.tsx'
 import Home from './pages/home/index.tsx'
 import { ToastContainer } from 'react-toastify'
 import Profile from './pages/profile.tsx/index.tsx'
 import 'react-toastify/dist/ReactToastify.css';
+import School from './pages/school/index.tsx'
+import SchoolId from './pages/SchoolId/index.tsx'
 
 const router = createBrowserRouter([
   {
@@ -27,8 +30,20 @@ const router = createBrowserRouter([
       },
       {
         path: "/profile",
-        element: <Profile />
-      }
+        element: <Profile />,
+      },
+      {
+        path: "/profile/:id",
+        element: <UserProfile />
+      },
+      {
+        "path": "/school",
+        element: <School />
+      },
+      {
+        path: "/school/:id",
+        element: <SchoolId />
+      },
     ]
   }
 ])

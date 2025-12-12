@@ -83,7 +83,7 @@ export const createSchool = async (req: Request, res: Response) => {
             }
         });
 
-        return res.status(200).json({ school })
+        return res.status(200).json({ school, message: "School was created successfuly" })
     } catch (error) {
         console.log('Smth happened in createSchool', error);
         return res.status(500).json({ error: 'Internal server error' });

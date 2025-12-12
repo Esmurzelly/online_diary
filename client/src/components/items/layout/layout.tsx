@@ -26,6 +26,7 @@ const Layout = (props: Props) => {
 
       <Button onClick={() => navigate('/home')}>Home</Button>
       <Button onClick={() => navigate('/profile')}>Profile</Button>
+      <Button onClick={() => navigate('/school')}>School</Button>
 
       <div className="flex flex-col items-start max-w-7xl mx-auto mt-10"> {/* container */}
         <h2>above the Outlet</h2>

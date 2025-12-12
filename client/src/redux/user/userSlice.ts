@@ -82,6 +82,19 @@ export const getMe = createAsyncThunk(
     }
 );
 
+export const getUserById = createAsyncThunk(
+    'user/getUserById',
+    async ({ id }: { id: string | undefined }) => {
+        try {
+            const { data } = await api.get(`${BASE_URL}/users/get-user-by-id/${id}`);
+
+            return data;
+        } catch (error) {
+            console.log(`error is in getMe asyncThunk ${error}`);
+        }
+    }
+)
+
 export const updateUser = createAsyncThunk(
     'user/updateUser',
     async ({ formData, id, role }: { formData: FormData, id: string | undefined, role: Role }, { rejectWithValue }) => {
@@ -111,13 +124,30 @@ export const removeUser = createAsyncThunk(
     }
 );
 
+export const removeUserByAdmin = createAsyncThunk(
+    'user/removeUserById',
+    async ({id}: { id: string | undefined }, { rejectWithValue }) => {
+        try {
+            const { data } = await api.delete(`${BASE_URL}/users/remove-user`, {
+                data: {
+                    id
+                }
+            });
+
+            console.log('data from removeUserByAdmin - redux', data)
+            return data;
+        } catch (error: any) {
+            return rejectWithValue({ message: error.message || "smth weng wrong in removeUserById" })
+        }
+    }
+)
+
 export const getAllUsers = createAsyncThunk(
     'user/getAllUsers',
     async (_, { rejectWithValue }) => {
         try {
             const { data } = await api.get(`${BASE_URL}/users/get-all-users`);
 
-            console.log('data from get all users', data)
             return data;
         } catch (error: any) {
             return rejectWithValue({ message: error.message || "smth weng wrong in removeUser" })
@@ -178,6 +208,18 @@ export const studentSlice = createSlice({
                 state.message = action.error.message
             })
 
+            .addCase(getUserById.pending, (state, action) => {
+                state.loading = true;
+            })
+            .addCase(getUserById.fulfilled, (state, action) => {
+                state.message = action.payload.message;
+                state.loading = false;
+            })
+            .addCase(getUserById.rejected, (state, action) => {
+                state.loading = false;
+                state.message = action.error.message
+            })
+
             .addCase(updateUser.pending, (state, action) => {
                 state.loading = true;
             })
@@ -200,6 +242,18 @@ export const studentSlice = createSlice({
                 state.loading = false;
             })
             .addCase(removeUser.rejected, (state, action) => {
+                state.loading = false;
+                state.message = action.error.message
+            })
+
+            .addCase(removeUserByAdmin.pending, (state, action) => {
+                state.loading = true;
+            })
+            .addCase(removeUserByAdmin.fulfilled, (state, action) => {
+                state.message = action.payload.message;
+                state.loading = false;
+            })
+            .addCase(removeUserByAdmin.rejected, (state, action) => {
                 state.loading = false;
                 state.message = action.error.message
             })
