@@ -73,6 +73,22 @@ export const getUserById = async (req: Request, res: Response) => {
 
 }
 
+export const getAllStudents = async (req: Request, res: Response) => {
+    try {
+        const allStudents = await prisma.student.findMany({
+            include: {
+                grades: true,
+                class: true,
+            }
+        });
+
+        return res.status(200).json({ allStudents, message: "You have got all students" });
+    } catch (error) {
+        console.error('Smt went wrong in getStudentById', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
 export const getStudentById = async (req: Request, res: Response) => {
     const { id } = req.params as { id: string };
 
@@ -581,7 +597,7 @@ export const removeUserById = async (req: Request, res: Response) => {
 
 export const getStudentsFromOneClass = async (req: Request, res: Response) => {
     try {
-        const { classId } = req.body as { classId: string };
+        const { classId } = req.params;
 
         const students = await prisma.student.findMany({
             where: {

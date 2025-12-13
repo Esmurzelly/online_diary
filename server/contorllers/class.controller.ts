@@ -131,3 +131,23 @@ export const classRemove = async (req: Request, res: Response) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 }
+
+export const getClassById = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        const classItem = await prisma.class.findFirst({
+            where: { id },
+            include: {
+                students: true,
+                subjects: true,
+                school: true,
+            }
+        });
+
+        return res.status(200).json({ classItem, message: "You have got class successfuly" });
+    } catch (error) {
+        console.error('Smt went wrong in getClassById', error);
+        return res.status(500).json({ error: "Internal server error" });
+
+    }
+}

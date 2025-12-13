@@ -53,6 +53,13 @@ export interface IClass {
     schoolId: string
 }
 
+export interface ISubject {
+    id: string;
+    title: string;
+    teacherId: string | null;
+    classId: string;
+}
+
 export interface ISchool {
     id: string;
     title: string;

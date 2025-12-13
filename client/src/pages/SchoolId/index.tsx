@@ -6,7 +6,7 @@ import type { ISchool } from '@/types';
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 
 type Props = {}
 
@@ -49,8 +49,6 @@ const SchoolId = (props: Props) => {
             console.log(`error in onSubmit - ${error}`);
         }
     }
-
-    console.log('currentSchool', currentSchool);
 
     if (loading) {
         <h1>Loading...</h1>
@@ -100,7 +98,7 @@ const SchoolId = (props: Props) => {
 
             {showClasses && <ul className='flex flex-col gap-3'>
                 {currentSchool?.classes.map(classEl => <li key={classEl.id} className='bg-green-400 flex flex-row items-center justify-between'>
-                    <p className='text-2xl'>{classEl.num} {classEl.letter}</p>
+                    <Link to={`/class/${classEl.id}`} className='text-2xl'>{classEl.num} {classEl.letter}</Link>
                     <Button onClick={() => handleDeleteClass({ id: classEl.id })} className='w-[100px]' variant={'destructive'}>delete</Button>
                 </li>)}
             </ul>}

@@ -155,7 +155,7 @@ export const getAllUsers = createAsyncThunk(
     }
 );
 
-export const studentSlice = createSlice({
+export const userSlice = createSlice({
     name: "user",
     initialState,
     reducers: {
@@ -273,5 +273,5 @@ export const studentSlice = createSlice({
     }
 });
 
-export const { logOut } = studentSlice.actions;
-export default studentSlice.reducer;
+export const { logOut } = userSlice.actions;
+export default userSlice.reducer;

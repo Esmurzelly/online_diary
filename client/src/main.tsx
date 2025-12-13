@@ -14,6 +14,7 @@ import Profile from './pages/profile.tsx/index.tsx'
 import 'react-toastify/dist/ReactToastify.css';
 import School from './pages/school/index.tsx'
 import SchoolId from './pages/SchoolId/index.tsx'
+import ClassPage from './pages/ClassPage/index.tsx'
 
 const router = createBrowserRouter([
   {
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
       {
         path: "/school/:id",
         element: <SchoolId />
+      },
+      {
+        path: "/class/:id",
+        element: <ClassPage />
       },
     ]
   }

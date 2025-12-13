@@ -81,15 +81,15 @@ export const addClassToSchool = createAsyncThunk(
     'school/addClassToSchool',
     async ({ schoolId, num, letter }: { schoolId: string | undefined, num: number, letter: string }, { rejectWithValue }) => {
         try {
-            const res = await api.put(`${BASE_URL}/schools/update-school-class`, {
+            const { data } = await api.put(`${BASE_URL}/schools/update-school-class`, {
                 schoolId,
                 num,
                 letter
             });
 
-            return res;
+            return data;
         } catch (error: any) {
-            return rejectWithValue({ message: error.message || "smth weng wrong in createSchool" })
+            return rejectWithValue({ message: error.message || "smth weng wrong in addClassToSchool" })
         }
     }
 );

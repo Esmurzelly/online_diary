@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import { checkUser } from '../middleware/auth';
-import { getStudentById, getStudentsFromOneClass, removeStudent, updateStudent } from '../contorllers/user.controller';
+import { getAllStudents, getStudentById, getStudentsFromOneClass, removeStudent, updateStudent } from '../contorllers/user.controller';
 import { addStudentToClass, removeStudentFromClass } from '../contorllers/class.controller';
 import { checkRole } from '../middleware/checkRole';
 
@@ -18,10 +18,10 @@ const storage = multer.diskStorage({
 
 const uploads = multer({ storage });
 
+router.get('/get-all-students', getAllStudents);
 router.get('/get-student-by-id/:id', getStudentById);
 router.get('/get-students-from-one-class', getStudentsFromOneClass);
 router.put('/update-student/:id', checkUser, checkRole("student", "admin"), uploads.single("avatar"), updateStudent);
-// router.put('/update-student/:id', checkUser, uploads.single("avatar"), updateStudent);
 router.put('/add-student-to-class', checkUser, checkRole("admin", "teacher"), addStudentToClass);
 router.put('/remove-student-from-class', checkUser, checkRole("admin", "teacher"), removeStudentFromClass);
 router.delete('/delete-student/:id', checkUser, checkRole("admin", "student"), removeStudent);
