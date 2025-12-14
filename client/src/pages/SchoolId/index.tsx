@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom'
+import { toast } from 'react-toastify';
 
 type Props = {}
 
@@ -20,12 +21,17 @@ const SchoolId = (props: Props) => {
         register,
         watch,
         handleSubmit,
+        resetField,
         formState: { errors }
     } = useForm<{ num: number, letter: string }>();
 
     useEffect(() => {
         dispatch(getSchoolById({ id }));
     }, []);
+
+    useEffect(() => {
+        if(message) toast.info(message);
+    }, [message]);
 
     const handleAddClassToSchool = async (data: { num: number, letter: string }) => {
         try {
@@ -34,6 +40,9 @@ const SchoolId = (props: Props) => {
                 num: Number(data.num),
                 schoolId: currentSchool?.id
             }));
+
+            resetField("letter");
+            resetField("num");
 
             dispatch(getSchoolById({ id }));
         } catch (error) {

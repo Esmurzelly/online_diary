@@ -35,13 +35,12 @@ const School = (props: Props) => {
 
     const { loading, message, schoolList } = useSelector((state: RootState) => state.school);
 
-    
     useEffect(() => {
         if (message) toast(message);
     }, [message]);
     
     useEffect(() => {
-        const res = dispatch(getAllSchools());
+        dispatch(getAllSchools());
     }, []);
     
     if (loading) {

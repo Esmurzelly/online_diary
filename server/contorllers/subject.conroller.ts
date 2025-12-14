@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 export const addSubject = async (req: Request, res: Response) => {
     const { title, classId, teacherId } = req.body as { title: string, classId: string, teacherId: string };
 
-    if (!title || !classId || !teacherId) {
+    if (!title || !classId) {
         return res.status(403).json({ error: "All fields are required" });
     }
 
@@ -12,7 +12,7 @@ export const addSubject = async (req: Request, res: Response) => {
         const newSubject = await prisma.subject.create({
             data: {
                 title: title,
-                teacherId: teacherId,
+                teacherId: teacherId || undefined,
                 classId: classId
             },
             include: {
