@@ -6,6 +6,16 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,6 +25,8 @@ import { updateUser, removeUser, getAllUsers, removeUserByAdmin } from '@/redux/
 import { toast } from 'react-toastify';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Link, useNavigate } from 'react-router-dom';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { getAllSchools } from '@/redux/school/schoolSlice';
 
 type Props = {}
 
@@ -30,6 +42,8 @@ type FormValues = {
 
 const Profile = (props: Props) => {
     const { currentUser, role, message, users } = useSelector((state: RootState) => state.user);
+    const { schoolList } = useSelector((state: RootState) => state.school);
+    
     const {
         handleSubmit,
         register,
@@ -48,6 +62,8 @@ const Profile = (props: Props) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const [showUsers, setShowUsers] = useState<boolean>(false);
+
+    console.log(currentUser)
 
     const filePicekerRef = useRef<HTMLInputElement>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -81,6 +97,10 @@ const Profile = (props: Props) => {
             toast(message)
         }
     }, [message]);
+
+    useEffect(() => {
+        dispatch(getAllSchools()).unwrap();
+    }, []);
 
     const handleDeleteUser = async () => {
         try {
@@ -142,6 +162,14 @@ const Profile = (props: Props) => {
         }
     }
 
+    const hadleLinkSchool = async () => {
+        try {
+
+        } catch (error) {
+            console.log(`error in hadleLinkSchool - ${error}`);
+        }
+    }
+
 
     if (!currentUser) {
         return <h1>Loading...</h1>
@@ -165,6 +193,7 @@ const Profile = (props: Props) => {
                 <p>phone: {currentUser?.phone}</p>
                 <p>address: {currentUser?.address}</p>
                 <p>email: {currentUser?.email}</p>
+                <p>school: {currentUser?.schoolId ? schooldId : "without school"}</p>
             </div>
 
             <form onSubmit={handleSubmit(handleSubmitForm)}>
@@ -256,11 +285,44 @@ const Profile = (props: Props) => {
                     </PopoverContent>
                 </Popover>
                 <input disabled={role === undefined || role === 'none' || role === null || !role} type="submit" />
-
             </form>
+
             <Button onClick={handleDeleteUser} variant={'destructive'}>Delete my account</Button>
 
             {role === 'admin' && <Button className='p-3' onClick={handleFetchUsers} variant={'outline'}>{showUsers ? "Hide" : "Show"} users</Button>}
+            {/* {role === 'teacher' && <div>
+                <Dialog>
+                    <form>
+                        <DialogTrigger asChild>
+                            <Button variant="outline">Link to the school</Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                                <DialogTitle>Link to the school</DialogTitle>
+                                <DialogDescription>
+                                    Add / change your school type: only for teachers and admins
+                                </DialogDescription>
+                            </DialogHeader>
+
+                            <Select>
+                                <SelectTrigger className="w-1/5">
+                                    <SelectValue placeholder="Select a subject" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {schoolList?.map(schoolItem => <SelectItem value={schoolItem.id}>{schoolItem.title}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+
+                            <DialogFooter>
+                                <DialogClose asChild>
+                                    <Button variant="outline">Cancel</Button>
+                                </DialogClose>
+                                <Button onSubmit={hadleLinkSchool} type="submit">Save changes</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </form>
+                </Dialog>
+            </div>} */}
 
             <ul className="bg-red-400 w-5xl flex flex-col gap-3">
                 {showUsers && users?.map(userEl => <li key={userEl.id} className='flex flex-row items-center justify-between gap-4'>

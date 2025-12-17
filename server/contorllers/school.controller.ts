@@ -121,6 +121,30 @@ export const updateSchoolTeachers = async (req: Request, res: Response) => {
     }
 }
 
+export const removeTeacherFromTheSchool = async (req: Request, res: Response) => {
+    const { schoolId, teacherId } = req.body as { schoolId: string, teacherId: string };
+
+    if (!schoolId || !teacherId) {
+        return res.status(403).json({ error: "Choose school and teacher" });
+    }
+
+    try {
+        const updatedTeacher = await prisma.teacher.update({
+            where: {
+                id: teacherId
+            },
+            data: {
+                schoolId: null,
+            },
+        });
+
+        return res.status(200).json({ data: updatedTeacher, message: "Teacher was deleted successfuly" });
+    } catch (error) {
+        console.log('Smth happened in updateShcoolTeachers', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
 export const updateSchoolClasses = async ( // add 1 Class with subjects in the school
     req: Request & { user?: IUserWithToken },
     res: Response

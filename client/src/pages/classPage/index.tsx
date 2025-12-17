@@ -1,8 +1,8 @@
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { addStudentToTheClass, addSubjectToTheClass, getClassById, removeStudentFromTheClass, removeSubjectFromTheClass } from '@/redux/class/classSlice';
+import { addStudentToTheClass, addSubjectToTheClass, addTeacherToSubject, getClassById, removeStudentFromTheClass, removeSubjectFromTheClass } from '@/redux/class/classSlice';
 import type { RootState } from '@/redux/rootReducer';
 import { useAppDispatch } from '@/redux/store';
-import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom'
 import { toast } from 'react-toastify';
@@ -10,9 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import {
     Select,
     SelectContent,
-    SelectGroup,
     SelectItem,
-    SelectLabel,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
@@ -26,8 +24,10 @@ const ClassPage = (props: Props) => {
     const dispatch = useAppDispatch();
     const { classItem, loading: classLoading, message } = useSelector((state: RootState) => state.class);
     const { studentsList, loading: studentLoading } = useSelector((state: RootState) => state.student);
+    const { teacherList } = useSelector((state: RootState) => state.teacher);
     const [selectedSubject, setSelectedSubject] = useState<string>();
     const [selectedStudent, setSelectedStudent] = useState<string>();
+    const [selectedTeacher, setSelectedTeacher] = useState<string>();
 
     const classSubjectTitleSet = new Set(classItem?.subjects?.map(subjectEl => subjectEl.title));
     const availableSubjects = SUBJECTS.filter(
@@ -44,9 +44,13 @@ const ClassPage = (props: Props) => {
         // dispatch(studentsFromOneClass({ classId: classItem?.id }));
     }, []);
 
+    const handleTeacherChange = (state: string) => {
+        setSelectedTeacher(state);
+        console.log('selectedTeacher', selectedTeacher);
+    };
+
     const handleSubjectChange = (state: string) => {
         setSelectedSubject(state);
-        console.log(selectedSubject)
     };
 
     const handleStudentChange = (state: string) => {
@@ -69,15 +73,17 @@ const ClassPage = (props: Props) => {
             await dispatch(removeStudentFromTheClass({ studentId, classId: id })).unwrap();
             await dispatch(getAllStudents());
         } catch (error) {
-            console.log('error in handleAddStudent', error);
+            console.log('error in handleRemoveStudent', error);
         }
     };
+
+    console.log('classItem', classItem);
 
     const handleAddSubject = async () => {
         try {
             await dispatch(addSubjectToTheClass({ title: selectedSubject, classId: id })).unwrap();
         } catch (error) {
-            console.log('error in handleAddStudent', error);
+            console.log('error in handleAddSubject', error);
         }
     }
 
@@ -86,8 +92,13 @@ const ClassPage = (props: Props) => {
             const res = await dispatch(removeSubjectFromTheClass({ subjectId })).unwrap();
             console.log('res from handleRemoveSubject', res);
         } catch (error) {
-            console.log('error in handleAddStudent', error);
+            console.log('error in handleRemoveSubject', error);
         }
+    };
+
+    const handleLinkTeacher = async (teacherItemId: string, subjectItemId: string) => {
+        const res = await dispatch(addTeacherToSubject({ teacherId: teacherItemId, subjectId: subjectItemId }));
+        console.log('res from handleLinkTeacher', res)
     }
 
 
@@ -108,6 +119,21 @@ const ClassPage = (props: Props) => {
                         {classItem.subjects?.map(subjectItem =>
                             <li className='flex justify-between items-center' key={`${classItem.id}_${uuidv4()}`}>
                                 <span>{subjectItem.title}</span>
+                                <div className="flex flex-row items-center gap-2">
+                                    {subjectItem?.teacher?.name || 'no teacher'}
+
+                                    <Select onValueChange={handleTeacherChange}>
+                                        <SelectTrigger className="w-1/5">
+                                            <SelectValue placeholder="Select a subject" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {teacherList && teacherList.filter(teacherItem => teacherItem.schoolId === classItem.schoolId).map((teacherItem) => <SelectItem key={teacherItem.id} value={teacherItem.id}>
+                                                {teacherItem.name} {teacherItem.surname}
+                                                <Button onClick={() => handleLinkTeacher(teacherItem.id, subjectItem.id)}>Link to teacher</Button>
+                                            </SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                                 <Button onClick={() => handleRemoveSubject(subjectItem.id)} variant={'destructive'}>delete subject</Button>
                             </li>
                         )}
@@ -146,8 +172,6 @@ const ClassPage = (props: Props) => {
                     <Button onClick={handleAddStudent}>Add Student</Button>
                 </div>
             </div>
-
-
         </div>
     )
 }

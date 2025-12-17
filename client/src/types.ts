@@ -17,6 +17,7 @@ export interface Student extends User {
 
 export interface Teacher extends User {
     schoolId?: string | null;
+    subjects: ISubject[];
 }
 
 export interface Parent extends User {
@@ -66,5 +67,6 @@ export interface ISchool {
     phone: string;
     email: string;
     address: string;
-    classes: IClass[]
+    classes: IClass[];
+    teachers: Teacher[];
 }

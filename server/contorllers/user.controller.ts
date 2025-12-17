@@ -89,6 +89,26 @@ export const getAllStudents = async (req: Request, res: Response) => {
     }
 }
 
+export const getAllTeachers = async (req: Request, res: Response) => {
+    try {
+        const allTeacher = await prisma.teacher.findMany({
+            include: {
+                subjects: true,
+                school: {
+                    include: {
+                        classes: true
+                    }
+                }
+            }
+        });
+
+        return res.status(200).json({ allTeacher, message: "You have got all teachers" });
+    } catch (error) {
+        console.error('Smt went wrong in getStudentById', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
 export const getStudentById = async (req: Request, res: Response) => {
     const { id } = req.params as { id: string };
 

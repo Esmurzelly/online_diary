@@ -43,7 +43,7 @@ export const getClassById = createAsyncThunk(
 
 export const addStudentToTheClass = createAsyncThunk(
     'class/addStudentToTheClass',
-    async ({ studentId, classId }: { studentId: string, classId: string }, { rejectWithValue }) => {
+    async ({ studentId, classId }: { studentId: string, classId: string | undefined }, { rejectWithValue }) => {
         try {
             const { data } = await api.put(`${BASE_URL}/students/add-student-to-class`, {
                 studentId,
@@ -59,7 +59,7 @@ export const addStudentToTheClass = createAsyncThunk(
 
 export const removeStudentFromTheClass = createAsyncThunk(
     'class/removeStudentToTheClass',
-    async ({ studentId, classId }: { studentId: string, classId: string }, { rejectWithValue }) => {
+    async ({ studentId, classId }: { studentId: string, classId: string | undefined }, { rejectWithValue }) => {
         try {
             const { data } = await api.put(`${BASE_URL}/students/remove-student-from-class`, {
                 studentId,
@@ -82,8 +82,6 @@ export const studentsFromOneClass = createAsyncThunk(
             }
             );
 
-            console.log('data from redux', data)
-
             return data;
         } catch (error: any) {
             return rejectWithValue({ message: error.message || "smth weng wrong in studentsFromOneClass" })
@@ -94,7 +92,7 @@ export const studentsFromOneClass = createAsyncThunk(
 
 export const addSubjectToTheClass = createAsyncThunk(
     'class/addSubjectToTheClass',
-    async ({ title, classId }: { title: string, classId: string }, { rejectWithValue }) => {
+    async ({ title, classId }: { title: string | undefined, classId: string | undefined }, { rejectWithValue }) => {
         try {
             const { data } = await api.put(`${BASE_URL}/subjects/create-new-subject`, {
                 title,
@@ -124,6 +122,22 @@ export const removeSubjectFromTheClass = createAsyncThunk(
         }
     }
 );
+
+export const addTeacherToSubject = createAsyncThunk(
+    'class/addTeacherToSubject',
+    async({ teacherId, subjectId }: { teacherId: string, subjectId: string }, { rejectWithValue }) => {
+        try {
+            const { data } = await api.put(`${BASE_URL}/subjects/teacher-to-subject`, {
+                teacherId,
+                subjectId
+            });
+
+            return data;
+        } catch (error: any) {
+            return rejectWithValue({ message: error.message || "smth weng wrong in studentsFromOneClass" })
+        }
+    }
+)
 
 export const classSlice = createSlice({
     name: "class",
@@ -220,6 +234,20 @@ export const classSlice = createSlice({
                 state.message = action.payload.message;
             })
             .addCase(removeSubjectFromTheClass.rejected, (state, action) => {
+                state.loading = false;
+                state.message = action.payload.message;
+            })
+
+            .addCase(addTeacherToSubject.pending, (state, action) => {
+                state.loading = true;
+            })
+            .addCase(addTeacherToSubject.fulfilled, (state, action) => {
+                state.loading = false;
+                // ? sta
+                console.log('action.payload in addTeacherToSubject in classSlice - extraRedux', action.payload);
+                state.message = action.payload.message;
+            })
+            .addCase(addTeacherToSubject.rejected, (state, action) => {
                 state.loading = false;
                 state.message = action.payload.message;
             })

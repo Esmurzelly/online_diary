@@ -94,6 +94,42 @@ export const addClassToSchool = createAsyncThunk(
     }
 );
 
+export const addTeacherToTheSchool = createAsyncThunk(
+    'school/addTeacherToTheSchool',
+    async ({ teacherId, schoolId }: { teacherId: string | undefined, schoolId: string | undefined }, { rejectWithValue }) => {
+        try {
+            const { data } = await api.put(`${BASE_URL}/schools/update-school-teacher`, {
+                teacherId,
+                schoolId
+            });
+
+            return data;
+        } catch (error: any) {
+            return rejectWithValue({ message: error.message || "smth weng wrong in addClassToSchool" })
+
+        }
+    }
+);
+
+export const removeTeacherFromTheSchool = createAsyncThunk(
+    'school/removeTeacherFromTheSchool',
+    async ({ teacherId, schoolId }: { teacherId: string | undefined, schoolId: string | undefined }, { rejectWithValue }) => {
+        try {
+            const { data } = await api.put(`${BASE_URL}/schools/remove-teacher-from-school`, {
+                teacherId,
+                schoolId
+            });
+
+            console.log('data from redux - removeTeacherFromTheSchool', data);
+
+            return data;
+        } catch (error: any) {
+            return rejectWithValue({ message: error.message || "smth weng wrong in addClassToSchool" })
+
+        }
+    }
+);
+
 export const schoolSlice = createSlice({
     name: "school",
     initialState,
@@ -169,6 +205,37 @@ export const schoolSlice = createSlice({
                 state.message = action.payload.message;
             })
             .addCase(deleteClass.rejected, (state, action) => {
+                state.loading = false;
+                state.message = action.payload.message;
+            })
+
+            .addCase(addTeacherToTheSchool.pending, (state, action) => {
+                state.loading = true;
+            })
+            .addCase(addTeacherToTheSchool.fulfilled, (state, action) => {
+                state.loading = false;
+                state.currentSchool = action.payload.data;
+                state.message = action.payload.message;
+            })
+            .addCase(addTeacherToTheSchool.rejected, (state, action) => {
+                state.loading = false;
+                state.message = action.payload.message;
+            })
+
+            .addCase(removeTeacherFromTheSchool.pending, (state, action) => {
+                state.loading = true;
+            })
+            .addCase(removeTeacherFromTheSchool.fulfilled, (state, action) => {
+                state.loading = false;
+                if (state.currentSchool?.teachers) {
+                    state.currentSchool.teachers =
+                        state.currentSchool.teachers.filter(
+                            teacherItem => teacherItem.id !== action.payload.data.id
+                        );
+                }
+                state.message = action.payload.message;
+            })
+            .addCase(removeTeacherFromTheSchool.rejected, (state, action) => {
                 state.loading = false;
                 state.message = action.payload.message;
             })

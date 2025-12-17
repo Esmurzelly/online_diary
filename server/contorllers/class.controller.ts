@@ -139,7 +139,11 @@ export const getClassById = async (req: Request, res: Response) => {
             where: { id },
             include: {
                 students: true,
-                subjects: true,
+                subjects: {
+                    include: {
+                        teacher: true
+                    }
+                },
                 school: true,
             }
         });
