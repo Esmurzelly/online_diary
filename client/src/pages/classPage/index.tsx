@@ -10,7 +10,9 @@ import { v4 as uuidv4 } from 'uuid';
 import {
     Select,
     SelectContent,
+    SelectGroup,
     SelectItem,
+    SelectLabel,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
@@ -48,9 +50,12 @@ const ClassPage = (props: Props) => {
         // dispatch(studentsFromOneClass({ classId: classItem?.id }));
     }, []);
 
+    useEffect(() => {
+        console.log('selectedTeacher', selectedTeacher);
+    }, [selectedTeacher])
+
     const handleTeacherChange = (state: string) => {
         setSelectedTeacher(state);
-        console.log('selectedTeacher', selectedTeacher);
     };
 
     const handleSubjectChange = (state: string) => {
@@ -91,8 +96,7 @@ const ClassPage = (props: Props) => {
 
     const handleRemoveSubject = async (subjectId: string) => {
         try {
-            const res = await dispatch(removeSubjectFromTheClass({ subjectId })).unwrap();
-            console.log('res from handleRemoveSubject', res);
+            await dispatch(removeSubjectFromTheClass({ subjectId })).unwrap();
         } catch (error) {
             console.log('error in handleRemoveSubject', error);
         }
@@ -100,8 +104,7 @@ const ClassPage = (props: Props) => {
 
     const handleLinkTeacher = async (teacherItemId: string, subjectItemId: string) => {
         try {
-            const res = await dispatch(addTeacherToSubject({ teacherId: teacherItemId, subjectId: subjectItemId }));
-            console.log('res from handleLinkTeacher', res);
+            await dispatch(addTeacherToSubject({ teacherId: teacherItemId, subjectId: subjectItemId }));
             setSelectedTeacher(undefined);
             await dispatch(getClassById({ id }));
         } catch (error) {
@@ -109,10 +112,11 @@ const ClassPage = (props: Props) => {
         }
     }
 
-    const handleUnlinkTeacher = async (teacherId: string, subjectId: string) => {
+    const handleUnlinkTeacher = async ({ teacherId, subjectId }: { teacherId: string, subjectId: string }) => {
+        console.log('teacherId', teacherId);
+        console.log('subjectId', subjectId);
         try {
-            const res = await dispatch(removeTeacherFromTheSubject({ teacherId, subjectId }));
-            console.log('res from handleLinkTeacher', res);
+            await dispatch(removeTeacherFromTheSubject({ teacherId, subjectId }));
             setSelectedTeacher(undefined);
             await dispatch(getClassById({ id }));
         } catch (error) {
@@ -143,16 +147,22 @@ const ClassPage = (props: Props) => {
 
                                     <Select onValueChange={handleTeacherChange}>
                                         <SelectTrigger className="w-1/5">
-                                            <SelectValue placeholder="Select a subject" />
+                                            <SelectValue placeholder="Select a teacher" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {teacherList && teacherList.filter(teacherItem => teacherItem.schoolId === classItem.schoolId).map((teacherItem) => <SelectItem key={teacherItem.id} value={teacherItem.id}>
-                                                {teacherItem.name} {teacherItem.surname}
-                                                <Button onClick={() => handleLinkTeacher(teacherItem.id, subjectItem.id)}>Link to teacher</Button>
-                                                <Button onClick={() => handleUnlinkTeacher(teacherItem.id, subjectItem.id)}>Unlink</Button>
-                                            </SelectItem>)}
+                                            <SelectGroup>
+                                                <SelectLabel>Teachers</SelectLabel>
+                                                {teacherList && teacherList.filter(teacherItem => teacherItem.schoolId === classItem.schoolId).map((teacherItem) => <SelectItem key={teacherItem.id} value={teacherItem.id}>
+                                                    {teacherItem.name} {teacherItem.surname}
+                                                </SelectItem>)}
+                                            </SelectGroup>
                                         </SelectContent>
                                     </Select>
+                                    {
+                                        subjectItem?.teacher?.name
+                                            ? <Button onClick={() => handleUnlinkTeacher({ teacherId: subjectItem.teacherId, subjectId: subjectItem.id })}>Unlink</Button>
+                                            : <Button onClick={() => handleLinkTeacher(selectedTeacher, subjectItem.id)}>Link to teacher</Button>
+                                    }
                                 </div>
                                 <Button onClick={() => handleRemoveSubject(subjectItem.id)} variant={'destructive'}>delete subject</Button>
                             </li>
