@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { addStudentToTheClass, addSubjectToTheClass, addTeacherToSubject, getClassById, removeStudentFromTheClass, removeSubjectFromTheClass } from '@/redux/class/classSlice';
+import { addStudentToTheClass, addSubjectToTheClass, addTeacherToSubject, getClassById, removeStudentFromTheClass, removeSubjectFromTheClass, removeTeacherFromTheSubject } from '@/redux/class/classSlice';
 import type { RootState } from '@/redux/rootReducer';
 import { useAppDispatch } from '@/redux/store';
 import { useSelector } from 'react-redux';
@@ -22,9 +22,9 @@ type Props = {}
 const ClassPage = (props: Props) => {
     const { id } = useParams();
     const dispatch = useAppDispatch();
-    const { classItem, loading: classLoading, message } = useSelector((state: RootState) => state.class);
+    const { classItem, loading: classLoading, message: classMessage } = useSelector((state: RootState) => state.class);
     const { studentsList, loading: studentLoading } = useSelector((state: RootState) => state.student);
-    const { teacherList } = useSelector((state: RootState) => state.teacher);
+    const { teacherList, message: teacherMessage } = useSelector((state: RootState) => state.teacher);
     const [selectedSubject, setSelectedSubject] = useState<string>();
     const [selectedStudent, setSelectedStudent] = useState<string>();
     const [selectedTeacher, setSelectedTeacher] = useState<string>();
@@ -35,8 +35,12 @@ const ClassPage = (props: Props) => {
     );
 
     useEffect(() => {
-        if (message) toast(message)
-    }, [message]);
+        if (classMessage) toast(classMessage);
+    }, [classMessage]);
+
+    useEffect(() => {
+        if (teacherMessage) toast(teacherMessage);
+    }, [teacherMessage]);
 
     useEffect(() => {
         dispatch(getClassById({ id }));
@@ -77,8 +81,6 @@ const ClassPage = (props: Props) => {
         }
     };
 
-    console.log('classItem', classItem);
-
     const handleAddSubject = async () => {
         try {
             await dispatch(addSubjectToTheClass({ title: selectedSubject, classId: id })).unwrap();
@@ -97,8 +99,25 @@ const ClassPage = (props: Props) => {
     };
 
     const handleLinkTeacher = async (teacherItemId: string, subjectItemId: string) => {
-        const res = await dispatch(addTeacherToSubject({ teacherId: teacherItemId, subjectId: subjectItemId }));
-        console.log('res from handleLinkTeacher', res)
+        try {
+            const res = await dispatch(addTeacherToSubject({ teacherId: teacherItemId, subjectId: subjectItemId }));
+            console.log('res from handleLinkTeacher', res);
+            setSelectedTeacher(undefined);
+            await dispatch(getClassById({ id }));
+        } catch (error) {
+            console.log('error in handleLinkTeacher', error);
+        }
+    }
+
+    const handleUnlinkTeacher = async (teacherId: string, subjectId: string) => {
+        try {
+            const res = await dispatch(removeTeacherFromTheSubject({ teacherId, subjectId }));
+            console.log('res from handleLinkTeacher', res);
+            setSelectedTeacher(undefined);
+            await dispatch(getClassById({ id }));
+        } catch (error) {
+            console.log('error in handleUnlinkTeacher', error);
+        }
     }
 
 
@@ -130,6 +149,7 @@ const ClassPage = (props: Props) => {
                                             {teacherList && teacherList.filter(teacherItem => teacherItem.schoolId === classItem.schoolId).map((teacherItem) => <SelectItem key={teacherItem.id} value={teacherItem.id}>
                                                 {teacherItem.name} {teacherItem.surname}
                                                 <Button onClick={() => handleLinkTeacher(teacherItem.id, subjectItem.id)}>Link to teacher</Button>
+                                                <Button onClick={() => handleUnlinkTeacher(teacherItem.id, subjectItem.id)}>Unlink</Button>
                                             </SelectItem>)}
                                         </SelectContent>
                                     </Select>

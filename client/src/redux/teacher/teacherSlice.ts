@@ -5,7 +5,7 @@ import { BASE_URL } from "@/constants";
 import { clearToken, setToken } from "../auth/authSlice";
 import api from "@/utils/axios";
 import { addTeacherToTheSchool, removeTeacherFromTheSchool } from "../school/schoolSlice";
-import { addTeacherToSubject } from "../class/classSlice";
+import { addTeacherToSubject, removeTeacherFromTheSubject } from "../class/classSlice";
 
 type Role = 'student' | 'teacher' | 'parent' | 'admin' | 'none';
 
@@ -90,15 +90,29 @@ export const teacherSlice = createSlice({
                 const teacher = state.teacherList?.find(teacherItem => teacherItem.id === action.payload.teacherToSubject.teacherId);
 
                 if(teacher) {
-                    if(Array.isArray(teacher.subjects)) {
-                        teacher.subjects.push(action.payload.teacherToSubject); // new Set in teacher -> teacherList.[1].subjects in server!!!!!!!!!!!!!!!!
-                    } else {
-                        teacher.subjects = [...action.payload.teacherToSubject]
-                    }
+                    teacher.subjects = action.payload.teacherToSubject.teacher.subjects;
                 }
                 state.message = action.payload.message;
             })
             .addCase(addTeacherToSubject.rejected, (state, action) => {
+                state.loading = false;
+                state.message = action.payload.message;
+            })
+
+            .addCase(removeTeacherFromTheSubject.pending, (state, action) => {
+                state.loading = true;
+            })
+            .addCase(removeTeacherFromTheSubject.fulfilled, (state, action) => {
+                state.loading = false;
+                const { teacherId, removedSubjectFromTeacher } = action.payload;
+                const teacher = state.teacherList?.find(teacherItem => teacherItem.id === teacherId);
+
+                if(teacher && teacher.subjects) {
+                    teacher.subjects = teacher.subjects.filter(subjectItem => subjectItem.id !== removedSubjectFromTeacher.id);
+                }
+                state.message = action.payload.message;
+            })
+            .addCase(removeTeacherFromTheSubject.rejected, (state, action) => {
                 state.loading = false;
                 state.message = action.payload.message;
             })

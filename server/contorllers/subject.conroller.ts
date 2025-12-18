@@ -1,5 +1,6 @@
 import { prisma } from '../prisma/prisma-client.js'
 import { Request, Response } from 'express';
+import { ITeacher } from '../types.js';
 
 export const addSubject = async (req: Request, res: Response) => {
     const { title, classId, teacherId } = req.body as { title: string, classId: string, teacherId: string };
@@ -31,6 +32,52 @@ export const addSubject = async (req: Request, res: Response) => {
 export const addTeacherToSubject = async (req: Request, res: Response) => {
     const { teacherId, subjectId } = req.body as { teacherId: string, subjectId: string };
 
+    const existedTeacher = await prisma.teacher.findUnique({
+        where: {
+            id: teacherId,
+        },
+        include: {
+            subjects: true
+        }
+    });
+    console.log('existedTeacher', existedTeacher);
+    console.log('existedTeacher?.subjects', existedTeacher.subjects);
+
+
+    if (existedTeacher.subjects) {
+        console.log('existedTeacher.subjects exists!!!!!!!!!!!!');
+
+        const existedSubject = await prisma.subject.findFirst({
+            where: {
+                id: subjectId
+            }
+        });
+
+        // const hasSubject = existedTeacher?.subjects.some(
+        //     subjectItem => subjectItem.id === subjectId
+        // );
+
+        // if(hasSubject) {
+        //     return res.status(403).json({ message: "This subject is already linked to the teacher" });
+        // }
+
+        const alreadyLinked = await prisma.subject.findFirst({
+            where: {
+                id: subjectId,
+                teacherId: teacherId
+            }
+        });
+
+        console.log('alreadyLinked', alreadyLinked);
+
+        if (alreadyLinked) {
+            return res.status(403).json({
+                message: "This subject is already linked to the teacher",
+            });
+        }
+    }
+
+
     if (!teacherId || !subjectId) {
         return res.status(403).json({ error: "All fields are required" });
     }
@@ -48,8 +95,12 @@ export const addTeacherToSubject = async (req: Request, res: Response) => {
                 }
             },
             include: {
-                teacher: true,
-                class: true
+                teacher: {
+                    include: {
+                        subjects: true,
+                    }
+                },
+                class: true,
             }
         });
 
@@ -75,16 +126,15 @@ export const deleteTeacherFromSubject = async (req: Request, res: Response) => {
             },
             data: {
                 teacherId: null,
-            },
-            include: {
-                class: true
             }
         });
 
-        return res.status(200).json({ removedSubjectFromTeacher: removedSubjectFromTeacher, message: "Teacher was removed successfully" });
+        console.log('removedSubjectFromTeacher', removedSubjectFromTeacher);
+
+        return res.status(200).json({ removedSubjectFromTeacher: removedSubjectFromTeacher, teacherId: teacherId, message: "Teacher was removed successfully" });
     } catch (error) {
         console.log('Smth happened in deleteTeacherFromSubject', error);
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: `Internal server error - ${error}` });
     }
 }
 

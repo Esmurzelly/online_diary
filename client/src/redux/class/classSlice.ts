@@ -137,6 +137,24 @@ export const addTeacherToSubject = createAsyncThunk(
             return rejectWithValue({ message: error.message || "smth weng wrong in studentsFromOneClass" })
         }
     }
+);
+
+export const removeTeacherFromTheSubject = createAsyncThunk(
+    'class/removeTeacherFromTheSubject',
+    async({ teacherId, subjectId }: { teacherId: string, subjectId: string }, { rejectWithValue }) => {
+        try {
+            const { data } = await api.put(`${BASE_URL}/subjects/delete-teacher-from-subject`, {
+                teacherId, 
+                subjectId
+            });
+
+            console.log('data from asyncThunk', data);
+
+            return data;
+        } catch (error: any) {
+            return rejectWithValue({ message: error.message || "smth weng wrong in studentsFromOneClass" })
+        }
+    }
 )
 
 export const classSlice = createSlice({
@@ -238,19 +256,19 @@ export const classSlice = createSlice({
                 state.message = action.payload.message;
             })
 
-            .addCase(addTeacherToSubject.pending, (state, action) => {
-                state.loading = true;
-            })
-            .addCase(addTeacherToSubject.fulfilled, (state, action) => {
-                state.loading = false;
-                // ? sta
-                console.log('action.payload in addTeacherToSubject in classSlice - extraRedux', action.payload);
-                state.message = action.payload.message;
-            })
-            .addCase(addTeacherToSubject.rejected, (state, action) => {
-                state.loading = false;
-                state.message = action.payload.message;
-            })
+            // .addCase(addTeacherToSubject.pending, (state, action) => {
+            //     state.loading = true;
+            // })
+            // .addCase(addTeacherToSubject.fulfilled, (state, action) => {
+            //     state.loading = false;
+            //     // ? sta
+            //     console.log('action.payload in addTeacherToSubject in classSlice - extraRedux', action.payload);
+            //     state.message = action.payload.message;
+            // })
+            // .addCase(addTeacherToSubject.rejected, (state, action) => {
+            //     state.loading = false;
+            //     state.message = action.payload.message;
+            // })
 });
 
 export const { } = classSlice.actions;
