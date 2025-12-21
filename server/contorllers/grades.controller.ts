@@ -4,7 +4,8 @@ import { IRequestGrade } from '../types.js';
 
 interface IRequestGradeSet extends IRequestGrade {
     comment: string;
-    value: number
+    value: number;
+    dateTime: Date;
 }
 
 interface IRequestGradeUpdate extends IRequestGradeSet {
@@ -16,7 +17,9 @@ interface IRequestGradeRemove extends IRequestGrade {
 }
 
 export const setGrade = async (req: Request, res: Response) => {
-    const { subjectId, studentId, teacherId, comment, value } = req.body as IRequestGradeSet;
+    const { subjectId, studentId, teacherId, comment, value, dateTime } = req.body as IRequestGradeSet;
+
+    console.log('req in server', {subjectId, studentId, teacherId, comment, value, dateTime});
 
     if (!subjectId || !studentId || !value || !teacherId) {
         return res.status(403).json({ error: "Missing fields" })
@@ -61,31 +64,36 @@ export const setGrade = async (req: Request, res: Response) => {
             };
         }
 
-        const commonIdInSubject = teacher.subjects.filter(teacherSubject => 
-                student?.class?.subjects.some(studentSubject => teacherSubject.id === studentSubject.id)
+        const commonIdInSubject = teacher.subjects.filter(teacherSubject =>
+            student?.class?.subjects.some(studentSubject => teacherSubject.id === studentSubject.id)
         );
+
+        console.log('commonIdInSubject between student and teacher', commonIdInSubject);
+        // console.log('commonSubjects - have or not', commonIdInSubject.some(subEl => subEl.id !== subjectId))
 
         if (commonIdInSubject.length === 0) {
             return res.status(403).json({ error: "No acccess. Different subjects" })
         }
 
-        if (commonIdInSubject.some(subEl => subEl.id !== subjectId)) {
-            return res.status(403).json({ error: "Teacher doesn't teach this subject" })
-        }
+        // if (commonIdInSubject.some(subEl => subEl.id !== subjectId)) {
+        //     return res.status(403).json({ error: "Teacher doesn't teach this subject" })
+        // }
 
         const createdGrade = await prisma.grade.create({
             data: {
-                value: value,
+                value: Number(value),
                 comment: comment || undefined,
                 studentId: studentId,
                 subjectId: subjectId,
-                date: new Date(Date.now()),
+                date: dateTime,
             },
             include: {
                 subject: true,
                 student: true,
             }
         });
+
+        console.log('createdGrade in server', createdGrade);
 
         return res.status(200).json({ grade: createdGrade, message: "Grade is set successfuly" });
 

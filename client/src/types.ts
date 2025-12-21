@@ -13,6 +13,7 @@ export interface User {
 export interface Student extends User {
     parentIds?: [],
     classId?: string | null,
+    grades: IGrade[];
 }
 
 export interface Teacher extends User {
@@ -69,4 +70,16 @@ export interface ISchool {
     address: string;
     classes: IClass[];
     teachers: Teacher[];
+}
+
+
+export interface IGrade {
+    id: string;
+    value: number;
+    date: Date;
+    subjectId: string;
+    subject: ISubject;
+    studentId: string;
+    student: Student;
+    comment: string;
 }

@@ -63,8 +63,6 @@ const Profile = (props: Props) => {
     const navigate = useNavigate();
     const [showUsers, setShowUsers] = useState<boolean>(false);
 
-    console.log(currentUser)
-
     const filePicekerRef = useRef<HTMLInputElement>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -170,7 +168,6 @@ const Profile = (props: Props) => {
         }
     }
 
-
     if (!currentUser) {
         return <h1>Loading...</h1>
     }
@@ -193,8 +190,10 @@ const Profile = (props: Props) => {
                 <p>phone: {currentUser?.phone}</p>
                 <p>address: {currentUser?.address}</p>
                 <p>email: {currentUser?.email}</p>
-                <p>school: {currentUser?.schoolId ? schooldId : "without school"}</p>
+                <p>school: {currentUser && currentUser?.schoolId ? <Link to={`/school/${currentUser.schoolId}`}>{currentUser.school.title}</Link> : "without school"}</p>
             </div>
+
+            <Link to={`/subjects`}>Subjects</Link>
 
             <form onSubmit={handleSubmit(handleSubmitForm)}>
                 <Popover>

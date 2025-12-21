@@ -622,6 +622,11 @@ export const getStudentsFromOneClass = async (req: Request, res: Response) => {
         const students = await prisma.student.findMany({
             where: {
                 classId: classId,
+            },
+            include: {
+                grades: true,
+                class: true,
+                parents: true
             }
         })
 
