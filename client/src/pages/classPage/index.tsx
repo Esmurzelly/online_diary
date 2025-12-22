@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { addStudentToTheClass, addSubjectToTheClass, addTeacherToSubject, getClassById, removeStudentFromTheClass, removeSubjectFromTheClass, removeTeacherFromTheSubject } from '@/redux/class/classSlice';
+import { addStudentToTheClass, addSubjectToTheClass, addTeacherToSubject, editClass, getClassById, removeStudentFromTheClass, removeSubjectFromTheClass, removeTeacherFromTheSubject } from '@/redux/class/classSlice';
 import type { RootState } from '@/redux/rootReducer';
 import { useAppDispatch } from '@/redux/store';
 import { useSelector } from 'react-redux';
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select"
 import { SUBJECTS } from '@/constants';
 import { getAllStudents } from '@/redux/student/studentSlice';
+import { Input } from '@/components/ui/input';
 
 type Props = {}
 
@@ -30,6 +31,7 @@ const ClassPage = (props: Props) => {
     const [selectedSubject, setSelectedSubject] = useState<string>();
     const [selectedStudent, setSelectedStudent] = useState<string>();
     const [selectedTeacher, setSelectedTeacher] = useState<string>();
+    const [showChangeField, setShowChangeField] = useState(false);
 
     const classSubjectTitleSet = new Set(classItem?.subjects?.map(subjectEl => subjectEl.title));
     const availableSubjects = SUBJECTS.filter(
@@ -124,6 +126,23 @@ const ClassPage = (props: Props) => {
         }
     }
 
+    const handleChangeClass = async (formData) => {
+        const changedNumber = formData.get("num");
+        const changedLetter = formData.get("letter");
+
+        try {
+            const res = await dispatch(editClass({
+                num: Number(changedNumber),
+                letter: changedLetter,
+                classId: classItem?.id
+            }));
+            await dispatch(getClassById({ id }));
+
+            console.log('res from handleChangeClass - client', res);
+        } catch (error) {
+            console.log('error in handleChangeClass', error);
+        }
+    }
 
     if (classLoading || studentLoading || !classItem) {
         return <h1>Loading...</h1>
@@ -134,6 +153,18 @@ const ClassPage = (props: Props) => {
             <p>classPage id {classItem.id}</p>
             <p>letter {classItem.letter}</p>
             <p>num {classItem.num}</p>
+
+            <div className="">
+                <h1>Edit</h1>
+
+                <form action={handleChangeClass}>
+                    <Input name='num' id='num' placeholder='num' type='text' />
+                    <Input name='letter' id='letter' placeholder='letter' type='text' />
+
+                    <button type="submit">Change</button>
+                </form>
+
+            </div>
 
             <div className="flex flex-row border w-full justify-between">
                 <div className="bg-blue-300 flex flex-col grow">

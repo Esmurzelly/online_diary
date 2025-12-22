@@ -55,10 +55,18 @@ const SubjectId = (props: Props) => {
 
     const dispatch = useAppDispatch();
 
-    const getClassByIdFunction = async () => {
-        await dispatch(getClassById({ id: currentClassId })).unwrap();
-        await dispatch(getAllStudentsFromOneClass({ classId: currentClassId })).unwrap();
-    }
+    useEffect(() => {
+        const getClassByIdFunction = async () => {
+            try {
+                await dispatch(getClassById({ id: currentClassId })).unwrap();
+                await dispatch(getAllStudentsFromOneClass({ classId: currentClassId })).unwrap();
+            } catch (error) {
+                console.log('error in getClassByIdFunction', error);
+            }
+        }
+
+        getClassByIdFunction();
+    }, []);
 
     const averageGrade = (array: []) => {
         const initialValue = 0;
@@ -103,10 +111,6 @@ const SubjectId = (props: Props) => {
             console.log('error in onDeleteGrade', error)
         }
     }
-
-    useEffect(() => {
-        getClassByIdFunction();
-    }, []);
 
     return (
         <div className='w-screen'>
@@ -158,7 +162,7 @@ const SubjectId = (props: Props) => {
                     <Dialog>
                         {studentsList?.map(studentItem => {
                             const sortedGrades = useMemo(() => {
-                                return [...(studentItem.grades ?? [])]
+                                return [...(studentItem.grades.filter(gradeItem => gradeItem.subjectId === id) ?? [])]
                                     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
                             }, [studentItem.grades]);
 

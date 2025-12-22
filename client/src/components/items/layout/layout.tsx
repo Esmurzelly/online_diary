@@ -13,6 +13,7 @@ const Layout = (props: Props) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const token = useSelector((state: RootState) => state.auth.token);
+  const { role } = useSelector((state: RootState) => state.user);
 
   useEffect(() => {
     if(token) {
@@ -27,6 +28,7 @@ const Layout = (props: Props) => {
       <Button onClick={() => navigate('/home')}>Home</Button>
       <Button onClick={() => navigate('/profile')}>Profile</Button>
       <Button onClick={() => navigate('/school')}>School</Button>
+      { role === 'student' && <Button onClick={() => navigate('/marks')}>Marks</Button> }
 
       <div className="flex flex-col items-start max-w-7xl mx-auto mt-10"> {/* container */}
         <h2>above the Outlet</h2>

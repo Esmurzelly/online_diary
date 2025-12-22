@@ -7,7 +7,7 @@ import { toast } from 'react-toastify'
 type Props = {}
 
 const Subjects = (props: Props) => {
-    const { currentUser, loading, message } = useSelector((state: RootState) => state.user);
+    const { currentUser, loading, message, role } = useSelector((state: RootState) => state.user);
 
     useEffect(() => {
         if (message) toast(message);
@@ -19,6 +19,10 @@ const Subjects = (props: Props) => {
 
     if (!currentUser) {
         return <h1>No user!</h1>
+    }
+
+    if(role !== 'admin' && role !== 'teacher') {
+        return <h1>No access</h1>
     }
 
     return (

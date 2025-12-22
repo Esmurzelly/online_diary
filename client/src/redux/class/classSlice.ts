@@ -125,7 +125,7 @@ export const removeSubjectFromTheClass = createAsyncThunk(
 
 export const addTeacherToSubject = createAsyncThunk(
     'class/addTeacherToSubject',
-    async({ teacherId, subjectId }: { teacherId: string, subjectId: string }, { rejectWithValue }) => {
+    async ({ teacherId, subjectId }: { teacherId: string, subjectId: string }, { rejectWithValue }) => {
         try {
             const { data } = await api.put(`${BASE_URL}/subjects/teacher-to-subject`, {
                 teacherId,
@@ -141,14 +141,32 @@ export const addTeacherToSubject = createAsyncThunk(
 
 export const removeTeacherFromTheSubject = createAsyncThunk(
     'class/removeTeacherFromTheSubject',
-    async({ teacherId, subjectId }: { teacherId: string, subjectId: string }, { rejectWithValue }) => {
+    async ({ teacherId, subjectId }: { teacherId: string, subjectId: string }, { rejectWithValue }) => {
         try {
             const { data } = await api.put(`${BASE_URL}/subjects/delete-teacher-from-subject`, {
-                teacherId, 
+                teacherId,
                 subjectId
             });
 
-            console.log('data from asyncThunk', data);
+
+            return data;
+        } catch (error: any) {
+            return rejectWithValue({ message: error.message || "smth weng wrong in studentsFromOneClass" })
+        }
+    }
+);
+
+export const editClass = createAsyncThunk(
+    'class/editClass',
+    async ({ classId, num, letter }: { classId: string | null | undefined, num: number | null | undefined, letter: string | null | undefined }, { rejectWithValue }) => {
+        try {
+            const { data } = await api.put(`${BASE_URL}/classes/edit-class`, {
+                classId,
+                num,
+                letter
+            });
+
+            console.log('data from editClass - asyncThunk', data);
 
             return data;
         } catch (error: any) {
@@ -242,13 +260,13 @@ export const classSlice = createSlice({
                 state.loading = false;
                 state.message = action.payload.message;
             })
-            
+
             .addCase(removeSubjectFromTheClass.pending, (state, action) => {
                 state.loading = true;
             })
             .addCase(removeSubjectFromTheClass.fulfilled, (state, action) => {
                 state.loading = false;
-                state.classItem!.subjects = state.classItem?.subjects?.filter(subjectItem => subjectItem.id !==  action.payload.subject.id);
+                state.classItem!.subjects = state.classItem?.subjects?.filter(subjectItem => subjectItem.id !== action.payload.subject.id);
                 state.message = action.payload.message;
             })
             .addCase(removeSubjectFromTheClass.rejected, (state, action) => {
@@ -256,19 +274,32 @@ export const classSlice = createSlice({
                 state.message = action.payload.message;
             })
 
-            // .addCase(addTeacherToSubject.pending, (state, action) => {
-            //     state.loading = true;
-            // })
-            // .addCase(addTeacherToSubject.fulfilled, (state, action) => {
-            //     state.loading = false;
-            //     // ? sta
-            //     console.log('action.payload in addTeacherToSubject in classSlice - extraRedux', action.payload);
-            //     state.message = action.payload.message;
-            // })
-            // .addCase(addTeacherToSubject.rejected, (state, action) => {
-            //     state.loading = false;
-            //     state.message = action.payload.message;
-            // })
+            .addCase(editClass.pending, (state, action) => {
+                state.loading = true;
+            })
+            .addCase(editClass.fulfilled, (state, action) => {
+                state.loading = false;
+                state.classItem = action.payload.editedClass;
+                state.message = action.payload.message;
+            })
+            .addCase(editClass.rejected, (state, action) => {
+                state.loading = false;
+                state.message = action.payload.message;
+            })
+
+    // .addCase(addTeacherToSubject.pending, (state, action) => {
+    //     state.loading = true;
+    // })
+    // .addCase(addTeacherToSubject.fulfilled, (state, action) => {
+    //     state.loading = false;
+    //     // ? sta
+    //     console.log('action.payload in addTeacherToSubject in classSlice - extraRedux', action.payload);
+    //     state.message = action.payload.message;
+    // })
+    // .addCase(addTeacherToSubject.rejected, (state, action) => {
+    //     state.loading = false;
+    //     state.message = action.payload.message;
+    // })
 });
 
 export const { } = classSlice.actions;

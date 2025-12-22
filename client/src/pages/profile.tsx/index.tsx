@@ -190,10 +190,12 @@ const Profile = (props: Props) => {
                 <p>phone: {currentUser?.phone}</p>
                 <p>address: {currentUser?.address}</p>
                 <p>email: {currentUser?.email}</p>
-                <p>school: {currentUser && currentUser?.schoolId ? <Link to={`/school/${currentUser.schoolId}`}>{currentUser.school.title}</Link> : "without school"}</p>
+
+                {role === 'teacher' && <p>school: {currentUser && currentUser?.schoolId ? <Link to={`/school/${currentUser.schoolId}`}>{currentUser.school?.title}</Link> : "without school"}</p>}
+                {role === 'student' && <p>school: {currentUser && currentUser?.classId ? <Link to={`/class/${currentUser.class.id}`}>{currentUser.class.school.title} / {currentUser.class.num} - {currentUser.class.letter}</Link> : "without school"}</p>}
             </div>
 
-            <Link to={`/subjects`}>Subjects</Link>
+            {role === 'admin' || role === 'teacher' && <Link to={`/subjects`}>Subjects</Link>}            
 
             <form onSubmit={handleSubmit(handleSubmitForm)}>
                 <Popover>
