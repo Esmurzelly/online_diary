@@ -55,11 +55,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/class/:id",
-        element: (
-          <ProtectedRoute allowRoles={["admin", "teacher"]}>
-            <ClassPage />
-          </ProtectedRoute>
-        )
+        element: <ClassPage />
       },
       {
         path: "/subjects",
@@ -71,7 +67,11 @@ const router = createBrowserRouter([
       },
       {
         path: "/subject/:id",
-        element: <SubjectId />
+        element: (
+          <ProtectedRoute allowRoles={["admin", "teacher"]}>
+            <SubjectId />
+          </ProtectedRoute>
+        )
       },
       {
         path: "/marks",

@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { averageGrade } from '@/utils/averageGrade';
 
 type Props = {}
 
@@ -67,17 +68,6 @@ const SubjectId = (props: Props) => {
 
         getClassByIdFunction();
     }, []);
-
-    const averageGrade = (array: []) => {
-        const initialValue = 0;
-
-        const sumWithInitial = array.reduce(
-            (accumulator, currentValue) => accumulator + currentValue.value,
-            initialValue
-        );
-
-        return (sumWithInitial / array.length).toFixed(2)
-    };
 
     const onUpdateGrade = async (studentId: string, gradeId: string) => {
         try {
@@ -223,14 +213,14 @@ const SubjectId = (props: Props) => {
                                     </Popover>
                                 ))}</TableCell>
 
-                                <TableCell>{averageGrade(studentItem.grades)}</TableCell>
+                                <TableCell>{averageGrade(studentItem.grades, 2, id)}</TableCell>
 
-                                <TableCell>{averageGrade(studentItem.grades)}</TableCell>
-                                <TableCell>{averageGrade(studentItem.grades)}</TableCell>
-                                <TableCell>{averageGrade(studentItem.grades)}</TableCell>
-                                <TableCell>{averageGrade(studentItem.grades)}</TableCell>
+                                <TableCell>{averageGrade(studentItem.grades, 2, id)}</TableCell>
+                                <TableCell>{averageGrade(studentItem.grades, 2, id)}</TableCell>
+                                <TableCell>{averageGrade(studentItem.grades, 2, id)}</TableCell>
+                                <TableCell>{averageGrade(studentItem.grades, 2, id)}</TableCell>
 
-                                <TableCell className='text-right'>{averageGrade(studentItem.grades)}</TableCell>
+                                <TableCell className='text-right'>{averageGrade(studentItem.grades, 0, id)}</TableCell>
 
                             </TableRow>)
                         }

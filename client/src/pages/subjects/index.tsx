@@ -21,8 +21,6 @@ const Subjects = (props: Props) => {
         return <h1>No user!</h1>
     }
 
-    console.log('currentUser.subjects', currentUser.subjects);
-
     return (
         <div>
             <h1>Subjects</h1>

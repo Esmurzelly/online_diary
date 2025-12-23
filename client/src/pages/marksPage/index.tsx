@@ -14,6 +14,7 @@ import Moment from 'react-moment';
 import { toast } from 'react-toastify';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
+import { averageGrade } from '@/utils/averageGrade';
 
 type Props = {}
 
@@ -23,17 +24,6 @@ const MarksPage = (props: Props) => {
     useEffect(() => {
         if (message) toast(message)
     }, [message]);
-
-    const averageGrade = (array: []) => {
-        const initialValue = 0;
-
-        const sumWithInitial = array.reduce(
-            (accumulator, currentValue) => accumulator + currentValue.value,
-            initialValue
-        );
-
-        return (sumWithInitial / array.length).toFixed(2)
-    };
 
     if (role !== 'student') {
         return <div>No access</div>
@@ -86,6 +76,11 @@ const MarksPage = (props: Props) => {
                                                         <span className='font-bold'>date: </span>
                                                         <Moment format='DD/MM/YYYY' date={new Date(gradeItemTwo.date)} />
                                                     </p>
+
+                                                    {/* <p className="text-muted-foreground text-sm">
+                                                        <span className='font-bold'>teacher: </span>
+                                                        
+                                                    </p> */}
                                                 </div>
                                             </div>
                                         </PopoverContent>
@@ -93,12 +88,12 @@ const MarksPage = (props: Props) => {
                                 )}
                             </TableCell>
 
-                            <TableCell>{averageGrade(currentUser.grades)}</TableCell>
-                            <TableCell>{averageGrade(currentUser.grades)}</TableCell>
-                            <TableCell>{averageGrade(currentUser.grades)}</TableCell>
-                            <TableCell>{averageGrade(currentUser.grades)}</TableCell>
-                            <TableCell>{averageGrade(currentUser.grades)}</TableCell>
-                            <TableCell className='text-right'>{averageGrade(currentUser.grades)}</TableCell>
+                            <TableCell>{averageGrade(currentUser.grades, 2, subjectItem.id)}</TableCell>
+                            <TableCell>{averageGrade(currentUser.grades, 2, subjectItem.id)}</TableCell>
+                            <TableCell>{averageGrade(currentUser.grades, 2, subjectItem.id)}</TableCell>
+                            <TableCell>{averageGrade(currentUser.grades, 2, subjectItem.id)}</TableCell>
+                            <TableCell>{averageGrade(currentUser.grades, 2, subjectItem.id)}</TableCell>
+                            <TableCell className='text-right'>{averageGrade(currentUser.grades, 0, subjectItem.id)}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
