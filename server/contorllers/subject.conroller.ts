@@ -1,10 +1,6 @@
 import { prisma } from '../prisma/prisma-client.js'
 import { Request, Response } from 'express';
 
-// export const getSubjectById = async(req: Request, res: Response) => {
-//     const {  } = req.body;
-// }
-
 export const addSubject = async (req: Request, res: Response) => {
     const { title, classId, teacherId } = req.body as { title: string, classId: string, teacherId: string };
 

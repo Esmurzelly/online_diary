@@ -6,27 +6,19 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { useAppDispatch } from '@/redux/store';
-import { updateUser, removeUser, getAllUsers, removeUserByAdmin } from '@/redux/user/userSlice';
+import { updateUser, removeUser, getAllUsers, removeUserByAdmin, addParentToChild, removeParentToChild, getMe } from '@/redux/user/userSlice';
 import { toast } from 'react-toastify';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Link, useNavigate } from 'react-router-dom';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getAllSchools } from '@/redux/school/schoolSlice';
+import type { Parent } from '@/types';
+
 
 type Props = {}
 
@@ -43,7 +35,8 @@ type FormValues = {
 const Profile = (props: Props) => {
     const { currentUser, role, message, users } = useSelector((state: RootState) => state.user);
     const { schoolList } = useSelector((state: RootState) => state.school);
-    
+    const [showChildren, setShowChildren] = useState(false);
+
     const {
         handleSubmit,
         register,
@@ -89,16 +82,6 @@ const Profile = (props: Props) => {
         // console.log('selectedFile', selectedFile) // ok!
         // console.log('filePicekerRef', filePicekerRef); // ok!
     }
-
-    useEffect(() => {
-        if (message) {
-            toast(message)
-        }
-    }, [message]);
-
-    useEffect(() => {
-        dispatch(getAllSchools()).unwrap();
-    }, []);
 
     const handleDeleteUser = async () => {
         try {
@@ -160,13 +143,39 @@ const Profile = (props: Props) => {
         }
     }
 
-    const hadleLinkSchool = async () => {
+    const onAddParentToChild = async (studentId: string) => {
         try {
-
+            await dispatch(addParentToChild({
+                parentId: currentUser?.id,
+                studentId,
+            }));
         } catch (error) {
-            console.log(`error in hadleLinkSchool - ${error}`);
+            console.log(`error in onAddParentToChild - ${error}`);
         }
     }
+
+    const onRemoveParentToChild = async (studentId: string) => {
+        try {
+            const res = await dispatch(removeParentToChild({
+                parentId: currentUser?.id,
+                studentId,
+            }));
+
+            console.log('res in onAddParentToChild', res);
+        } catch (error) {
+            console.log(`error in onAddParentToChild - ${error}`);
+        }
+    }
+
+    useEffect(() => {
+        if (message) {
+            toast(message)
+        }
+    }, [message]);
+
+    useEffect(() => {
+        dispatch(getAllSchools()).unwrap();
+    }, []);
 
     if (!currentUser) {
         return <h1>Loading...</h1>
@@ -190,12 +199,52 @@ const Profile = (props: Props) => {
                 <p>phone: {currentUser?.phone}</p>
                 <p>address: {currentUser?.address}</p>
                 <p>email: {currentUser?.email}</p>
+                {role === 'parent' &&
+                    <>
+                        <p>Children:
+                            {currentUser && currentUser?.children && currentUser?.children.length > 0
+                                && (
+                                    <>
+                                        {currentUser?.children.map(childrenEl =>
+                                            <div className='flex items-center gap-3'>
+                                                <span key={childrenEl.id}>{childrenEl.name}</span>
+                                                <Button onClick={() => onRemoveParentToChild(childrenEl.id)} size={'sm'} variant={'outline'}>
+                                                    Remove Child
+                                                </Button>
+                                            </div>
+                                        )}
+
+                                        <div className='flex items-center gap-2'>
+                                            <Button onClick={() => setShowChildren(state => !state)}>{showChildren ? "Hide" : "Show"} children</Button>
+                                        </div>
+                                    </>
+                                )
+                            }
+                        </p>
+                        {showChildren && <Select>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Select the parent" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Parents</SelectLabel>
+
+                                    {/* mutable array? */}
+                                    {users?.filter(userEl => userEl.parentIds).map(userEl =>
+                                        <SelectItem className='w-full' value={userEl.id}>
+                                            {userEl.name} - <Button onClick={() => onAddParentToChild(userEl.id)} variant={'outline'}>Add Child</Button>
+                                        </SelectItem>)}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>}
+                    </>
+                }
 
                 {role === 'teacher' && <p>school: {currentUser && currentUser?.schoolId ? <Link to={`/school/${currentUser.schoolId}`}>{currentUser.school?.title}</Link> : "without school"}</p>}
                 {role === 'student' && <p>school: {currentUser && currentUser?.classId ? <Link to={`/class/${currentUser.class.id}`}>{currentUser.class.school.title} / {currentUser.class.num} - {currentUser.class.letter}</Link> : "without school"}</p>}
             </div>
 
-            {role === 'admin' || role === 'teacher' && <Link to={`/subjects`}>Subjects</Link>}            
+            {role === 'admin' || role === 'teacher' && <Link to={`/subjects`}>Subjects</Link>}
 
             <form onSubmit={handleSubmit(handleSubmitForm)}>
                 <Popover>

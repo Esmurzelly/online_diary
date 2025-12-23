@@ -19,8 +19,6 @@ interface IRequestGradeRemove extends IRequestGrade {
 export const setGrade = async (req: Request, res: Response) => {
     const { subjectId, studentId, teacherId, comment, value, dateTime } = req.body as IRequestGradeSet;
 
-    console.log('req in server', {subjectId, studentId, teacherId, comment, value, dateTime});
-
     if (!subjectId || !studentId || !value || !teacherId) {
         return res.status(403).json({ error: "Missing fields" })
     }
@@ -68,9 +66,6 @@ export const setGrade = async (req: Request, res: Response) => {
             student?.class?.subjects.some(studentSubject => teacherSubject.id === studentSubject.id)
         );
 
-        console.log('commonIdInSubject between student and teacher', commonIdInSubject);
-        // console.log('commonSubjects - have or not', commonIdInSubject.some(subEl => subEl.id !== subjectId))
-
         if (commonIdInSubject.length === 0) {
             return res.status(403).json({ error: "No acccess. Different subjects" })
         }
@@ -93,10 +88,7 @@ export const setGrade = async (req: Request, res: Response) => {
             }
         });
 
-        console.log('createdGrade in server', createdGrade);
-
         return res.status(200).json({ grade: createdGrade, message: "Grade is set successfuly" });
-
     } catch (error) {
         console.error('Smt went wrong in setGrade', error);
         return res.status(500).json({ error: 'Internal server error' });
@@ -246,7 +238,7 @@ export const updateGrade = async (req: Request, res: Response) => {
     }
 }
 
-export const getGradesFromSubject = async (req: Request, res: Response) => {
+export const getGradesFromSubject = async (req: Request, res: Response) => { // need it??
     const { subjectId } = req.body as { subjectId: string };
 
     if (!subjectId) {

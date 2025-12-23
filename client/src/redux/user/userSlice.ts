@@ -126,7 +126,7 @@ export const removeUser = createAsyncThunk(
 
 export const removeUserByAdmin = createAsyncThunk(
     'user/removeUserById',
-    async ({id}: { id: string | undefined }, { rejectWithValue }) => {
+    async ({ id }: { id: string | undefined }, { rejectWithValue }) => {
         try {
             const { data } = await api.delete(`${BASE_URL}/users/remove-user`, {
                 data: {
@@ -154,6 +154,42 @@ export const getAllUsers = createAsyncThunk(
         }
     }
 );
+
+export const addParentToChild = createAsyncThunk(
+    'user/addParentToChild',
+    async ({ parentId, studentId }: { parentId: string, studentId: string }, { rejectWithValue }) => {
+        try {
+            const { data } = await api.put(`${BASE_URL}/parents/add-parent-to-child`, {
+                parentId,
+                studentId
+            });
+
+            console.log('data addParentToChild', data);
+
+            return data;
+        } catch (error: any) {
+            return rejectWithValue({ message: error.message || "smth weng wrong in addParentToChild" })
+        }
+    }
+);
+
+export const removeParentToChild = createAsyncThunk(
+    'user/removeParentToChild',
+    async ({ parentId, studentId }: { parentId: string, studentId: string }, { rejectWithValue }) => {
+        try {
+            const { data } = await api.put(`${BASE_URL}/parents/remove-parent-from-child`, {
+                parentId,
+                studentId
+            });
+
+            console.log('data removeParentToChild', data);
+
+            return data;
+        } catch (error: any) {
+            return rejectWithValue({ message: error.message || "smth weng wrong in removeParentToChild" })
+        }
+    }
+)
 
 export const userSlice = createSlice({
     name: "user",
@@ -267,6 +303,47 @@ export const userSlice = createSlice({
                 state.loading = false;
             })
             .addCase(getAllUsers.rejected, (state, action) => {
+                state.loading = false;
+                state.message = action.error.message
+            })
+
+            .addCase(addParentToChild.pending, (state, action) => {
+                state.loading = true;
+            })
+            .addCase(addParentToChild.fulfilled, (state, action) => {
+                state.message = action.payload.message;
+
+                if (state.currentUser && state.role === 'parent') {
+                    // if(state.role === 'student') {
+                    //     state.currentUser.parentIds.push(action.payload.result.childrenIds);
+                    // }
+
+                    // console.log('action.payload.result', action.payload.result);
+                    state.currentUser.childrenIds.push(action.payload.result.childrenIds); // ? state.currentUser.childrenIds = action.payload.result.childrenIds
+                    state.currentUser.children = action.payload.result.children;
+                }
+                state.loading = false;
+            })
+            .addCase(addParentToChild.rejected, (state, action) => {
+                state.loading = false;
+                state.message = action.error.message
+            })
+
+            .addCase(removeParentToChild.pending, (state, action) => {
+                state.loading = true;
+            })
+            .addCase(removeParentToChild.fulfilled, (state, action) => {
+                state.message = action.payload.message;
+
+                if (state.currentUser && state.role === 'parent') {
+                    console.log('action.payload.parentToChild', action.payload.parentToChild);
+                    state.currentUser.childrenIds.filter(childrenIdsItem => childrenIdsItem !== action.payload.parentToChild.id);
+                    state.currentUser.children = action.payload.parentToChild.children;
+                    // state.currentUser.parentIds = state.currentUser.parentIds.filter(childrenIdsItem => childrenIdsItem !== action.payload.parentToChild.id)
+                }
+                state.loading = false;
+            })
+            .addCase(removeParentToChild.rejected, (state, action) => {
                 state.loading = false;
                 state.message = action.error.message
             })

@@ -4,6 +4,8 @@ import { Request, Response } from 'express'
 export const addParentToChild = async (req: Request, res: Response) => {
     const { parentId, studentId } = req.body as { parentId: string, studentId: string };
 
+    console.log('parentId and studentId', parentId, studentId);
+
     if (!parentId || !studentId) {
         return res.status(403).json({ error: "All fields are required" });
     }
@@ -13,7 +15,7 @@ export const addParentToChild = async (req: Request, res: Response) => {
             where: {
                 id: parentId
             }
-        })
+        });
 
         if (parent && parent.childrenIds.includes(studentId)) {
             return res.status(403).json({ error: "Student is already linked to parent" });
@@ -91,7 +93,7 @@ export const removeParentFromChild = async (req: Request, res: Response) => {
             }
         });
 
-        return res.status(200).json({ parentToChild, message: "Parent is linked to child" });
+        return res.status(200).json({ parentToChild, message: "Parent is unlinked to child" });
     } catch (error) {
         console.error('Smt went wrong in addParentToChild', error);
         return res.status(500).json({ error: "Internal server error" });
