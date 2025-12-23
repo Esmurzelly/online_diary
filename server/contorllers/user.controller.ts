@@ -24,7 +24,7 @@ export const getAllUsers = async (req: Request, res: Response) => {
 
 export const getUserById = async (req: Request, res: Response) => {
     const { id } = req.params as { id: string };
-    
+
     try {
         const studentById = await prisma.student.findFirst({
             where: {
@@ -589,25 +589,25 @@ export const removeUserById = async (req: Request, res: Response) => {
         const allTeachers = await prisma.teacher.findFirst({ where: { id } });
         const allParents = await prisma.parent.findFirst({ where: { id } });
 
-        if(allStudents) {
+        if (allStudents) {
             const removedUser = await prisma.student.delete({
                 where: { id }
             });
-            return res.status(200).json({removedUser, message: `student ${removedUser.name} was deleted successfuly`})
+            return res.status(200).json({ removedUser, message: `student ${removedUser.name} was deleted successfuly` })
         }
 
-        if(allTeachers) {
+        if (allTeachers) {
             const removedUser = await prisma.teacher.delete({
                 where: { id }
             });
-            return res.status(200).json({removedUser, message: `teacher ${removedUser.name} was deleted successfuly`})
+            return res.status(200).json({ removedUser, message: `teacher ${removedUser.name} was deleted successfuly` })
         }
 
-        if(allParents) {
+        if (allParents) {
             const removedUser = await prisma.parent.delete({
                 where: { id }
             });
-            return res.status(200).json({removedUser, message: `parent ${removedUser.name} was deleted successfuly`})
+            return res.status(200).json({ removedUser, message: `parent ${removedUser.name} was deleted successfuly` })
         }
     } catch (error) {
         console.log('Smth happened in removeUserById', error);
@@ -654,7 +654,19 @@ export const getMe = async (
 
         const teacher = await prisma.teacher.findFirst({
             where: { id: userId },
-            include: { subjects: true, school: true }
+            include: {
+                subjects: {
+                    include: {
+                        class: true,
+                        teacher: {
+                            include: {
+                                school: true
+                            }
+                        }
+                    }
+                }, 
+                school: true
+            }
         });
 
         const parent = await prisma.parent.findFirst({

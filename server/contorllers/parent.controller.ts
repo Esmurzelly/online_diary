@@ -63,7 +63,7 @@ export const addParentToChild = async (req: Request, res: Response) => {
         console.error('Smt went wrong in addParentToChild', error);
         return res.status(500).json({ error: "Internal server error" });
     }
-}
+};
 
 export const removeParentFromChild = async (req: Request, res: Response) => {
     const { parentId, studentId } = req.body;

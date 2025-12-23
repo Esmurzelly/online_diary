@@ -36,6 +36,7 @@ const Profile = (props: Props) => {
     const { currentUser, role, message, users } = useSelector((state: RootState) => state.user);
     const { schoolList } = useSelector((state: RootState) => state.school);
     const [showChildren, setShowChildren] = useState(false);
+    const [childId, setChildId] = useState<string | undefined>();
 
     const {
         handleSubmit,
@@ -165,6 +166,10 @@ const Profile = (props: Props) => {
         } catch (error) {
             console.log(`error in onAddParentToChild - ${error}`);
         }
+    };
+
+    const handleUserIdChange = (studentId: string | undefined) => {
+        setChildId(studentId)
     }
 
     useEffect(() => {
@@ -199,17 +204,29 @@ const Profile = (props: Props) => {
                 <p>phone: {currentUser?.phone}</p>
                 <p>address: {currentUser?.address}</p>
                 <p>email: {currentUser?.email}</p>
+
+                {role === 'student' &&
+                    <>
+                        <div>Parents:</div>
+                        {currentUser && currentUser?.parents && currentUser?.parents.length > 0 ? (
+                            currentUser?.parents.map(parentEl => (
+                                <Link key={parentEl.id} to={`/profile/${parentEl.id}`}>{parentEl.name} - {parentEl.surname}</Link>
+                            ))
+                        ) : "no parents"}
+                    </>
+                }
                 {role === 'parent' &&
                     <>
-                        <p>Children:
+                        <div>Children:
                             {currentUser && currentUser?.children && currentUser?.children.length > 0
                                 && (
                                     <>
                                         {currentUser?.children.map(childrenEl =>
-                                            <div className='flex items-center gap-3'>
-                                                <span key={childrenEl.id}>{childrenEl.name}</span>
-                                                <Button onClick={() => onRemoveParentToChild(childrenEl.id)} size={'sm'} variant={'outline'}>
-                                                    Remove Child
+                                            <div key={childrenEl.id} className='flex items-center gap-3'>
+                                                <Link to={`/profile/${childrenEl.id}`}>{childrenEl.name}</Link>
+
+                                                <Button className='w-10 cursor-pointer' onClick={() => onRemoveParentToChild(childrenEl.id)} size={'sm'} variant={'destructive'}>
+                                                    -
                                                 </Button>
                                             </div>
                                         )}
@@ -220,23 +237,29 @@ const Profile = (props: Props) => {
                                     </>
                                 )
                             }
-                        </p>
-                        {showChildren && <Select>
-                            <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Select the parent" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectGroup>
-                                    <SelectLabel>Parents</SelectLabel>
+                        </div>
+                        {showChildren &&
+                            <>
+                                <Select value={childId} onValueChange={handleUserIdChange}>
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue placeholder="Select the parent" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Parents</SelectLabel>
 
-                                    {/* mutable array? */}
-                                    {users?.filter(userEl => userEl.parentIds).map(userEl =>
-                                        <SelectItem className='w-full' value={userEl.id}>
-                                            {userEl.name} - <Button onClick={() => onAddParentToChild(userEl.id)} variant={'outline'}>Add Child</Button>
-                                        </SelectItem>)}
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>}
+                                            {/* mutable array? */}
+                                            {users?.filter(userEl => userEl.parentIds).map(userEl =>
+                                                <SelectItem key={userEl.id} className='w-full' value={userEl.id}>
+                                                    {userEl.name}
+                                                </SelectItem>)}
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+
+                                <Button onClick={() => onAddParentToChild(childId)} variant={'outline'}>Add Child</Button>
+                            </>
+                        }
                     </>
                 }
 

@@ -1,3 +1,5 @@
+import type { JSX } from "react";
+
 export interface User {
     id: string;
     name: string;
@@ -83,3 +85,4 @@ export interface IGrade {
     student: Student;
     comment: string;
 }
+

@@ -18,6 +18,7 @@ import Subjects from './pages/subjects/index.tsx'
 import SubjectId from './pages/subjectId/index.tsx'
 import MarksPage from './pages/marksPage/index.tsx'
 import ClassPage from './pages/classPage/index.tsx'
+import ProtectedRoute from './components/items/protectedRoute/index.tsx'
 
 const router = createBrowserRouter([
   {
@@ -42,7 +43,11 @@ const router = createBrowserRouter([
       },
       {
         "path": "/school",
-        element: <School />
+        element: (
+          <ProtectedRoute allowRoles={["admin"]}>
+            <School />
+          </ProtectedRoute>
+        )
       },
       {
         path: "/school/:id",
@@ -50,11 +55,19 @@ const router = createBrowserRouter([
       },
       {
         path: "/class/:id",
-        element: <ClassPage />
+        element: (
+          <ProtectedRoute allowRoles={["admin", "teacher"]}>
+            <ClassPage />
+          </ProtectedRoute>
+        )
       },
       {
         path: "/subjects",
-        element: <Subjects />
+        element: (
+          <ProtectedRoute allowRoles={["admin", "teacher"]}>
+            <Subjects />
+          </ProtectedRoute>
+        )
       },
       {
         path: "/subject/:id",

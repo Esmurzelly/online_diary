@@ -21,17 +21,17 @@ const Subjects = (props: Props) => {
         return <h1>No user!</h1>
     }
 
-    if(role !== 'admin' && role !== 'teacher') {
-        return <h1>No access</h1>
-    }
+    console.log('currentUser.subjects', currentUser.subjects);
 
     return (
         <div>
             <h1>Subjects</h1>
-            <ul>
+            <ul className='flex flex-col gap-3'>
                 {currentUser.subjects.map(subjectItem => <li key={subjectItem.id}>
                     <Link to={`/subject/${subjectItem.id}`}>
-                        {subjectItem.title} - name of class (und school)
+                        <p>title: {subjectItem.title}  </p>
+                        <p>name of class: {subjectItem.class.num} {subjectItem.class.letter}</p>
+                        <p>name of school: {subjectItem.teacher.school.title}</p>
                     </Link>
                 </li>)}
             </ul>
