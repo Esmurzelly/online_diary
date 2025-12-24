@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { logout, signInAdmin, signInParent, signInStudent, signInTeacher, signUpAdmin, signUpParent, signUpStudent, signUpTeacher } from '../contorllers/auth.contorller';
+import { googleAuth, logout, signInAdmin, signInParent, signInStudent, signInTeacher, signUpAdmin, signUpParent, signUpStudent, signUpTeacher } from '../contorllers/auth.contorller';
 
 const router = express.Router();
 
@@ -24,5 +24,6 @@ router.post('/signin-parent', signInParent);
 router.post('/signup-admin', signUpAdmin);
 router.post('/signin-admin', signInAdmin);
 router.post('/logout', logout);
+router.post('/google-auth', googleAuth)
 
 export default router;

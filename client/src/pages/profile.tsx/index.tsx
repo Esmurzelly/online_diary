@@ -186,8 +186,6 @@ const Profile = (props: Props) => {
         return <h1>Loading...</h1>
     }
 
-    console.log('currentUser', currentUser);
-
     return (
         <div className='min-w-screen flex flex-col justify-center items-center gap-3'>
             <div className="flex flex-col items-start gap-2">
@@ -240,6 +238,7 @@ const Profile = (props: Props) => {
                                 )
                             }
                         </div>
+
                         {showChildren &&
                             <>
                                 <Select value={childId} onValueChange={handleUserIdChange}>

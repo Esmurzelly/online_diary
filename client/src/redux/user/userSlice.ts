@@ -69,6 +69,32 @@ export const loginUser = createAsyncThunk(
     }
 );
 
+export const googleAuth = createAsyncThunk(
+    'user/googleAuth',
+    async ({ email, role, name, avatar }: { email: string | null, role: string, name: string | null, avatar: string | null }, { rejectWithValue, dispatch }) => {
+        console.log('args in asyncThunk - email, role, name, avatar', email, role, name, avatar)
+        
+        try {
+            const { data } = await api.post(`${BASE_URL}/auth/google-auth`, {
+                email,
+                role,
+                name,
+                avatar
+            });
+
+            if (data.token) {
+                dispatch(setToken(data.token))
+            };
+
+            console.log('data from googleAuth', data);
+
+            return data;
+        } catch (error: any) {
+            return rejectWithValue({ message: error.message || "smth weng wrong in googleAuth" })
+        }
+    }
+)
+
 export const getMe = createAsyncThunk(
     'user/getMe',
     async () => {
@@ -199,6 +225,7 @@ export const userSlice = createSlice({
             state.currentUser = null;
             state.loading = false;
             state.message = null;
+            state.role = 'none'
         }
     },
     extraReducers: (builder) => {
@@ -227,6 +254,21 @@ export const userSlice = createSlice({
                 state.role = action.payload.role;
             })
             .addCase(loginUser.rejected, (state, action) => {
+                state.loading = false;
+                state.message = action.error.message
+            })
+
+            .addCase(googleAuth.pending, (state, action) => {
+                state.loading = true;
+            })
+            .addCase(googleAuth.fulfilled, (state, action) => {
+                state.message = action.payload.message;
+                state.currentUser = action.payload.user;
+                state.users?.push(action.payload.user)
+                state.loading = false;
+                state.role = action.payload.role;
+            })
+            .addCase(googleAuth.rejected, (state, action) => {
                 state.loading = false;
                 state.message = action.error.message
             })

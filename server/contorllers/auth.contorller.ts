@@ -357,4 +357,136 @@ export const logout = async (req: Request, res: Response) => {
     }
 }
 
-// export const google = async (req, res, next) => {}
+export const googleAuth = async (req: Request, res: Response) => {
+    try {
+        const { email } = req.body;
+
+        const existedStudent = await prisma.student.findFirst({ where: { email } });
+        const existedTeacher = await prisma.teacher.findFirst({ where: { email } });
+        const existedParent = await prisma.parent.findFirst({ where: { email } });
+        const existedAdmin = await prisma.admin.findFirst({ where: { email } });
+
+        const user = existedStudent ?? existedTeacher ?? existedParent ?? existedAdmin;
+        const role = existedStudent ? "student"
+            : existedTeacher ? "teacher"
+                : existedParent ? "parent"
+                    : existedAdmin ? "admin"
+                        : "none"
+
+        if (user) {
+            console.log('user in OAuth server', user);
+            const token = jwt.sign(({ userId: user.id, role }), process.env.SECRET_KEY, { expiresIn: '7d' });
+
+            return res.status(200).json({ user, role, token, message: "Login is successful" });
+        } else {
+            const { email, role, name, avatar } = req.body;
+
+            const generatedPassword = Math.random().toString(36).slice(-8);
+            const hashedPassword = bcrypt.hashSync(generatedPassword, 10);
+
+            if (role === 'student') {
+                const student = await prisma.student.create({
+                    data: {
+                        email,
+                        name: name.split(" ").join(" ").toLowerCase() + Math.random().toString(36).slice(-4),
+                        surname: "defaul",
+                        password: hashedPassword,
+                        avatarUrl: avatar,
+                    },
+                });
+
+                const token = jwt.sign(({ userId: student.id, role }), process.env.SECRET_KEY, { expiresIn: '7d' });
+
+                return res
+                    .cookie("access_token", token, {
+                        httpOnly: true,
+                        secure: process.env.NODE_ENV === "production",
+                        sameSite: "lax"
+                    })
+                    .json({
+                        user: { id: student.id, email: student.email, name: student.name, surname: student.surname, avatarUrl: student.avatarUrl },
+                        token,
+                        role: "student",
+                        message: "Signing up is successful!"
+                    });
+            } else if (role === 'teacher') {
+                const teacher = await prisma.teacher.create({
+                    data: {
+                        email,
+                        name,
+                        surname: "default",
+                        password: hashedPassword,
+                        avatarUrl: avatar,
+                    },
+                });
+
+                const token = jwt.sign(({ userId: teacher.id, role }), process.env.SECRET_KEY, { expiresIn: '7d' });
+
+                return res
+                    .cookie("access_token", token, {
+                        httpOnly: true,
+                        secure: process.env.NODE_ENV === "production",
+                        sameSite: "lax"
+                    })
+                    .json({
+                        user: { id: teacher.id, email: teacher.email, name: teacher.name, surname: teacher.surname, avatarUrl: teacher.avatarUrl },
+                        token,
+                        role: "teacher",
+                        message: "Signing up is successful!"
+                    });
+            } else if (role === 'parent') {
+                const parent = await prisma.parent.create({
+                    data: {
+                        email,
+                        name,
+                        surname: "default",
+                        password: hashedPassword,
+                        avatarUrl: avatar,
+                    },
+                });
+
+                const token = jwt.sign(({ userId: parent.id, role }), process.env.SECRET_KEY, { expiresIn: '7d' });
+
+                return res
+                    .cookie("access_token", token, {
+                        httpOnly: true,
+                        secure: process.env.NODE_ENV === "production",
+                        sameSite: "lax"
+                    })
+                    .json({
+                        user: { id: parent.id, email: parent.email, name: parent.name, surname: parent.surname, avatarUrl: parent.avatarUrl },
+                        token,
+                        role: "parent",
+                        message: "Signing up is successful!"
+                    });
+            } else if (role === 'admin') {
+                const admin = await prisma.admin.create({
+                    data: {
+                        email,
+                        password: hashedPassword,
+                    },
+                });
+
+                const token = jwt.sign(({ userId: admin.id, role }), process.env.SECRET_KEY, { expiresIn: '7d' });
+
+                return res
+                    .cookie("access_token", token, {
+                        httpOnly: true,
+                        secure: process.env.NODE_ENV === "production",
+                        sameSite: "lax"
+                    })
+                    .json({
+                        user: admin,
+                        token,
+                        role: "admin",
+                        message: "Signing up is successful!"
+                    });
+            }
+
+
+        }
+    } catch (error) {
+        console.error('Smt went wrong in googleAuth', error);
+        return res.status(500).json({ error: `Internal server error ${error}` });
+    }
+}

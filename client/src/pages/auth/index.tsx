@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { toast } from 'react-toastify'
+import OAuth from '@/components/items/OAuth'
 
 type Props = {}
 
@@ -83,6 +84,8 @@ const Auth = (props: Props) => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <OAuth role={role} />
       </div>
     </>
   )

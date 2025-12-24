@@ -41,7 +41,7 @@ const LoginComponent = ({ role }: Props) => {
         if (role === 'none') {
             toast.info("Choose the role")
         }
-        
+
         try {
             await dispatch(loginUser({ email: data.email, password: data.password, role }));
         } catch (error) {
@@ -50,28 +50,30 @@ const LoginComponent = ({ role }: Props) => {
     }
 
     return (
-        <form onSubmit={handleSubmit(handleSubmitForm)}>
-            <h1>Login</h1>
-            <div>
-                <label htmlFor="email">Email:</label>
-                <input
-                    {...register("email", { required: "Email is required" })}
-                    type="email"
-                    id="email"
-                />
-                {errors.email && <span>{errors.email.message}</span>}
+        <div className='flex flex-col gap-4'>
+            <form onSubmit={handleSubmit(handleSubmitForm)}>
+                <h1>Login</h1>
+                <div>
+                    <label htmlFor="email">Email:</label>
+                    <input
+                        {...register("email", { required: "Email is required" })}
+                        type="email"
+                        id="email"
+                    />
+                    {errors.email && <span>{errors.email.message}</span>}
 
-                <label htmlFor="password">Password:</label>
-                <input
-                    {...register("password", { required: "Password is required" })}
-                    type="password"
-                    id="password"
-                />
-                {errors.password && <span>{errors.password.message}</span>}
-            </div>
+                    <label htmlFor="password">Password:</label>
+                    <input
+                        {...register("password", { required: "Password is required" })}
+                        type="password"
+                        id="password"
+                    />
+                    {errors.password && <span>{errors.password.message}</span>}
+                </div>
 
-            <input disabled={!role || role === undefined} type="submit" />
-        </form>
+                <input disabled={!role || role === undefined} type="submit" />
+            </form>
+        </div>
     )
 }
 
