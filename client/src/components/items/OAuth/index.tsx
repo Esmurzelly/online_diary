@@ -14,6 +14,8 @@ const OAuth = ({ role }: Props) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
 
+    console.log(import.meta.env.VITE_APP_FIREBASE_API_KEY)
+
     const handleGoogleClick = async () => {
         const provider = new GoogleAuthProvider();
         // provider.setCustomParameters({ prompt: "select_account" });

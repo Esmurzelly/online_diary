@@ -32,7 +32,9 @@ const Auth = (props: Props) => {
   const handleChange = (state: Role) => {
     setRole(state);
     toast.info(`role is ${state}`)
-  }
+  };
+
+  console.log(import.meta.env.VITE_APP_FIREBASE_API_KEY)
 
   return (
     <>
