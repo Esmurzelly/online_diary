@@ -38,7 +38,7 @@ const MarksPage = (props: Props) => {
             <h1>Your marks</h1>
 
             <Table className='w-full'>
-                <TableCaption>Marks of course.</TableCaption>
+                <TableCaption>Marks of course</TableCaption>
                 <TableHeader>
                     <TableRow>
                         <TableHead className="w-1/3">Subject</TableHead>
@@ -53,15 +53,15 @@ const MarksPage = (props: Props) => {
                 </TableHeader>
 
                 <TableBody>
-                    {currentUser && currentUser.class.subjects.map(subjectItem => (
+                    {currentUser && currentUser.class && currentUser.class.subjects.map(subjectItem => (
                         <TableRow key={subjectItem.id}>
-                            <TableCell>{subjectItem.title}</TableCell>
+                            <TableCell className='h-10'>{subjectItem.title}</TableCell>
 
                             <TableCell className='flex gap-2'>
                                 {currentUser.grades.filter(gradeItem => gradeItem.subjectId === subjectItem.id).map(gradeItemTwo =>
                                     <Popover key={gradeItemTwo.id}>
                                         <PopoverTrigger asChild>
-                                            <Button className={`w-6 cursor-pointer ${gradeItemTwo.value === 5 ? 'bg-red-600' : "bg-green-500"}`} variant="outline">{gradeItemTwo.value}</Button>
+                                            <Button className={`w-7 cursor-pointer ${gradeItemTwo.value === 5 ? 'bg-red-600' : "bg-green-500"}`} variant="outline">{gradeItemTwo.value}</Button>
                                         </PopoverTrigger>
                                         <PopoverContent className="w-full">
                                             <div className="grid gap-4">

@@ -6,6 +6,11 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '@/redux/rootReducer';
 import { loginUser } from '@/redux/user/userSlice';
 import { toast } from 'react-toastify'
+import { MdEmail } from "react-icons/md";
+import { TbLockPassword } from "react-icons/tb";
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import FormField from '@/components/items/formField';
 
 type Props = {
     role: 'none' | 'student' | 'teacher' | 'parent' | 'admin';
@@ -51,27 +56,28 @@ const LoginComponent = ({ role }: Props) => {
 
     return (
         <div className='flex flex-col gap-4'>
-            <form onSubmit={handleSubmit(handleSubmitForm)}>
-                <h1>Login</h1>
-                <div>
-                    <label htmlFor="email">Email:</label>
-                    <input
-                        {...register("email", { required: "Email is required" })}
-                        type="email"
-                        id="email"
+            <form className='' onSubmit={handleSubmit(handleSubmitForm)}>
+                <div className='flex flex-col gap-3'>
+                    <FormField
+                        title='Email'
+                        Icon={MdEmail}
+                        inputType='email'
+                        register={register}
+                        registerName='email'
+                        errorType={errors.email}
                     />
-                    {errors.email && <span>{errors.email.message}</span>}
 
-                    <label htmlFor="password">Password:</label>
-                    <input
-                        {...register("password", { required: "Password is required" })}
-                        type="password"
-                        id="password"
+                    <FormField
+                        title='Password'
+                        Icon={TbLockPassword}
+                        inputType='password'
+                        register={register}
+                        registerName='password'
+                        errorType={errors.password}
                     />
-                    {errors.password && <span>{errors.password.message}</span>}
                 </div>
 
-                <input disabled={!role || role === undefined} type="submit" />
+                <Button className='w-full mt-3! bg-primary-light text-primary-dark h-12' disabled={!role || role === undefined} type='submit'>Sign in</Button>
             </form>
         </div>
     )

@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -9,6 +12,16 @@ body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+@theme {
+  --color-primary-dark: #102020;
+  --color-primary-light: #78B4B7;
+  --color-secondary-dark: #2D4C4F;
+  --color-secondary-light: #D9E9E9;
+  --color-destructive: #83241E;
+  --font-inter: "Inter", sans-serif;
+  --font-playfair-display: "Playfair Display", sans-serif;
 }
 
 @theme inline {
@@ -122,6 +135,7 @@ body {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }

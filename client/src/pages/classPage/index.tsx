@@ -151,21 +151,18 @@ const ClassPage = (props: Props) => {
 
     return (
         <div className='w-screen'>
-            <p>classPage id {classItem.id}</p>
             <p>letter {classItem.letter}</p>
             <p>num {classItem.num}</p>
 
-            <div className="">
+            {role === 'teacher' || role === 'admin' && <div className="">
                 <h1>Edit</h1>
-
                 <form action={handleChangeClass}>
                     <Input name='num' id='num' placeholder='num' type='text' />
                     <Input name='letter' id='letter' placeholder='letter' type='text' />
 
                     <button type="submit">Change</button>
                 </form>
-
-            </div>
+            </div>}
 
             <div className="flex flex-row border w-full justify-between">
                 <div className="bg-blue-300 flex flex-col grow">

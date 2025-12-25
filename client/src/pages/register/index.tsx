@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { useForm, type SubmitErrorHandler, type SubmitHandler } from 'react-hook-form';
-import { Input } from "@/components/ui/input"
+import React, { useEffect } from 'react'
+import { useForm, type SubmitHandler } from 'react-hook-form';
 // import { useLazyCurrentQuery, useSigninStudentMutation } from '@/app/services/authApi';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '@/redux/store';
@@ -8,7 +7,11 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '@/redux/rootReducer';
 import { registerUser } from '@/redux/user/userSlice';
 import { toast } from 'react-toastify';
-
+import { MdDriveFileRenameOutline, MdOutlineDriveFileRenameOutline } from "react-icons/md"; // name
+import { MdEmail } from "react-icons/md";
+import { TbLockPassword } from "react-icons/tb";
+import { Button } from '@/components/ui/button';
+import FormField from '@/components/items/formField';
 
 type Props = {
     role: 'student' | 'teacher' | 'parent' | 'admin' | 'none';
@@ -61,51 +64,53 @@ const RegisterComponent = ({ role }: Props) => {
     }
 
     return (
-        <>
+        <div className='flex flex-col gap-4'>
             <form className='mt-5' onSubmit={handleSubmit(handleSubmitForm)}>
-                <h1>Register</h1>
-
                 <div className='flex flex-col'>
                     {role !== 'admin' &&
-                        <>
-                            <label htmlFor="name">Name:</label>
-                            <input
-                                {...register("name", { required: "Name is required" })}
-                                type="text"
-                                id="name"
+                        <div className='flex flex-col'>
+                            <FormField
+                                title='Name'
+                                Icon={MdDriveFileRenameOutline}
+                                inputType='text'
+                                register={register}
+                                registerName='name'
+                                errorType={errors.name}
                             />
-                            {errors.name && <span>{errors.name.message}</span>}
 
-                            <label htmlFor="surname">Surname:</label>
-                            <input
-                                {...register("surname", { required: "Surname is required" })}
-                                type="text"
-                                id="surname"
+                            <FormField
+                                title='Surname'
+                                Icon={MdOutlineDriveFileRenameOutline}
+                                inputType='text'
+                                register={register}
+                                registerName='surname'
+                                errorType={errors.surname}
                             />
-                            {errors.surname && <span>{errors.surname.message}</span>}
-                        </>
+                        </div>
                     }
 
-                    <label htmlFor="email">Email:</label>
-                    <input
-                        {...register("email", { required: "Email is required" })}
-                        type="email"
-                        id="email"
+                    <FormField
+                        title='Email'
+                        Icon={MdEmail}
+                        inputType='email'
+                        register={register}
+                        registerName='email'
+                        errorType={errors.email}
                     />
-                    {errors.email && <span>{errors.email.message}</span>}
 
-                    <label htmlFor="password">Password:</label>
-                    <input
-                        {...register("password", { required: "Password is required" })}
-                        type="password"
-                        id="password"
+                    <FormField
+                        title='Password'
+                        Icon={TbLockPassword}
+                        inputType='password'
+                        register={register}
+                        registerName='password'
+                        errorType={errors.password}
                     />
-                    {errors.password && <span>{errors.password.message}</span>}
                 </div>
 
-                <input type="submit" />
+                <Button className='w-full mt-3! bg-primary-light text-primary-dark h-12' disabled={!role || role === undefined} type='submit'>Sign up</Button>
             </form>
-        </>
+        </div>
     )
 }
 
