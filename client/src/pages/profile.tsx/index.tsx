@@ -187,7 +187,7 @@ const Profile = (props: Props) => {
     }
 
     return (
-        <div className='min-w-screen flex flex-col justify-center items-center gap-3'>
+        <div className='w-screen flex flex-col justify-center items-center gap-3'>
             <div className="flex flex-col items-start gap-2">
                 {
                     currentUser?.avatarUrl
@@ -266,6 +266,7 @@ const Profile = (props: Props) => {
 
                 {role === 'teacher' && <p>school: {currentUser && currentUser?.schoolId ? <Link to={`/school/${currentUser.schoolId}`}>{currentUser.school?.title}</Link> : "without school"}</p>}
                 {role === 'student' && <p>school: {currentUser && currentUser?.classId ? <Link to={`/class/${currentUser.class.id}`}>{currentUser.class.school.title} / {currentUser.class.num} - {currentUser.class.letter}</Link> : "without school"}</p>}
+                {role === 'student' && <Link to={`/marks}`}>arks</Link>}
             </div>
 
             {role === 'admin' || role === 'teacher' && <Link to={`/subjects`}>Subjects</Link>}
@@ -364,39 +365,6 @@ const Profile = (props: Props) => {
             <Button onClick={handleDeleteUser} variant={'destructive'}>Delete my account</Button>
 
             {role === 'admin' && <Button className='p-3' onClick={handleFetchUsers} variant={'outline'}>{showUsers ? "Hide" : "Show"} users</Button>}
-            {/* {role === 'teacher' && <div>
-                <Dialog>
-                    <form>
-                        <DialogTrigger asChild>
-                            <Button variant="outline">Link to the school</Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[425px]">
-                            <DialogHeader>
-                                <DialogTitle>Link to the school</DialogTitle>
-                                <DialogDescription>
-                                    Add / change your school type: only for teachers and admins
-                                </DialogDescription>
-                            </DialogHeader>
-
-                            <Select>
-                                <SelectTrigger className="w-1/5">
-                                    <SelectValue placeholder="Select a subject" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {schoolList?.map(schoolItem => <SelectItem value={schoolItem.id}>{schoolItem.title}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-
-                            <DialogFooter>
-                                <DialogClose asChild>
-                                    <Button variant="outline">Cancel</Button>
-                                </DialogClose>
-                                <Button onSubmit={hadleLinkSchool} type="submit">Save changes</Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </form>
-                </Dialog>
-            </div>} */}
 
             <ul className="bg-red-400 w-5xl flex flex-col gap-3">
                 {showUsers && users?.map(userEl => <li key={userEl.id} className='flex flex-row items-center justify-between gap-4'>

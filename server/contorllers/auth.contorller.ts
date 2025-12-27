@@ -374,7 +374,6 @@ export const googleAuth = async (req: Request, res: Response) => {
                         : "none"
 
         if (user) {
-            console.log('user in OAuth server', user);
             const token = jwt.sign(({ userId: user.id, role }), process.env.SECRET_KEY, { expiresIn: '7d' });
 
             return res.status(200).json({ user, role, token, message: "Login is successful" });

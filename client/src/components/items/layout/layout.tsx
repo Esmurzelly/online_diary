@@ -25,12 +25,7 @@ const Layout = (props: Props) => {
     <div className='bg-secondary-light w-screen h-screen'>
       <Header />
 
-      <Button onClick={() => navigate('/home')}>Home</Button>
-      <Button onClick={() => navigate('/profile')}>Profile</Button>
-      <Button onClick={() => navigate('/school')}>School</Button>
-      { role === 'student' && <Button onClick={() => navigate('/marks')}>Marks</Button> }
-
-      <div className="flex flex-col items-start max-w-7xl mx-auto mt-10 font-inter"> {/* container */}
+      <div className="flex flex-col items-start max-w-7xl mx-auto mt-10 pt-20! font-inter"> {/* container */}
         <Outlet />
       </div>
     </div>

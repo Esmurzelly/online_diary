@@ -33,7 +33,7 @@ const MarksPage = (props: Props) => {
         return <div>Loading...</div>
     }
 
-    return (
+        return (
         <div className='w-screen'>
             <h1>Your marks</h1>
 

@@ -1,4 +1,4 @@
-import React, { type JSX } from 'react'
+import React from 'react'
 import { Label } from '@/components/ui/label'
 import { type IconType } from 'react-icons'
 
@@ -23,7 +23,7 @@ const FormField = ({title, register, Icon, errorType, registerName, inputType, t
         type={inputType}
         id={registerName}
       />
-      {Icon && <Icon className={`w-4 absolute top-${topPosition || 8.5} left-${leftPosition || 3}`} />}
+      {Icon && <Icon className={`w-4 absolute top-8.5 left-3`} />}
       {errorType && <span className='text-red-700'>{errorType.message}</span>}
     </div>
   )
