@@ -5,10 +5,11 @@ import type { RootState } from '@/redux/rootReducer';
 import { useAppDispatch } from '@/redux/store';
 import { logOut } from '@/redux/user/userSlice';
 import { useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { RxHamburgerMenu } from "react-icons/rx";
 import { RxCross2 } from "react-icons/rx";
 import Modal from '../modal';
+import { useLocation } from 'react-router-dom';
 
 type Props = {}
 
@@ -62,7 +63,7 @@ const Header = (props: Props) => {
   }, [showModal, headerRef])
 
   return (
-    <section ref={headerRef} className={`fixed top-0 left-0 z-50 w-full bg-black text-white ${isTopOfPage || showModal ? "opacity-100" : "opacity-95"}`}>
+    <section ref={headerRef} className={`fixed top-0 left-0 z-50 w-full text-black ${isTopOfPage || showModal ? "opacity-100" : "opacity-95"}`}>
       <div className="max-w-screen-2xl mx-auto! flex flex-row items-center justify-between px-5! py-3!">
 
         <nav className="hidden md:flex w-2/3 font-inter text-center">
@@ -107,7 +108,7 @@ const Header = (props: Props) => {
         </div>
       </div>
 
-      <Modal showModal={showModal} setShowModal={setShowModal} />
+      <Modal showModal={showModal} setShowModal={setShowModal} tokenValue={tokenValue} handleLogOut={handleLogOut} />
     </section>
   )
 }
