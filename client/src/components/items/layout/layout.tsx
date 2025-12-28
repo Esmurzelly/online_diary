@@ -16,14 +16,16 @@ const Layout = (props: Props) => {
   const { role } = useSelector((state: RootState) => state.user);
 
   useEffect(() => {
-    if(token) {
+    if (token) {
       dispatch(getMe());
     }
   }, [token]);
 
   return (
-    <div className='bg-secondary-light w-screen h-screen'>
-      <Header />
+    <div className='bg-secondary-light w-screen h-screen flex flex-row'>
+      <aside>
+        <Header />
+      </aside>
 
       <div className="flex flex-col items-start max-w-7xl mx-auto mt-10 pt-20! font-inter"> {/* container */}
         <Outlet />

@@ -18,7 +18,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getAllSchools } from '@/redux/school/schoolSlice';
 import type { Parent } from '@/types';
-
+import { FaPen } from "react-icons/fa6";
+import { MdOutlineEmail, MdOutlineLocalPhone, MdOutlineSchool } from "react-icons/md";
+import { FiExternalLink } from "react-icons/fi";
+import { RiParentFill } from "react-icons/ri";
+import { FaAddressBook } from "react-icons/fa";
 
 type Props = {}
 
@@ -187,194 +191,292 @@ const Profile = (props: Props) => {
     }
 
     return (
-        <div className='w-screen flex flex-col justify-center items-center gap-3'>
-            <div className="flex flex-col items-start gap-2">
+        <div className='w-screen h-screen flex flex-col items-center gap-3 font-inter px-8!'>
+            <div className="flex flex-row items-center justify-between">
+                <div className="w-1/2">
+                    <h1 className='text-3xl'>My Profile</h1>
+                    <p className='text-sm'>Manage your personal information</p>
+                </div>
+
+                <form onSubmit={handleSubmit(handleSubmitForm)}>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button className='w-[150px]' variant="outline">
+                                <FaPen />
+                                Edit profile
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className='w-80 p-3!'>
+                            <div className="grid gap-4">
+                                <div className="space-y-2">
+                                    <h4 className="leading-none font-medium">Your data</h4>
+                                    <p className="text-muted-foreground text-sm">
+                                        Change your data here
+                                    </p>
+                                </div>
+                                <div className="grid gap-2">
+                                    <div className="grid grid-cols-3 items-center gap-4">
+                                        <Label htmlFor="name">Name</Label>
+                                        <Input
+                                            id="name"
+                                            type='text'
+                                            defaultValue={currentUser?.name}
+                                            className="col-span-2 h-8"
+                                            {...register("name")}
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-3 items-center gap-4">
+                                        <Label htmlFor="password">Password</Label>
+                                        <Input
+                                            id="password"
+                                            type='text'
+                                            defaultValue={''}
+                                            className="col-span-2 h-8"
+                                            {...register("password")}
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-3 items-center gap-4">
+                                        <Label htmlFor="surname">Surname</Label>
+                                        <Input
+                                            id="surname"
+                                            type='text'
+                                            defaultValue={currentUser?.surname}
+                                            className="col-span-2 h-8"
+                                            {...register("surname")}
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-3 items-center gap-4">
+                                        <Label htmlFor="email">Email</Label>
+                                        <Input
+                                            id="email"
+                                            type='email'
+                                            defaultValue={currentUser?.email}
+                                            className="col-span-2 h-8"
+                                            {...register("email")}
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-3 items-center gap-4">
+                                        <Label htmlFor="adress">Adress</Label>
+                                        <Input
+                                            id="adress"
+                                            defaultValue={currentUser?.address}
+                                            className="col-span-2 h-8"
+                                            {...register("address")}
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-3 items-center gap-4">
+                                        <Label htmlFor="phone">Phone</Label>
+                                        <Input
+                                            id="phone"
+                                            defaultValue={currentUser?.phone}
+                                            className="col-span-2 h-8"
+                                            {...register("phone")}
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-3 items-center gap-4">
+                                        <Label htmlFor="avatar">Avatar</Label>
+                                        <Button onClick={handleAvatarClick}>Change avatar</Button>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            hidden
+                                            ref={filePicekerRef}
+                                            onChange={handleAvatarChange}
+                                        />
+                                    </div>
+
+                                </div>
+                            </div>
+                            {/* popOver - wtf? */}
+                            <Button type='submit' disabled={role === undefined || role === 'none' || role === null || !role}>Change</Button>
+                        </PopoverContent>
+                    </Popover>
+                </form>
+            </div>
+
+            <div className="flex flex-col min-w-full text-xl items-center justify-between gap-2 bg-white rounded-2xl shadow-xl p-5!">
                 {
                     currentUser?.avatarUrl
-                        ? <Avatar>
+                        ? <Avatar className='size-28'>
                             <AvatarImage src={`http://localhost:3000${currentUser?.avatarUrl}`} />
                             <AvatarFallback>avatarUrl</AvatarFallback>
                         </Avatar>
-                        : "No image"
-                }
-
-                <p>role: {role}</p>
-                <p>name: {currentUser?.name}</p>
-                <p>surname: {currentUser?.surname}</p>
-                <p>phone: {currentUser?.phone}</p>
-                <p>address: {currentUser?.address}</p>
-                <p>email: {currentUser?.email}</p>
-
-                {role === 'student' &&
-                    <>
-                        <div>Parents:</div>
-                        {currentUser && currentUser?.parents && currentUser?.parents.length > 0 ? (
-                            currentUser?.parents.map(parentEl => (
-                                <Link key={parentEl.id} to={`/profile/${parentEl.id}`}>{parentEl.name} - {parentEl.surname}</Link>
-                            ))
-                        ) : "no parents"}
-                    </>
-                }
-                {role === 'parent' &&
-                    <>
-                        <div>Children:
-                            {currentUser && currentUser?.children && currentUser?.children.length > 0
-                                && (
-                                    <>
-                                        {currentUser?.children.map(childrenEl =>
-                                            <div key={childrenEl.id} className='flex items-center gap-3'>
-                                                <Link to={`/profile/${childrenEl.id}`}>{childrenEl.name}</Link>
-
-                                                <Button className='w-10 cursor-pointer' onClick={() => onRemoveParentToChild(childrenEl.id)} size={'sm'} variant={'destructive'}>
-                                                    -
-                                                </Button>
-                                            </div>
-                                        )}
-
-                                        <div className='flex items-center gap-2'>
-                                            <Button onClick={() => setShowChildren(state => !state)}>{showChildren ? "Hide" : "Show"} children</Button>
-                                        </div>
-                                    </>
-                                )
-                            }
+                        : <div className="flex items-center justify-center uppercase text-white text-3xl bg-secondary-dark w-28 h-28 rounded-full">
+                            {currentUser.name ? currentUser.name.split('')[0] : "A"}
+                            {currentUser.name ? currentUser.surname.split('')[0] : "A"}
                         </div>
-
-                        {showChildren &&
-                            <>
-                                <Select value={childId} onValueChange={handleUserIdChange}>
-                                    <SelectTrigger className="w-[180px]">
-                                        <SelectValue placeholder="Select the parent" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectLabel>Parents</SelectLabel>
-
-                                            {/* mutable array? */}
-                                            {users?.filter(userEl => userEl.parentIds).map(userEl =>
-                                                <SelectItem key={userEl.id} className='w-full' value={userEl.id}>
-                                                    {userEl.name}
-                                                </SelectItem>)}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
-
-                                <Button onClick={() => onAddParentToChild(childId)} variant={'outline'}>Add Child</Button>
-                            </>
-                        }
-                    </>
                 }
+                <p>{currentUser?.name} {currentUser?.surname}</p>
 
-                {role === 'teacher' && <p>school: {currentUser && currentUser?.schoolId ? <Link to={`/school/${currentUser.schoolId}`}>{currentUser.school?.title}</Link> : "without school"}</p>}
-                {role === 'student' && <p>school: {currentUser && currentUser?.classId ? <Link to={`/class/${currentUser.class.id}`}>{currentUser.class.school.title} / {currentUser.class.num} - {currentUser.class.letter}</Link> : "without school"}</p>}
-                {role === 'student' && <Link to={`/marks}`}>arks</Link>}
+                <p className='bg-secondary-dark text-secondary-light px-4! py-1! rounded-3xl text-sm capitalize'>{role}</p>
+                <p className='flex items-center gap-2 text-secondary-dark text-lg'><MdOutlineEmail /> {currentUser?.email}</p>
+                <p className='flex items-center gap-2 text-secondary-dark text-lg'><MdOutlineLocalPhone /> {currentUser?.phone || "no phone"}</p>
+                <p className='flex items-center gap-2 text-secondary-dark text-lg'><FaAddressBook /> {currentUser?.address || "no address"}</p>
+
+                {role === 'teacher' && <Link className='flex items-center text-sm rounded-xl gap-1 bg-primary-light px-4! py-1!' to={`/subjects`}>Subjects</Link>}
             </div>
 
-            {role === 'admin' || role === 'teacher' && <Link to={`/subjects`}>Subjects</Link>}
 
-            <form onSubmit={handleSubmit(handleSubmitForm)}>
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button variant="outline">Open popover</Button>
-                    </PopoverTrigger>
-                    <PopoverContent className='w-80'>
-                        <div className="grid gap-4">
-                            <div className="space-y-2">
-                                <h4 className="leading-none font-medium">Your data</h4>
-                                <p className="text-muted-foreground text-sm">
-                                    Change your data here
-                                </p>
-                            </div>
-                            <div className="grid gap-2">
-                                <div className="grid grid-cols-3 items-center gap-4">
-                                    <Label htmlFor="name">Name</Label>
-                                    <Input
-                                        id="name"
-                                        type='text'
-                                        defaultValue={currentUser?.name}
-                                        className="col-span-2 h-8"
-                                        {...register("name")}
-                                    />
-                                </div>
-                                <div className="grid grid-cols-3 items-center gap-4">
-                                    <Label htmlFor="password">Password</Label>
-                                    <Input
-                                        id="password"
-                                        type='text'
-                                        defaultValue={''}
-                                        className="col-span-2 h-8"
-                                        {...register("password")}
-                                    />
-                                </div>
-                                <div className="grid grid-cols-3 items-center gap-4">
-                                    <Label htmlFor="surname">Surname</Label>
-                                    <Input
-                                        id="surname"
-                                        type='text'
-                                        defaultValue={currentUser?.surname}
-                                        className="col-span-2 h-8"
-                                        {...register("surname")}
-                                    />
-                                </div>
-                                <div className="grid grid-cols-3 items-center gap-4">
-                                    <Label htmlFor="email">Email</Label>
-                                    <Input
-                                        id="email"
-                                        type='email'
-                                        defaultValue={currentUser?.email}
-                                        className="col-span-2 h-8"
-                                        {...register("email")}
-                                    />
-                                </div>
-                                <div className="grid grid-cols-3 items-center gap-4">
-                                    <Label htmlFor="adress">Adress</Label>
-                                    <Input
-                                        id="adress"
-                                        defaultValue={currentUser?.address}
-                                        className="col-span-2 h-8"
-                                        {...register("address")}
-                                    />
-                                </div>
-                                <div className="grid grid-cols-3 items-center gap-4">
-                                    <Label htmlFor="phone">Phone</Label>
-                                    <Input
-                                        id="phone"
-                                        defaultValue={currentUser?.phone}
-                                        className="col-span-2 h-8"
-                                        {...register("phone")}
-                                    />
-                                </div>
-                                <div className="grid grid-cols-3 items-center gap-4">
-                                    <Label htmlFor="avatar">Avatar</Label>
-                                    <Button onClick={handleAvatarClick}>Change avatar</Button>
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        hidden
-                                        ref={filePicekerRef}
-                                        onChange={handleAvatarChange}
-                                    />
-                                </div>
+            {role === 'parent' &&
+                <div className="flex flex-col min-w-full text-xl items-center justify-between gap-2 bg-white rounded-2xl shadow-xl p-5!">
+                    <div className="text-xl w-full">
+                        <h1 className='flex items-center gap-2 mb-1!'><RiParentFill className='text-primary-light' /> Children</h1>
+                        <p className='text-sm'>Connected children accounts</p>
 
+                        <div className="">
+                            <div className='flex items-center gap-2'>
+                                <Button onClick={() => setShowChildren(state => !state)}>{showChildren ? "Hide" : "Show"} children</Button>
+
+                                {showChildren &&
+                                    <>
+                                        <Select value={childId} onValueChange={handleUserIdChange}>
+                                            <SelectTrigger className="w-[180px]">
+                                                <SelectValue placeholder="Select the parent" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectGroup>
+                                                    <SelectLabel>Parents</SelectLabel>
+
+                                                    {/* mutable array? */}
+                                                    {users?.filter(userEl => userEl.parentIds).map(userEl =>
+                                                        <SelectItem key={userEl.id} className='w-full' value={userEl.id}>
+                                                            {userEl.name}
+                                                        </SelectItem>)}
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+
+                                        <Button onClick={() => onAddParentToChild(childId)} variant={'outline'}>Add Child</Button>
+                                    </>
+                                }
                             </div>
                         </div>
-                    </PopoverContent>
-                </Popover>
-                <input disabled={role === undefined || role === 'none' || role === null || !role} type="submit" />
-            </form>
+                    </div>
+
+                    <div className='flex flex-col items-start w-full gap-3'>
+                        {currentUser && currentUser?.children && currentUser?.children.length > 0 ? (
+                            currentUser?.children.map(childrenEl => (
+                                <div key={childrenEl.id} className="flex text-sm items-center gap-2 justify-between w-full">
+                                    <Avatar className=''>
+                                        <AvatarImage src={`http://localhost:3000${childrenEl?.avatarUrl}`} />
+                                        <AvatarFallback>avatarUrl</AvatarFallback>
+                                    </Avatar>
+
+                                    <div className="flex flex-col items-start">
+                                        <h1>{childrenEl.name} {childrenEl.surname}</h1>
+                                        <p>{childrenEl.email}</p>
+                                    </div>
+
+                                    <div className="">
+                                        <Link className='flexbg-secondary-light px-4! py-2! rounded-2xl text-black' to={`/profile/${childrenEl.id}`}>View child</Link>
+                                        <Button className='w-10 cursor-pointer' onClick={() => onRemoveParentToChild(childrenEl.id)} size={'sm'} variant={'destructive'}>
+                                            -
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))
+                        ) : "no parents"}
+                    </div>
+                </div>
+            }
+
+            {role === 'teacher' && <div className="flex flex-col min-w-full text-xl items-center justify-between gap-4 bg-white rounded-2xl shadow-xl p-5!">
+                <div className="text-xl w-full">
+                    <h1 className='flex items-center gap-2 mb-1!'><MdOutlineSchool className='text-primary-light' /> Teacher's Information</h1>
+                    <p className='text-sm'>Your current classes info</p>
+                </div>
+
+                {currentUser && currentUser?.schoolId ? (
+                    <div className="text-lg flex items-center justify-between w-full">
+                        <div className="">
+                            <p>School's title: <span className='font-medium'>{currentUser.school?.title}</span></p>
+                        </div>
+                        <Link className='flex items-center text-sm rounded-xl gap-1 bg-primary-light px-2! py-1!' to={`/school/${currentUser.schoolId}`}>View school <FiExternalLink /></Link>
+                    </div>
+                ) : (
+                    "without school"
+                )}
+            </div>}
+
+
+            {role === 'student' && <div className="flex flex-col min-w-full text-xl items-center justify-between gap-4 bg-white rounded-2xl shadow-xl p-5!">
+                <div className="text-xl w-full">
+                    <h1 className='flex items-center gap-2 mb-1!'><MdOutlineSchool className='text-primary-light' /> Class Information</h1>
+                    <p className='text-sm'>Your current class assignment</p>
+                </div>
+
+                <div className="w-full flex flex-row items-center justify-between bg-secondary-light px-4! py-2! rounded-2xl text-black">
+                    {currentUser && currentUser?.classId ? (
+                        <div className="text-lg flex items-center justify-between w-full">
+                            <div className="">
+                                <p className='font-medium'>Class {currentUser.class.num} {currentUser.class.letter}</p>
+                                <p className='text-sm'>school's title: {currentUser.class.school.title}</p>
+                            </div>
+                            <Link className='flex items-center text-sm rounded-xl gap-1 bg-primary-light px-2! py-1!' to={`/class/${currentUser.class.id}`}>View class <FiExternalLink /></Link>
+                        </div>
+                    )
+                        : "without class"}
+
+                </div>
+
+                <Link className='w-full flex items-center justify-center text-sm rounded-xl gap-1 bg-primary-light px-2! py-1!' to={'/marks'}>See your marks</Link>
+            </div>}
+
+
+            {role === 'student' && (
+                <div className="flex flex-col min-w-full text-xl items-center justify-between gap-2 bg-white rounded-2xl shadow-xl p-5!">
+                    <div className="text-xl w-full">
+                        <h1 className='flex items-center gap-2 mb-1!'><RiParentFill className='text-primary-light' /> Parents / Guardians</h1>
+                        <p className='text-sm'>Connected parent accounts</p>
+                    </div>
+
+                    <div className='flex flex-col items-start w-full gap-3'>
+                        {currentUser && currentUser?.parents && currentUser?.parents.length > 0 ? (
+                            currentUser?.parents.map(parentEl => (
+                                <div key={parentEl.id} className="flex text-sm items-center gap-2 justify-between w-full">
+                                    <Avatar className=''>
+                                        <AvatarImage src={`http://localhost:3000${currentUser?.avatarUrl}`} />
+                                        <AvatarFallback>avatarUrl</AvatarFallback>
+                                    </Avatar>
+
+                                    <div className="flex flex-col items-start">
+                                        <h1>{parentEl.name} {parentEl.surname}</h1>
+                                        <p>{parentEl.email}</p>
+                                    </div>
+
+                                    <Link className='flexbg-secondary-light px-4! py-2! rounded-2xl text-black' to={`/profile/${parentEl.id}`}>View parent</Link>
+                                </div>
+                            ))
+                        ) : "no parents"}
+                    </div>
+                </div>
+            )}
+
+            {role === 'admin' && (
+                <>
+                    <Button className='p-3! cursor-pointer' onClick={handleFetchUsers} variant={'outline'}>{showUsers ? "Hide" : "Show"} users</Button>
+
+                    {showUsers && <div className="flex flex-col min-w-full text-xl items-center justify-between gap-2 bg-white rounded-2xl shadow-xl p-5!">
+                        <ul className="w-full flex flex-col gap-3">
+                            {showUsers && users?.map(userEl => <li key={userEl.id} className='flex flex-row items-center justify-between gap-4'>
+                                <Link to={`http://localhost:5173/profile/${userEl.id}`}>
+                                    <div className="flex flex-col items-start text-sm">
+                                        <h1>{userEl.name} {userEl.surname}</h1>
+                                        <p>{userEl.email}</p>
+                                    </div>
+                                </Link>
+
+                                <Button variant={"destructive"} onClick={() => handleDeleteUserByAdmin({ id: userEl.id })} className='w-[100px]'>Delete user</Button>
+                            </li>)}
+                        </ul>
+                    </div>}
+
+
+
+                </>
+            )}
 
             <Button onClick={handleDeleteUser} variant={'destructive'}>Delete my account</Button>
-
-            {role === 'admin' && <Button className='p-3' onClick={handleFetchUsers} variant={'outline'}>{showUsers ? "Hide" : "Show"} users</Button>}
-
-            <ul className="bg-red-400 w-5xl flex flex-col gap-3">
-                {showUsers && users?.map(userEl => <li key={userEl.id} className='flex flex-row items-center justify-between gap-4'>
-                    <Link to={`http://localhost:5173/profile/${userEl.id}`}>
-                        <span>{userEl.name} - {userEl.email}</span>
-                    </Link>
-
-                    <Button onClick={() => handleDeleteUserByAdmin({ id: userEl.id })} className='w-[100px]'>Delete user</Button>
-                </li>)}
-            </ul>
         </div>
     )
 }
