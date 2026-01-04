@@ -36,7 +36,7 @@ const UserProfile = (props: Props) => {
         <span>phone: {user?.phone}</span>
         {user?.avatarUrl
           ?
-          <img src={`http://localhost:3000${user?.avatarUrl}`} alt="avatarUrl" />
+          <img className='rounded-full w-40 h-40' src={`http://localhost:3000${user?.avatarUrl}`} alt="avatarUrl" />
           : "No Image"}
       </div>
     </div>

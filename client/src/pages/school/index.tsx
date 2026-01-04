@@ -8,16 +8,22 @@ import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
 import { createSchool, getAllSchools } from '@/redux/school/schoolSlice'
 import { Link } from 'react-router-dom'
+import { GoPlus } from "react-icons/go";
+import { FaSchool } from "react-icons/fa";
+import { GoLinkExternal } from "react-icons/go";
+import { MdEmail } from "react-icons/md";
+import { IoLocationSharp } from "react-icons/io5";
+import { FaPhoneAlt } from "react-icons/fa";
 
 type Props = {}
 
 const School = (props: Props) => {
+    const { schoolList, loading, message } = useSelector((state: RootState) => state.school);
     const [showSchools, setShowSchools] = useState(false);
     const dispatch = useAppDispatch();
 
     const {
         register,
-        watch,
         handleSubmit,
         formState: { errors }
     } = useForm<ISchool>();
@@ -33,96 +39,127 @@ const School = (props: Props) => {
         }
     }
 
-    const { loading, message, schoolList } = useSelector((state: RootState) => state.school);
 
     useEffect(() => {
         if (message) toast(message);
     }, [message]);
-    
+
     useEffect(() => {
         dispatch(getAllSchools());
     }, []);
-    
+
     if (loading) {
         return <h1>Loading...</h1>
     }
 
     return (
-        <div className='w-scree'>
-            <h1>School</h1>
+        <div className='w-screen p-5! pt-0!'>
+            <h1>Schools</h1>
+            <p className='mt-1!'>Manage schools and institutions</p>
 
-            <form className='' onSubmit={handleSubmit(onSubmit)}>
-                <div className="flex flex-col items-end bg-gray-400 p-4">
+            <form className="bg-white rounded-2xl p-3! mt-3! shadow-xl" onSubmit={handleSubmit(onSubmit)}>
+                <div className="flex flex-col gap-2">
                     <div className="">
-                        <label htmlFor="title">Title:</label>
-                        <input
-                            {...register("title", { required: "title is required" })}
-                            type="text"
-                            id="title"
-                            className='bg-white outline'
-                        />
-                        {errors.title && <span>{errors.title.message}</span>}
+                        <h1 className='flex items-center gap-1 font-medium text-xl'><GoPlus className='w-6 h-6 text-primary-light' /> Create New School</h1>
+                        <p className='text-sm'>Add a new school to the system</p>
                     </div>
 
-                    <div className="">
-                        <label className='text-left' htmlFor="email">Email:</label>
-                        <input
-                            {...register("email", { required: "email is required" })}
-                            type="email"
-                            id="email"
-                            className='bg-white outline'
-                        />
-                        {errors.email && <span>{errors.email.message}</span>}
-                    </div>
+                    <div className="flex flex-col md:grid md:grid-cols-2 md:grid-rows-2 gap-5">
+                        <div className="flex flex-col">
+                            <label htmlFor="title">Title:</label>
+                            <input
+                                {...register("title", { required: "title is required" })}
+                                type="text"
+                                id="title"
+                                placeholder='Enter the title'
+                                className='bg-white outline ml-2! p-2! rounded-lg'
+                            />
+                            {errors.title && <span className='text-red-600'>{errors.title.message}</span>}
+                        </div>
 
-                    <div className="">
-                        <label htmlFor="title">Address:</label>
-                        <input
-                            {...register("address", { required: "address is required" })}
-                            type="text"
-                            id="address"
-                            className='bg-white outline'
-                        />
-                        {errors.address && <span>{errors.address.message}</span>}
-                    </div>
+                        <div className="flex flex-col">
+                            <label className='text-left' htmlFor="email">Email:</label>
+                            <input
+                                {...register("email", { required: "email is required" })}
+                                type="email"
+                                id="email"
+                                placeholder='school@example.edu'
+                                className='bg-white outline ml-2! p-2! rounded-lg'
+                            />
+                            {errors.email && <span className='text-red-600'>{errors.email.message}</span>}
+                        </div>
 
-                    <div className="">
-                        <label htmlFor="phone">Phone:</label>
-                        <input
-                            {...register("phone", { required: "phone is required" })}
-                            type="text"
-                            id="phone"
-                            className='bg-white outline'
-                        />
-                        {errors.phone && <span>{errors.phone.message}</span>}
+                        <div className="flex flex-col">
+                            <label htmlFor="address">Address:</label>
+                            <input
+                                {...register("address", { required: "address is required" })}
+                                type="text"
+                                id="address"
+                                placeholder='Enter the address'
+                                className='bg-white outline ml-2! p-2! rounded-lg'
+                            />
+                            {errors.address && <span className='text-red-600'>{errors.address.message}</span>}
+                        </div>
+
+                        <div className="flex flex-col">
+                            <label htmlFor="phone">Phone:</label>
+                            <input
+                                {...register("phone", { required: "phone is required" })}
+                                type="text"
+                                id="phone"
+                                placeholder='+7 964 058 38 74'
+                                className='bg-white outline ml-2! p-2! rounded-lg'
+                            />
+                            {errors.phone && <span className='text-red-600'>{errors.phone.message}</span>}
+                        </div>
                     </div>
                 </div>
 
-                <input type="submit" value="Create" />
+                <Button className='mt-4! w-[200px] bg-primary-light cursor-pointer text-primary-dark hover:bg-primary-light hover:scale-110' type='submit'>
+                    <GoPlus className='w-6 h-6' />
+                    <p>Create School</p>
+                </Button>
             </form>
 
-            {
-                schoolList && schoolList?.length
-                    ? <>
-                        <h1>School List</h1>
-                        <Button onClick={() => setShowSchools(state => !state)} variant={'outline'}>Show schools</Button>
+            {schoolList && schoolList?.length > 0
+                ? <div className='mt-5!'>
+                    <h1 className='flex items-center gap-1 font-medium text-xl'>All Schools ({schoolList.length})</h1>
+                    <Button className='cursor-pointer' onClick={() => setShowSchools(state => !state)} variant={'outline'}>{showSchools ? "Hide" : "Show"} schools</Button>
 
-                    <ul className='flex flex-col gap-2 items-start'>
-                        {showSchools && schoolList.map(schoolEl =>
-                            <li key={schoolEl.id}>
-                                <p>title: {schoolEl.title}</p>
-                                <p>email: {schoolEl.email}</p>
-                                <p>address: {schoolEl.address}</p>
-                                <p>phone: {schoolEl.phone}</p>
-                                <p>classes: {schoolEl.classes.length}</p>
-                                <Link to={`/school/${schoolEl.id}`}>Go to the school</Link>
-                            </li>)}
-                    </ul>
-                        
-                    </>
-                    : <div className="flex items-center justify-center">
-                        <h1>No schools</h1>
-                    </div>
+                    {showSchools && <ul className='flex flex-col md:flex-row md:flex-wrap gap-2 items-start'>
+                        {schoolList.map(schoolEl =>
+                            <li key={schoolEl.id} className="w-full md:w-[250px] flex flex-col md:flex-wrap gap-3 bg-white rounded-2xl p-3! mt-3! shadow-xl">
+                                <div className="flex items-center justify-between">
+                                    <FaSchool className='text-primary-light w-6 h-6' />
+                                    <Link className='hover:bg-primary-light p-1! rounded-sm' to={`/school/${schoolEl.id}`}><GoLinkExternal className='text-primary-dark w-4 h-4' /></Link>
+                                </div>
+
+                                <p className='font-semibold capitalize'>{schoolEl.title}</p>
+
+                                <div className="flex items-center justify-start gap-2 text-primary-light">
+                                    <MdEmail className='w-4 h-4' />
+                                    <p className='text-sm'>{schoolEl.email}</p>
+                                </div>
+
+                                <div className="flex items-center justify-start gap-2 text-primary-light">
+                                    <IoLocationSharp className='w-4 h-4' />
+                                    <p className='text-sm'>{schoolEl.address}</p>
+                                </div>
+
+                                <div className="flex items-center justify-start gap-2 text-primary-light">
+                                    <FaPhoneAlt className='w-4 h-4' />
+                                    <p className='text-sm'>{schoolEl.phone}</p>
+                                </div>
+
+                                <Link className='mt-4! p-2! w-full rounded-lg bg-primary-light/25 hover:bg-primary-light transition delay-100 duration-300 ease-in-out text-primary-dark text-center' to={`/school/${schoolEl.id}`}>Go to School</Link>
+                            </li>
+                        )}
+                    </ul>}
+                </div>
+
+                : <div className="flex items-center justify-center mt-5!">
+                    <h1>No schools</h1>
+                </div>
             }
         </div>
     )

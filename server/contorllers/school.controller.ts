@@ -30,7 +30,11 @@ export const getSchoolById = async (req: Request, res: Response) => {
             },
             include: {
                 teachers: true,
-                classes: true
+                classes: {
+                    include: {
+                        students: true,
+                    }
+                }
             }
         })
 

@@ -22,12 +22,12 @@ const Layout = (props: Props) => {
   }, [token]);
 
   return (
-    <div className='bg-secondary-light w-screen h-screen flex flex-row'>
+    <div className='bg-secondary-light w-screen h-screen flex flex-row font-inter'>
       <aside>
         <Header />
       </aside>
 
-      <div className="flex flex-col items-start max-w-7xl mx-auto mt-10 pt-20! font-inter"> {/* container */}
+      <div className="flex flex-col items-start max-w-7xl mx-auto mt-10 pt-20!"> {/* container */}
         <Outlet />
       </div>
     </div>
