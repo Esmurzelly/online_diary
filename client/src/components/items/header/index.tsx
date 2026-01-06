@@ -63,13 +63,12 @@ const Header = (props: Props) => {
   }, [showModal, headerRef])
 
   return (
-    <section ref={headerRef} className={`fixed top-0 left-0 z-50 w-full text-black ${isTopOfPage || showModal ? "opacity-100" : "opacity-95"}`}>
+    <section ref={headerRef} className={`fixed top-0 left-0 z-50 w-full ${isTopOfPage ? "bg-primary-dark" : "bg-secondary-light"} text-primary-dark ${isTopOfPage || showModal ? "opacity-100" : "opacity-95"}`}>
       <div className="max-w-screen-2xl mx-auto! flex flex-row items-center justify-between px-5! py-3!">
-
         <nav className="hidden md:flex w-2/3 font-inter text-center">
           <ul className='flex flex-row items-center gap-3 w-full'>
             {[
-              ['Home', '/home'],
+              ['Home', '/'],
               ['Profile', '/profile'],
               ['School', '/school'],
             ].map(([title, url]) => (

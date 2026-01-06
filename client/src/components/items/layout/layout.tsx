@@ -27,7 +27,7 @@ const Layout = (props: Props) => {
         <Header />
       </aside>
 
-      <div className="flex flex-col items-start max-w-7xl mx-auto mt-10 pt-20!"> {/* container */}
+      <div className="flex flex-col items-start max-w-7xl mx-auto pt-10!"> {/* container */}
         <Outlet />
       </div>
     </div>

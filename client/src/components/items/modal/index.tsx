@@ -42,7 +42,7 @@ const Modal = ({ showModal, setShowModal, tokenValue, handleLogOut }: Props) => 
                 <nav className="w-full h-full flex items-start justify-between mt-8!">
                     <ul className="flex flex-col items-center gap-3 w-full">
                         {[
-                            ['Home', '/home', <FaHome />],
+                            ['Home', '/', <FaHome />],
                             ['My Profile', '/profile', <CgProfile />],
                             ['School', '/school', <FaSchool />],
                             ['Subject', '/subjects', <FaBook />],
