@@ -31,7 +31,7 @@ const Home = (props: Props) => {
         </div>
       </div>
 
-      <div className="bg-primary-light py-5! px-5!">
+      <div className="bg-primary-light/60 py-5! px-5!">
         <div className="max-w-3xl mx-auto!">
           <div className="text-center">
             <h1 className='text-3xl text-primary-dark'>Everything You Need</h1>
@@ -49,61 +49,67 @@ const Home = (props: Props) => {
         </div>
       </div>
 
-      <div className="bg-primary-light p-5!">
+      <div className="bg-primary-light/60 p-5!">
         <div className="max-w-3xl mx-auto! w-full flex flex-col items-start justify-between gap-3 bg-white rounded-2xl shadow-xl p-3!">
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col lg:flex-row lg:items-center gap-8">
             <div className="flex flex-col items-start text-left gap-4 w-full">
               <h1 className='font-medium text-3xl w-3/5'>Why Choose Online Diary?</h1>
               <p className='text-lg text-black/75 w-4/5'>Join thousands of schools already using our platform to streamline their academic processes and improve communication.</p>
+
+              <div className="flex flex-col items-start gap-4">
+                <div className="flex items-center gap-2">
+                  <CiBookmarkCheck className='w-5 h-5' />
+                  <p>Easy grade tracking and management</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CiBookmarkCheck className='w-5 h-5' />
+                  <p>Real-time communication between teachers and parents</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CiBookmarkCheck className='w-5 h-5' />
+                  <p>Comprehensive student profiles</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CiBookmarkCheck className='w-5 h-5' />
+                  <p>Attendance monitoring</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CiBookmarkCheck className='w-5 h-5' />
+                  <p>Assignment and homework tracking</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CiBookmarkCheck className='w-5 h-5' />
+                  <p>Multi-school support</p>
+                </div>
+              </div>
             </div>
 
-            <div className="flex flex-col items-start gap-4">
-              <div className="flex items-center gap-2">
-                <CiBookmarkCheck className='w-5 h-5' />
-                <p>Easy grade tracking and management</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <CiBookmarkCheck className='w-5 h-5' />
-                <p>Real-time communication between teachers and parents</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <CiBookmarkCheck className='w-5 h-5' />
-                <p>Comprehensive student profiles</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <CiBookmarkCheck className='w-5 h-5' />
-                <p>Attendance monitoring</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <CiBookmarkCheck className='w-5 h-5' />
-                <p>Assignment and homework tracking</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <CiBookmarkCheck className='w-5 h-5' />
-                <p>Multi-school support</p>
-              </div>
 
-              <div className=" w-full">
-                <div className="aspect-square rounded-3xl bg-linear-to-br from-primary/20 to-secondary/30 flex items-center justify-center">
-                  <div className="w-3/4 h-3/4 bg-card rounded-2xl shadow-xl p-6 animate-float">
-                    <div className="space-y-4">
-                      <div className="h-4 bg-muted rounded w-3/4" />
-                      <div className="h-4 bg-muted rounded w-1/2" />
-                      <div className="h-20 bg-primary/10 rounded-lg mt-6" />
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="h-16 bg-muted rounded-lg" />
-                        <div className="h-16 bg-primary/20 rounded-lg" />
-                      </div>
+            <div className="relative w-full sm:w-4/5 md:w-3/5 lg:w-2/5 mx-auto!">
+              <div className="aspect-square rounded-3xl bg-linear-to-br from-primary/20 to-secondary/30 flex items-center justify-center">
+                <div className="w-3/4 h-3/4 bg-card rounded-2xl shadow-xl p-6 animate-float">
+                  <div className="space-y-4 h-full flex flex-col justify-around gap-3 p-5!">
+                    <div className="h-6 bg-muted rounded w-3/4" />
+                    <div className="h-6 bg-muted rounded w-1/2" />
+                    <div className="h-20 bg-primary-dark/10 rounded-lg mt-6" />
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="h-16 bg-muted rounded-lg" />
+                      <div className="h-16 bg-primary-dark/10 rounded-lg" />
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            </div>
-
-            <div className=""></div>
           </div>
         </div>
+
+        <div className="mt-12! flex flex-col items-center justify-center gap-4 text-center">
+          <h1 className='font-medium text-xl'>Ready to Get Started?</h1>
+          <p className='text-lg text-black/70'>Create your account today and start managing your school more efficiently.</p>
+          <Button className='font-medium mt-4! bg-primary-light  text-primary-dark text-2xl p-6!'>Start Free Trial <MdArrowRightAlt /></Button>
+        </div>
+      </div>
     </section>
   )
 }
