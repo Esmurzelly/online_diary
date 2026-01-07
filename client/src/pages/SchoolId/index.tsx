@@ -107,7 +107,7 @@ const SchoolId = (props: Props) => {
     }
 
     return (
-        <div className='w-screen p-5! pt-0!'>
+        <div className='w-full p-5! pt-3!'>
             <div className="w-full grid grid-cols-2 grid-rows-2 bg-secondary-dark text-white p-3! rounded-2xl">
                 <div className="flex items-center justify-between md:justify-start md:gap-3">
                     <FaSchool className='w-12 h-12' />

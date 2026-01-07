@@ -37,7 +37,7 @@ const Subjects = (props: Props) => {
     }
 
     return (
-        <div className='w-screen p-5!'>
+        <div className='w-full p-5!'>
 
             <div className="bg-white rounded-2xl p-3! shadow-xl">
                 <h1 className='flex items-center gap-2 font-semibold text-primary-dark'><IoIosBookmarks className='text-primary-light w-5 h-5' /> All Subjects ({currentUser.subjects.length})</h1>

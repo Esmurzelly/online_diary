@@ -150,7 +150,7 @@ const ClassPage = (props: Props) => {
     };
 
     return (
-        <div className='w-screen'>
+        <div className='w-full py-3!'>
             <p>letter {classItem.letter}</p>
             <p>num {classItem.num}</p>
 

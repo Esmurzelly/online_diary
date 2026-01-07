@@ -191,7 +191,7 @@ const Profile = (props: Props) => {
     }
 
     return (
-        <div className='w-screen h-screen flex flex-col items-center gap-3 font-inter px-8!'>
+        <div className='w-full h-screen flex flex-col items-center gap-3 font-inter px-8! py-3!'>
             <div className="flex flex-row items-center justify-between">
                 <div className="w-1/2">
                     <h1 className='text-3xl'>My Profile</h1>
@@ -201,7 +201,7 @@ const Profile = (props: Props) => {
                 <form onSubmit={handleSubmit(handleSubmitForm)}>
                     <Popover>
                         <PopoverTrigger asChild>
-                            <Button className='w-[150px]' variant="outline">
+                            <Button className='w-[150px] cursor-pointer' variant="outline">
                                 <FaPen />
                                 Edit profile
                             </Button>
@@ -275,7 +275,7 @@ const Profile = (props: Props) => {
                                     </div>
                                     <div className="grid grid-cols-3 items-center gap-4">
                                         <Label htmlFor="avatar">Avatar</Label>
-                                        <Button onClick={handleAvatarClick}>Change avatar</Button>
+                                        <Button className='cursor-pointer' onClick={handleAvatarClick}>Change avatar</Button>
                                         <input
                                             type="file"
                                             accept="image/*"
@@ -288,7 +288,7 @@ const Profile = (props: Props) => {
                                 </div>
                             </div>
                             {/* popOver - wtf? */}
-                            <Button type='submit' disabled={role === undefined || role === 'none' || role === null || !role}>Change</Button>
+                            <Button className='cursor-pointer' type='submit' disabled={role === undefined || role === 'none' || role === null || !role}>Change</Button>
                         </PopoverContent>
                     </Popover>
                 </form>

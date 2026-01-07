@@ -6,10 +6,14 @@ import { useAppDispatch } from '@/redux/store';
 import { logOut } from '@/redux/user/userSlice';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { RxHamburgerMenu } from "react-icons/rx";
+import { RxAvatar, RxHamburgerMenu } from "react-icons/rx";
 import { RxCross2 } from "react-icons/rx";
 import Modal from '../modal';
 import { useLocation } from 'react-router-dom';
+import { FaHome, FaSchool } from 'react-icons/fa';
+import NavItem from '../navItem';
+import { MdPlayLesson } from 'react-icons/md';
+import { IoBookOutline } from 'react-icons/io5';
 
 type Props = {}
 
@@ -63,27 +67,22 @@ const Header = (props: Props) => {
   }, [showModal, headerRef])
 
   return (
-    <section ref={headerRef} className={`fixed top-0 left-0 z-50 w-full ${isTopOfPage ? "bg-primary-dark" : "bg-secondary-light"} text-primary-dark ${isTopOfPage || showModal ? "opacity-100" : "opacity-95"}`}>
-      <div className="max-w-screen-2xl mx-auto! flex flex-row items-center justify-between px-5! py-3!">
-        <nav className="hidden md:flex w-2/3 font-inter text-center">
-          <ul className='flex flex-row items-center gap-3 w-full'>
+    <aside ref={headerRef} className={`md:sticky md:top-0 md:h-screen md:w-1/7 z-50 bg-primary-dark text-secondary-light ${isTopOfPage || showModal ? "opacity-100" : "opacity-95"}`}>
+      <div className="mx-auto! h-full flex flex-col items-center justify-between px-5! py-3!">
+        <nav className="hidden md:flex w-full font-inter text-center">
+          <ul className='flex flex-col items-center gap-3 w-full'>
             {[
-              ['Home', '/'],
-              ['Profile', '/profile'],
-              ['School', '/school'],
-            ].map(([title, url]) => (
-              <Link
-                key={title}
-                className="flex hover:bg-white rounded-lg cursor-pointer w-full hover:text-black py-2!"
-                to={url}
-              >
-                {title}
-              </Link>
+              ['Home', FaHome, '/'],
+              ['My Profile', RxAvatar, '/profile'],
+              ['School', FaSchool, '/school'],
+              ['Subjects', IoBookOutline, '/subjects'],
+            ].map(([title, icon, url]) => (
+              <NavItem key={title} title={title} link={url} Icon={icon} />
             ))}
           </ul>
         </nav>
 
-        <div className="flex md:hidden">
+        <div className="flex w-full items-start md:hidden">
           {showModal ? (
             <RxCross2
               className="w-7 cursor-pointer"
@@ -98,17 +97,12 @@ const Header = (props: Props) => {
         </div>
 
         <div className="hidden md:flex flex-row gap-1 items-center">
-          <span>name: {currentUser?.name}</span>
-          <span>surname: {currentUser?.surname}</span>
-          <span>email: {currentUser?.email}</span>
-          <span>role: {role}</span>
-
-          {tokenValue && <Button className='w-[100px]' onClick={handleLogOut}>Log Out</Button>}
+          {tokenValue && <Button className='w-[100px] cursor-pointer' onClick={handleLogOut}>Sign Out</Button>}
         </div>
       </div>
 
       <Modal showModal={showModal} setShowModal={setShowModal} tokenValue={tokenValue} handleLogOut={handleLogOut} />
-    </section>
+    </aside>
   )
 }
 

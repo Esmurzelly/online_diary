@@ -51,24 +51,24 @@ const Auth = (props: Props) => {
 
         <div className='w-full bg-white p-5! rounded-lg shadow-2xl'>
           <Select defaultValue='none' onValueChange={handleChange}>
-            <SelectTrigger className="w-full h-11! px-4!">
+            <SelectTrigger className="w-full h-11! px-4! cursor-pointer">
               <SelectValue placeholder="Role" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">Choose the role</SelectItem>
-              <SelectItem className='h-8! border rounded-none pl-2!' value="student">
+              <SelectItem className='h-8! border rounded-none pl-2! cursor-pointer' value="student">
                 <PiStudent />
                 Student
               </SelectItem>
-              <SelectItem className='h-8! border rounded-none pl-2!' value="teacher">
+              <SelectItem className='h-8! border rounded-none pl-2! cursor-pointer' value="teacher">
                 <GiTeacher />
                 Teacher
               </SelectItem>
-              <SelectItem className='h-8! border rounded-none pl-2!' value="parent">
+              <SelectItem className='h-8! border rounded-none pl-2! cursor-pointer' value="parent">
                 <RiParentFill />
                 Parent
               </SelectItem>
-              <SelectItem className='h-8! border rounded-none pl-2!' value="admin">
+              <SelectItem className='h-8! border rounded-none pl-2! cursor-pointer' value="admin">
                 <RiAdminLine />
                 Admin
               </SelectItem>

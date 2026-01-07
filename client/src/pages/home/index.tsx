@@ -10,23 +10,24 @@ import { BsGraphUp } from "react-icons/bs";
 import { GrSchedules } from "react-icons/gr";
 import { FaShieldAlt } from "react-icons/fa";
 import { CiBookmarkCheck } from "react-icons/ci";
+import { Link } from 'react-router-dom';
 
 type Props = {}
 
 const Home = (props: Props) => {
   return (
-    <section className="flex flex-col w-screen">
+    <section className="flex flex-col min-w-full py-3!">
       <div className="bg-linear-to-b from-primary-light to-secondary-dark text-center py-5!">
-        <div className="max-w-3xl mx-auto!">
+        <div className="mx-auto!">
           <div className="w-[250px] bg-secondary-dark/20 mx-auto! flex items-center justify-center gap-2 py-1! px-2! rounded-xl shadow-2xl">
             <IoBookOutline className='w-3 h-3' />
             <p className='text-sm text-secondary-light'>School Management Platform</p>
           </div>
           <h1 className='mt-5! text-secondary-light font-medium text-2xl'>Simplify School Management with <span className='text-primary-dark'>Online Diary</span></h1>
           <p className='text-secondary-light/90 mt-5!'>The complete platform for students, teachers, and parents to stay connected and organized. Track grades, manage classes, and communicate effortlessly.</p>
-          <div className="mt-5! flex flex-col items-center justify-center gap-2 w-full">
-            <Button className='font-medium bg-primary-light w-1/2 text-primary-dark p-2!'>Get Started <MdArrowRightAlt /></Button>
-            <Button className='font-medium bg-gray-400 w-1/2 text-primary-dark p-2!'>Explore Schools</Button>
+          <div className="mt-5! flex flex-col md:flex-row items-center justify-center gap-2 w-full">
+            <Link to={'/auth'} className='flex items-center justify-center text-center gap-3 font-medium bg-primary-light w-[200px] text-primary-dark p-3! rounded-lg'>Get Started <MdArrowRightAlt /></Link>
+            <Link to={'/school'} className='font-medium bg-gray-400 w-[200px] text-primary-dark p-3! rounded-lg'>Explore Schools</Link>
           </div>
         </div>
       </div>
@@ -61,7 +62,7 @@ const Home = (props: Props) => {
                   <CiBookmarkCheck className='w-5 h-5' />
                   <p>Easy grade tracking and management</p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <CiBookmarkCheck className='w-5 h-5' />
                   <p>Real-time communication between teachers and parents</p>
                 </div>
@@ -85,7 +86,7 @@ const Home = (props: Props) => {
             </div>
 
 
-            <div className="relative w-full sm:w-4/5 md:w-3/5 lg:w-2/5 mx-auto!">
+            <div className="relative w-[200px] py-10! sm:w-4/5 md:w-3/5 lg:w-2/5 mx-auto! animate-bounce">
               <div className="aspect-square rounded-3xl bg-linear-to-br from-primary/20 to-secondary/30 flex items-center justify-center">
                 <div className="w-3/4 h-3/4 bg-card rounded-2xl shadow-xl p-6 animate-float">
                   <div className="space-y-4 h-full flex flex-col justify-around gap-3 p-5!">
@@ -107,7 +108,7 @@ const Home = (props: Props) => {
         <div className="mt-12! flex flex-col items-center justify-center gap-4 text-center">
           <h1 className='font-medium text-xl'>Ready to Get Started?</h1>
           <p className='text-lg text-black/70'>Create your account today and start managing your school more efficiently.</p>
-          <Button className='font-medium mt-4! bg-primary-light  text-primary-dark text-2xl p-6!'>Start Free Trial <MdArrowRightAlt /></Button>
+          <Link to={'/auth'} className='flex items-center justify-center text-center gap-3 font-medium bg-primary-light w-[200px] text-primary-dark p-3! rounded-lg'>Start Free Trial <MdArrowRightAlt /></Link>
         </div>
       </div>
     </section>

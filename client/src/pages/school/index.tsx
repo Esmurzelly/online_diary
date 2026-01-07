@@ -53,9 +53,9 @@ const School = (props: Props) => {
     }
 
     return (
-        <div className='w-screen p-5! pt-0!'>
-            <h1>Schools</h1>
-            <p className='mt-1!'>Manage schools and institutions</p>
+        <div className='w-full p-5! pt-3!'>
+            <h1 className='text-3xl font-medium'>Schools</h1>
+            <p className='mt-1! text-sm'>Manage schools and institutions</p>
 
             <form className="bg-white rounded-2xl p-3! mt-3! shadow-xl" onSubmit={handleSubmit(onSubmit)}>
                 <div className="flex flex-col gap-2">

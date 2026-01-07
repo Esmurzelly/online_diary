@@ -34,10 +34,10 @@ const MarksPage = (props: Props) => {
     }
 
         return (
-        <div className='w-screen'>
+        <div className='w-full'>
             <h1>Your marks</h1>
 
-            <Table className='w-full'>
+            <Table className=''>
                 <TableCaption>Marks of course</TableCaption>
                 <TableHeader>
                     <TableRow>

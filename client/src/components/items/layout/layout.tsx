@@ -22,12 +22,10 @@ const Layout = (props: Props) => {
   }, [token]);
 
   return (
-    <div className='bg-secondary-light w-screen h-screen flex flex-row font-inter'>
-      <aside>
-        <Header />
-      </aside>
+    <div className='bg-secondary-light w-screen min-h-screen flex flex-col md:flex-row font-inter gap-px'>
+      <Header />
 
-      <div className="flex flex-col items-start max-w-7xl mx-auto pt-10!"> {/* container */}
+      <div className="flex flex-col items-start w-full overflow-x-scroll"> {/* container */}
         <Outlet />
       </div>
     </div>
