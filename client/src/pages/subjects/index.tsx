@@ -22,7 +22,7 @@ type Props = {}
 const Subjects = (props: Props) => {
     const { currentUser, loading, message, role } = useSelector((state: RootState) => state.user);
 
-    const numberOfClasses = currentUser?.subjects.map(tempEl => tempEl.classId)
+    const numberOfClasses = currentUser?.subjects ? currentUser?.subjects.map(tempEl => tempEl.classId) : [];
 
     useEffect(() => {
         if (message) toast(message);
@@ -36,9 +36,12 @@ const Subjects = (props: Props) => {
         return <h1>No user!</h1>
     }
 
+    if(!currentUser.subjects) {
+        return "No access"
+    }
+
     return (
         <div className='w-full p-5!'>
-
             <div className="bg-white rounded-2xl p-3! shadow-xl">
                 <h1 className='flex items-center gap-2 font-semibold text-primary-dark'><IoIosBookmarks className='text-primary-light w-5 h-5' /> All Subjects ({currentUser.subjects.length})</h1>
                 <Table className='mt-5!'>
@@ -93,7 +96,6 @@ const Subjects = (props: Props) => {
                     <div className="">
                         <p className='font-semibold text-2xl'>{currentUser.subjects.length}</p>
                         <p className='text-sm mt-1!'>Total Subjects</p>
-
                     </div>
                 </div>
 

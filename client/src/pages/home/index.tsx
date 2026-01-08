@@ -16,7 +16,7 @@ type Props = {}
 
 const Home = (props: Props) => {
   return (
-    <section className="flex flex-col min-w-full py-3!">
+    <section className="flex flex-col min-w-full">
       <div className="bg-linear-to-b from-primary-light to-secondary-dark text-center py-5!">
         <div className="mx-auto!">
           <div className="w-[250px] bg-secondary-dark/20 mx-auto! flex items-center justify-center gap-2 py-1! px-2! rounded-xl shadow-2xl">
