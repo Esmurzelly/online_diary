@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom';
 import { RxCross2 } from "react-icons/rx";
 import { FaHome } from "react-icons/fa";
@@ -18,6 +18,20 @@ type Props = {
 
 const Modal = ({ showModal, setShowModal, tokenValue, handleLogOut }: Props) => {
     const location = useLocation();
+
+    useEffect(() => {
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                setShowModal(false);
+            }
+        };
+
+        if (showModal) {
+            window.addEventListener("keydown", onKeyDown);
+        }
+
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [showModal]);
 
     return (
         <div className={`absolute font-inter text-secondary-light text-center h-screen top-0 ${showModal ? '-translate-x-10' : "-translate-x-[200%]"} transition-all w-full min-h-svh z-20 py-1! bg-primary-dark`}>
@@ -45,7 +59,6 @@ const Modal = ({ showModal, setShowModal, tokenValue, handleLogOut }: Props) => 
                             ['Home', '/', <FaHome />],
                             ['My Profile', '/profile', <CgProfile />],
                             ['School', '/school', <FaSchool />],
-                            ['Subject', '/subjects', <FaBook />],
                         ].map(([title, url, icon]) => (
                             <Link
                                 key={title}

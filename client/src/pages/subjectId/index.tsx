@@ -145,8 +145,6 @@ const SubjectId = (props: Props) => {
         }
     }
 
-    console.log('selectedStudent', selectedStudent);
-
     return (
         <div className='w-full p-5!'>
             <div className="flex flex-col gap-7">

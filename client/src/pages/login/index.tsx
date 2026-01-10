@@ -36,7 +36,7 @@ const LoginComponent = ({ role }: Props) => {
     useEffect(() => {
         try {
             if (message) toast(message);
-            if (isAuth) navigate('/');
+            if (isAuth) navigate('/profile');
         } catch (error) {
             console.log(`error in useEffect - ${error}`)
         }

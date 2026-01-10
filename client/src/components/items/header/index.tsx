@@ -75,7 +75,6 @@ const Header = (props: Props) => {
               ['Home', FaHome, '/'],
               ['My Profile', RxAvatar, '/profile'],
               ['School', FaSchool, '/school'],
-              ['Subjects', IoBookOutline, '/subjects'],
             ].map(([title, icon, url]) => (
               <NavItem key={title} title={title} link={url} Icon={icon} />
             ))}

@@ -65,6 +65,7 @@ const Profile = (props: Props) => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     const handleAvatarClick = () => {
+        console.log(filePicekerRef.current)
         filePicekerRef.current?.click();
     };
 
@@ -76,6 +77,11 @@ const Profile = (props: Props) => {
         if (selectedFile) {
             reader.readAsDataURL(selectedFile);
             setSelectedFile(selectedFile);
+
+            const formData = new FormData();
+            formData.append("avatar", selectedFile);
+
+            dispatch(updateUser({ formData, id: currentUser?.id, role })).unwrap();
         }
 
         // reader.onload = (readerEvent) => {
@@ -105,6 +111,7 @@ const Profile = (props: Props) => {
     }
 
     const handleSubmitForm: SubmitHandler<FormValues> = async () => {
+        console.log('tututuu')
         try {
             const formData = new FormData();
             formData.append("name", watch('name'));
@@ -113,9 +120,6 @@ const Profile = (props: Props) => {
             formData.append("phone", watch('phone'));
             formData.append("address", watch('address'));
 
-            if (selectedFile) {
-                formData.append("avatar", selectedFile);
-            }
             if (watch('password') && watch('password').length > 0) {
                 formData.append("password", watch('password'));
             }
@@ -198,15 +202,15 @@ const Profile = (props: Props) => {
                     <p className='text-sm'>Manage your personal information</p>
                 </div>
 
-                <form onSubmit={handleSubmit(handleSubmitForm)}>
-                    <Popover>
-                        <PopoverTrigger asChild>
-                            <Button className='w-[150px] cursor-pointer' variant="outline">
-                                <FaPen />
-                                Edit profile
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className='w-80 p-3!'>
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button className='w-[150px] cursor-pointer' variant="outline">
+                            <FaPen />
+                            Edit profile
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className='w-80 p-3!'>
+                        <form onSubmit={handleSubmit(handleSubmitForm)}>
                             <div className="grid gap-4">
                                 <div className="space-y-2">
                                     <h4 className="leading-none font-medium">Your data</h4>
@@ -273,9 +277,9 @@ const Profile = (props: Props) => {
                                             {...register("phone")}
                                         />
                                     </div>
-                                    <div className="grid grid-cols-3 items-center gap-4">
+                                    {/* <div className="grid grid-cols-3 items-center gap-4">
                                         <Label htmlFor="avatar">Avatar</Label>
-                                        <Button className='cursor-pointer' onClick={handleAvatarClick}>Change avatar</Button>
+                                        <Button type='button' className='cursor-pointer' onClick={handleAvatarClick}>Change avatar</Button>
                                         <input
                                             type="file"
                                             accept="image/*"
@@ -283,29 +287,36 @@ const Profile = (props: Props) => {
                                             ref={filePicekerRef}
                                             onChange={handleAvatarChange}
                                         />
-                                    </div>
+                                    </div> */}
 
                                 </div>
                             </div>
-                            {/* popOver - wtf? */}
-                            <Button className='cursor-pointer' type='submit' disabled={role === undefined || role === 'none' || role === null || !role}>Change</Button>
-                        </PopoverContent>
-                    </Popover>
-                </form>
+                            {/* <Button onClick={() => console.log('change temp button')} className='cursor-pointer z-50' type='button' disabled={role === undefined || role === 'none' || role === null || !role}>Change temp</Button> */}
+                            <Button className='cursor-pointer' type='submit' disabled={role === undefined || role === 'none' || role === null || !role}>Change Data</Button>
+                        </form>
+                    </PopoverContent>
+                </Popover>
             </div>
 
             <div className="flex flex-col min-w-full text-xl items-center justify-between gap-2 bg-white rounded-2xl shadow-xl p-5!">
                 {
                     currentUser?.avatarUrl
-                        ? <Avatar className='size-28'>
+                        ? <Avatar onClick={handleAvatarClick} className='size-28'>
                             <AvatarImage src={`http://localhost:3000${currentUser?.avatarUrl}`} />
                             <AvatarFallback>avatarUrl</AvatarFallback>
                         </Avatar>
-                        : <div className="flex items-center justify-center uppercase text-white text-3xl bg-secondary-dark w-28 h-28 rounded-full">
+                        : <div onClick={handleAvatarClick} className="flex items-center justify-center uppercase text-white text-3xl bg-secondary-dark w-28 h-28 rounded-full">
                             {currentUser.name ? currentUser.name.split('')[0] : "A"}
                             {currentUser.name ? currentUser.surname.split('')[0] : "A"}
                         </div>
                 }
+                <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    ref={filePicekerRef}
+                    onChange={handleAvatarChange}
+                />
                 <p>{currentUser?.name} {currentUser?.surname}</p>
 
                 <p className='bg-secondary-dark text-secondary-light px-4! py-1! rounded-3xl text-sm capitalize'>{role}</p>

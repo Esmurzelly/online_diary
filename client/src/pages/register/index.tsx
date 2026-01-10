@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
 import { useForm, type SubmitHandler } from 'react-hook-form';
-// import { useLazyCurrentQuery, useSigninStudentMutation } from '@/app/services/authApi';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '@/redux/store';
 import { useSelector } from 'react-redux';

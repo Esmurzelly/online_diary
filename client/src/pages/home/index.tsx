@@ -51,7 +51,7 @@ const Home = (props: Props) => {
       </div>
 
       <div className="bg-primary-light/60 p-5!">
-        <div className="max-w-3xl mx-auto! w-full flex flex-col items-start justify-between gap-3 bg-white rounded-2xl shadow-xl p-3!">
+        <div className="max-w-3xl mx-auto! w-full flex flex-col items-start justify-between gap-3 bg-white rounded-2xl shadow-xl p-7!">
           <div className="flex flex-col lg:flex-row lg:items-center gap-8">
             <div className="flex flex-col items-start text-left gap-4 w-full">
               <h1 className='font-medium text-3xl w-3/5'>Why Choose Online Diary?</h1>
