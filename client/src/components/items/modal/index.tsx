@@ -34,6 +34,7 @@ const Modal = ({ showModal, setShowModal, tokenValue, handleLogOut }: Props) => 
     }, [showModal]);
 
     return (
+        
         <div className={`absolute font-inter text-secondary-light text-center h-screen top-0 ${showModal ? '-translate-x-10' : "-translate-x-[200%]"} transition-all w-full min-h-svh z-20 py-1! bg-primary-dark`}>
             <div className="w-full h-full flex flex-col px-16!">
                 <div className="flex md:hidden">

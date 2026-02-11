@@ -1,13 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
-import type { Parent, Student, Teacher, User } from "@/types";
+import type { PayloadAction } from "@reduxjs/toolkit";
+import type { ApiError, GetAllTeachersResponse, Teacher } from "@/types";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { BASE_URL } from "@/constants";
-import { clearToken, setToken } from "../auth/authSlice";
 import api from "@/utils/axios";
 import { addTeacherToTheSchool, removeTeacherFromTheSchool } from "../school/schoolSlice";
 import { addTeacherToSubject, removeTeacherFromTheSubject } from "../class/classSlice";
-
-type Role = 'student' | 'teacher' | 'parent' | 'admin' | 'none';
 
 interface InitialState {
     teacherList: Teacher[] | null;
@@ -23,11 +21,11 @@ const initialState: InitialState = {
     loading: false,
 };
 
-export const getAllTeachers = createAsyncThunk(
+export const getAllTeachers = createAsyncThunk<GetAllTeachersResponse, void, { rejectValue: ApiError }>(
     'teacher/getAllTeachers',
     async (_, { rejectWithValue }) => {
         try {
-            const { data } = await api.get(`${BASE_URL}/teachers/get-all-teachers`);
+            const { data } = await api.get<GetAllTeachersResponse>(`${BASE_URL}/teachers/get-all-teachers`);
 
             return data;
         } catch (error: any) {
@@ -43,19 +41,22 @@ export const teacherSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(getAllTeachers.pending, (state, action) => {
+            .addCase(getAllTeachers.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(getAllTeachers.fulfilled, (state, action) => {
+            .addCase(getAllTeachers.fulfilled, (state, action: PayloadAction<GetAllTeachersResponse>) => {
                 state.teacherList = action.payload.allTeacher;
                 state.loading = false;
                 state.message = action.payload.message;
             })
             .addCase(getAllTeachers.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.error.message;
+                state.message = action.payload?.message;
             })
 
+            .addCase(removeTeacherFromTheSchool.pending, (state) => {
+                state.loading = true;
+            })
             .addCase(removeTeacherFromTheSchool.fulfilled, (state, action) => {
                 state.loading = false;
                 const removedTeacherId = action.payload.data.id;
@@ -68,7 +69,14 @@ export const teacherSlice = createSlice({
 
                 state.message = action.payload.message;
             })
+            .addCase(removeTeacherFromTheSchool.rejected, (state, action) => {
+                state.loading = false;
+                state.message = action.payload?.message;
+            })
 
+            .addCase(addTeacherToTheSchool.pending, (state) => {
+                state.loading = true;
+            })
             .addCase(addTeacherToTheSchool.fulfilled, (state, action) => {
                 state.loading = false;
                 const addedTeacher = action.payload.data;
@@ -81,25 +89,29 @@ export const teacherSlice = createSlice({
 
                 state.message = action.payload.message;
             })
+            .addCase(addTeacherToTheSchool.rejected, (state, action) => {
+                state.loading = false;
+                state.message = action.payload?.message;
+            })
 
-            .addCase(addTeacherToSubject.pending, (state, action) => {
+            .addCase(addTeacherToSubject.pending, (state) => {
                 state.loading = true;
             })
             .addCase(addTeacherToSubject.fulfilled, (state, action) => {
                 state.loading = false;
                 const teacher = state.teacherList?.find(teacherItem => teacherItem.id === action.payload.teacherToSubject.teacherId);
 
-                if(teacher) {
+                if (teacher) {
                     teacher.subjects = action.payload.teacherToSubject.teacher.subjects;
                 }
                 state.message = action.payload.message;
             })
             .addCase(addTeacherToSubject.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.payload.message;
+                state.message = action.payload?.message;
             })
 
-            .addCase(removeTeacherFromTheSubject.pending, (state, action) => {
+            .addCase(removeTeacherFromTheSubject.pending, (state) => {
                 state.loading = true;
             })
             .addCase(removeTeacherFromTheSubject.fulfilled, (state, action) => {
@@ -107,14 +119,14 @@ export const teacherSlice = createSlice({
                 const { teacherId, removedSubjectFromTeacher } = action.payload;
                 const teacher = state.teacherList?.find(teacherItem => teacherItem.id === teacherId);
 
-                if(teacher && teacher.subjects) {
+                if (teacher && teacher.subjects) {
                     teacher.subjects = teacher.subjects.filter(subjectItem => subjectItem.id !== removedSubjectFromTeacher.id);
                 }
                 state.message = action.payload.message;
             })
             .addCase(removeTeacherFromTheSubject.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.payload.message;
+                state.message = action.payload?.message;
             })
     }
 });

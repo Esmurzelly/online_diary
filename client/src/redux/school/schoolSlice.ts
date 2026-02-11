@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { BASE_URL } from "@/constants";
 import api from "@/utils/axios";
-import type { ISchool } from '@/types';
+import type { AddClassResponse, AddTeacherResponse, ApiError, CreateSchoolResponse, DeleteClassResponse, GetSchoolByIdResponse, IGetAllSchoolsAction, ISchool, RemoveTeacherResponse } from '@/types';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
 interface InitialState {
     currentSchool: ISchool | null;
@@ -17,11 +18,11 @@ const initialState: InitialState = {
     loading: false,
 };
 
-export const getAllSchools = createAsyncThunk(
+export const getAllSchools = createAsyncThunk<IGetAllSchoolsAction, void, { rejectValue: ApiError }>(
     'school/getAllSchools',
     async (obj, { rejectWithValue }) => {
         try {
-            const { data } = await api.get(`${BASE_URL}/schools/get-all-schools`, {
+            const { data } = await api.get<IGetAllSchoolsAction>(`${BASE_URL}/schools/get-all-schools`, {
                 data: obj
             });
 
@@ -33,25 +34,25 @@ export const getAllSchools = createAsyncThunk(
     }
 );
 
-export const getSchoolById = createAsyncThunk(
+export const getSchoolById = createAsyncThunk<GetSchoolByIdResponse, { id: string }, { rejectValue: ApiError }>(
     'school/getSchoolById',
-    async ({ id }: { id: string | undefined }, { rejectWithValue }) => {
+    async ({ id }, { rejectWithValue }) => {
         try {
-            const { data } = await api.get(`${BASE_URL}/schools/get-school-by-id/${id}`);
+            const { data } = await api.get<GetSchoolByIdResponse>(`${BASE_URL}/schools/get-school-by-id/${id}`);
 
             return data;
         } catch (error: any) {
-            return rejectWithValue({ message: error.message || "smth weng wrong in getAllSchools" })
+            return rejectWithValue({ message: error.message || "smth weng wrong in getSchoolById" })
 
         }
     }
 );
 
-export const deleteClass = createAsyncThunk(
+export const deleteClass = createAsyncThunk<DeleteClassResponse, { id: string }, { rejectValue: ApiError }>(
     'school/deleteClass',
     async ({ id }: { id: string }, { rejectWithValue }) => {
         try {
-            const { data } = await api.delete(`${BASE_URL}/classes/remove-class`, {
+            const { data } = await api.delete<DeleteClassResponse>(`${BASE_URL}/classes/remove-class`, {
                 data: {
                     classId: id
                 }
@@ -59,16 +60,16 @@ export const deleteClass = createAsyncThunk(
 
             return data;
         } catch (error: any) {
-            return rejectWithValue({ message: error.message || "smth weng wrong in getAllSchools" })
+            return rejectWithValue({ message: error.message || "smth weng wrong in deleteClass" })
         }
     }
 );
 
-export const createSchool = createAsyncThunk(
+export const createSchool = createAsyncThunk<CreateSchoolResponse, Omit<ISchool, 'id' | 'classes' | 'teachers'>, { rejectValue: ApiError }>(
     'school/createSchool',
-    async (obj: ISchool, { rejectWithValue }) => {
+    async (obj, { rejectWithValue }) => {
         try {
-            const { data } = await api.post(`${BASE_URL}/schools/create-school`, obj);
+            const { data } = await api.post<CreateSchoolResponse>(`${BASE_URL}/schools/create-school`, obj);
 
             return data;
         } catch (error: any) {
@@ -77,14 +78,14 @@ export const createSchool = createAsyncThunk(
     }
 );
 
-export const addClassToSchool = createAsyncThunk(
+export const addClassToSchool = createAsyncThunk<AddClassResponse, { schoolId: string; num: number; letter: string }, { rejectValue: ApiError }>(
     'school/addClassToSchool',
-    async ({ schoolId, num, letter }: { schoolId: string | undefined, num: number, letter: string }, { rejectWithValue }) => {
+    async ({ schoolId, num, letter }, { rejectWithValue }) => {
         try {
-            const { data } = await api.put(`${BASE_URL}/schools/update-school-class`, {
+            const { data } = await api.put<AddClassResponse>(`${BASE_URL}/schools/update-school-class`, {
                 schoolId,
                 num,
-                letter
+                letter,
             });
 
             return data;
@@ -94,38 +95,35 @@ export const addClassToSchool = createAsyncThunk(
     }
 );
 
-export const addTeacherToTheSchool = createAsyncThunk(
+export const addTeacherToTheSchool = createAsyncThunk<AddTeacherResponse, { teacherId: string; schoolId: string }, { rejectValue: ApiError }>(
     'school/addTeacherToTheSchool',
-    async ({ teacherId, schoolId }: { teacherId: string | undefined, schoolId: string | undefined }, { rejectWithValue }) => {
+    async ({ teacherId, schoolId }, { rejectWithValue }) => {
         try {
-            const { data } = await api.put(`${BASE_URL}/schools/update-school-teacher`, {
+            const { data } = await api.put<AddTeacherResponse>(`${BASE_URL}/schools/update-school-teacher`, {
                 teacherId,
                 schoolId
             });
 
             return data;
         } catch (error: any) {
-            return rejectWithValue({ message: error.message || "smth weng wrong in addClassToSchool" })
+            return rejectWithValue({ message: error.message || "smth weng wrong in addTeacherToTheSchool" })
 
         }
     }
 );
 
-export const removeTeacherFromTheSchool = createAsyncThunk(
+export const removeTeacherFromTheSchool = createAsyncThunk<RemoveTeacherResponse, { teacherId: string; schoolId: string }, { rejectValue: ApiError }>(
     'school/removeTeacherFromTheSchool',
     async ({ teacherId, schoolId }: { teacherId: string | undefined, schoolId: string | undefined }, { rejectWithValue }) => {
         try {
-            const { data } = await api.put(`${BASE_URL}/schools/remove-teacher-from-school`, {
+            const { data } = await api.put<RemoveTeacherResponse>(`${BASE_URL}/schools/remove-teacher-from-school`, {
                 teacherId,
                 schoolId
             });
 
-            console.log('data from redux - removeTeacherFromTheSchool', data);
-
             return data;
         } catch (error: any) {
-            return rejectWithValue({ message: error.message || "smth weng wrong in addClassToSchool" })
-
+            return rejectWithValue({ message: error.message || "smth weng wrong in removeTeacherFromTheSchool" })
         }
     }
 );
@@ -136,36 +134,36 @@ export const schoolSlice = createSlice({
     reducers: {},
     extraReducers: (builder) =>
         builder
-            .addCase(getAllSchools.pending, (state, action) => {
+            .addCase(getAllSchools.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(getAllSchools.fulfilled, (state, action) => {
+            .addCase(getAllSchools.fulfilled, (state, action: PayloadAction<IGetAllSchoolsAction>) => {
                 state.loading = false;
                 state.schoolList = action.payload.allSchools;
                 state.message = action.payload.message;
             })
             .addCase(getAllSchools.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.payload.message;
+                state.message = action.payload?.message || null;
             })
 
-            .addCase(getSchoolById.pending, (state, action) => {
+            .addCase(getSchoolById.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(getSchoolById.fulfilled, (state, action) => {
+            .addCase(getSchoolById.fulfilled, (state, action: PayloadAction<GetSchoolByIdResponse>) => {
                 state.loading = false;
                 state.currentSchool = action.payload.schoolById;
                 state.message = action.payload.message;
             })
             .addCase(getSchoolById.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.payload.message;
+                state.message = action.payload?.message || null;
             })
 
-            .addCase(createSchool.pending, (state, action) => {
+            .addCase(createSchool.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(createSchool.fulfilled, (state, action) => {
+            .addCase(createSchool.fulfilled, (state, action: PayloadAction<CreateSchoolResponse>) => {
                 state.loading = false;
                 if (Array.isArray(state.schoolList)) {
                     state.schoolList.push(action.payload.school)
@@ -176,26 +174,28 @@ export const schoolSlice = createSlice({
             })
             .addCase(createSchool.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.payload.message;
+                state.message = action.payload?.message || null;
             })
 
-            .addCase(addClassToSchool.pending, (state, action) => {
+            .addCase(addClassToSchool.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(addClassToSchool.fulfilled, (state, action) => {
+            .addCase(addClassToSchool.fulfilled, (state, action: PayloadAction<AddClassResponse>) => {
                 state.loading = false;
-                state.currentSchool?.classes.push(action.payload.data);
+                if (state.currentSchool) {
+                    state.currentSchool.classes.push(action.payload.data);
+                }
                 state.message = action.payload.message;
             })
             .addCase(addClassToSchool.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.payload.message;
+                state.message = action.payload?.message || null;
             })
 
-            .addCase(deleteClass.pending, (state, action) => {
+            .addCase(deleteClass.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(deleteClass.fulfilled, (state, action) => {
+            .addCase(deleteClass.fulfilled, (state, action: PayloadAction<DeleteClassResponse>) => {
                 state.loading = false;
                 if (state.currentSchool?.classes) {
                     state.currentSchool!.classes = state.currentSchool!.classes.filter(
@@ -206,26 +206,26 @@ export const schoolSlice = createSlice({
             })
             .addCase(deleteClass.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.payload.message;
+                state.message = action.payload?.message || null;
             })
 
-            .addCase(addTeacherToTheSchool.pending, (state, action) => {
+            .addCase(addTeacherToTheSchool.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(addTeacherToTheSchool.fulfilled, (state, action) => {
+            .addCase(addTeacherToTheSchool.fulfilled, (state, action: PayloadAction<AddTeacherResponse>) => {
                 state.loading = false;
                 state.currentSchool = action.payload.data;
                 state.message = action.payload.message;
             })
             .addCase(addTeacherToTheSchool.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.payload.message;
+                state.message = action.payload?.message || null;
             })
 
-            .addCase(removeTeacherFromTheSchool.pending, (state, action) => {
+            .addCase(removeTeacherFromTheSchool.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(removeTeacherFromTheSchool.fulfilled, (state, action) => {
+            .addCase(removeTeacherFromTheSchool.fulfilled, (state, action: PayloadAction<RemoveTeacherResponse>) => {
                 state.loading = false;
                 if (state.currentSchool?.teachers) {
                     state.currentSchool.teachers =
@@ -237,7 +237,7 @@ export const schoolSlice = createSlice({
             })
             .addCase(removeTeacherFromTheSchool.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.payload.message;
+                state.message = action.payload?.message || null;
             })
 });
 

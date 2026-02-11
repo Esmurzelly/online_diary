@@ -17,7 +17,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Link, useNavigate } from 'react-router-dom';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getAllSchools } from '@/redux/school/schoolSlice';
-import type { Parent } from '@/types';
 import { FaPen } from "react-icons/fa6";
 import { MdOutlineEmail, MdOutlineLocalPhone, MdOutlineSchool } from "react-icons/md";
 import { FiExternalLink } from "react-icons/fi";
@@ -335,13 +334,13 @@ const Profile = (props: Props) => {
                         <p className='text-sm'>Connected children accounts</p>
 
                         <div className="">
-                            <div className='flex items-center gap-2'>
-                                <Button onClick={() => setShowChildren(state => !state)}>{showChildren ? "Hide" : "Show"} children</Button>
+                            <div className='flex flex-col items-start items-center gap-2'>
+                                <Button className='px-2! cursor-pointer' onClick={() => setShowChildren(state => !state)}>{showChildren ? "Hide" : "Show"} children</Button>
 
                                 {showChildren &&
-                                    <>
+                                    <div className='flex items-center gap-2'>
                                         <Select value={childId} onValueChange={handleUserIdChange}>
-                                            <SelectTrigger className="w-[180px]">
+                                            <SelectTrigger className="w-[180px] cursor-pointer">
                                                 <SelectValue placeholder="Select the parent" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -350,15 +349,15 @@ const Profile = (props: Props) => {
 
                                                     {/* mutable array? */}
                                                     {users?.filter(userEl => userEl.parentIds).map(userEl =>
-                                                        <SelectItem key={userEl.id} className='w-full' value={userEl.id}>
+                                                        <SelectItem key={userEl.id} className='w-full py-2! px-1!' value={userEl.id}>
                                                             {userEl.name}
                                                         </SelectItem>)}
                                                 </SelectGroup>
                                             </SelectContent>
                                         </Select>
 
-                                        <Button onClick={() => onAddParentToChild(childId)} variant={'outline'}>Add Child</Button>
-                                    </>
+                                        <Button className='px-2! cursor-pointer' onClick={() => onAddParentToChild(childId)} variant={'outline'}>Add Child</Button>
+                                    </div>
                                 }
                             </div>
                         </div>
@@ -379,7 +378,7 @@ const Profile = (props: Props) => {
                                     </div>
 
                                     <div className="">
-                                        <Link className='flexbg-secondary-light px-4! py-2! rounded-2xl text-black' to={`/profile/${childrenEl.id}`}>View child</Link>
+                                        <Link className='flexbg-secondary-light px-4! py-2! rounded-2xl text-black' to={`/profile/${childrenEl.id}`}>View Profile</Link>
                                         <Button className='w-10 cursor-pointer' onClick={() => onRemoveParentToChild(childrenEl.id)} size={'sm'} variant={'destructive'}>
                                             -
                                         </Button>
@@ -481,13 +480,10 @@ const Profile = (props: Props) => {
                             </li>)}
                         </ul>
                     </div>}
-
-
-
                 </>
             )}
 
-            <Button onClick={handleDeleteUser} variant={'destructive'}>Delete my account</Button>
+            <Button className='p-3! cursor-pointer' onClick={handleDeleteUser} variant={'destructive'}>Delete my account</Button>
         </div>
     )
 }

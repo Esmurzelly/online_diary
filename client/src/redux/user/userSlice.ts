@@ -1,18 +1,16 @@
-import { createSlice } from "@reduxjs/toolkit";
-import type { Parent, Student, Teacher, User } from "@/types";
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import type { AddParentToChildResponse, ApiError, AuthResponse, GetAllUsersResponse, GetMeResponse, GetUserByIdResponse, Parent, RemoveParentToChildResponse, RemoveUserResponse, Role, Student, Teacher, UpdateUserResponse, User } from "@/types";
+import type { PayloadAction } from "@reduxjs/toolkit";
 import { BASE_URL } from "@/constants";
 import { clearToken, setToken } from "../auth/authSlice";
 import api from "@/utils/axios";
-
-type Role = 'student' | 'teacher' | 'parent' | 'admin' | 'none';
 
 interface InitialState {
     users: Student[] | Teacher[] | Parent[] | null;
     currentUser: User | null;
     message?: string | null;
     loading: boolean,
-    role: Role,
+    role: Role | undefined | null,
 }
 
 const initialState: InitialState = {
@@ -23,11 +21,11 @@ const initialState: InitialState = {
     role: "none"
 };
 
-export const registerUser = createAsyncThunk(
+export const registerUser = createAsyncThunk<AuthResponse, { name: string; email: string; password: string; surname: string; role: string }, { rejectValue: ApiError }>(
     'user/registerStudent',
-    async ({ name, email, password, surname, role }: { name: string, email: string, password: string, surname: string, role: string }, { rejectWithValue, dispatch }) => {
+    async ({ name, email, password, surname, role }, { rejectWithValue, dispatch }) => {
         try {
-            const { data } = await api.post(`${BASE_URL}/auth/signup-${role}`, {
+            const { data } = await api.post<AuthResponse>(`${BASE_URL}/auth/signup-${role}`, {
                 name,
                 email,
                 password,
@@ -38,20 +36,18 @@ export const registerUser = createAsyncThunk(
                 dispatch(setToken(data.token));
             }
 
-            console.log('data from register any of them - asyncThunk', data);
-
             return data;
         } catch (error: any) {
-            return rejectWithValue({ message: error.message || 'Smth weng wrong in register student' })
+            return rejectWithValue({ message: error.message || 'Smth weng wrong in registerUser' })
         }
     }
 );
 
-export const loginUser = createAsyncThunk(
+export const loginUser = createAsyncThunk<AuthResponse, { email: string; password: string; role: string }, { rejectValue: ApiError }>(
     'user/loginUser',
-    async ({ email, password, role }: { email: string, password: string, role: string }, { rejectWithValue, dispatch }) => {
+    async ({ email, password, role }, { rejectWithValue, dispatch }) => {
         try {
-            const { data } = await api.post(`${BASE_URL}/auth/signin-${role}`, {
+            const { data } = await api.post<AuthResponse>(`${BASE_URL}/auth/signin-${role}`, {
                 email,
                 password
             });
@@ -60,22 +56,18 @@ export const loginUser = createAsyncThunk(
                 dispatch(setToken(data.token));
             }
 
-            console.log('data from logInUser', data);
-
             return data;
         } catch (error: any) {
-            return rejectWithValue({ message: error.message || "smth weng wrong in login student" })
+            return rejectWithValue({ message: error.message || "smth weng wrong in loginUser" })
         }
     }
 );
 
-export const googleAuth = createAsyncThunk(
+export const googleAuth = createAsyncThunk<AuthResponse, { email: string | null; role: string; name: string | null; avatar: string | null }, { rejectValue: ApiError }>(
     'user/googleAuth',
-    async ({ email, role, name, avatar }: { email: string | null, role: string, name: string | null, avatar: string | null }, { rejectWithValue, dispatch }) => {
-        console.log('args in asyncThunk - email, role, name, avatar', email, role, name, avatar)
-        
+    async ({ email, role, name, avatar }, { rejectWithValue, dispatch }) => {
         try {
-            const { data } = await api.post(`${BASE_URL}/auth/google-auth`, {
+            const { data } = await api.post<AuthResponse>(`${BASE_URL}/auth/google-auth`, {
                 email,
                 role,
                 name,
@@ -86,8 +78,6 @@ export const googleAuth = createAsyncThunk(
                 dispatch(setToken(data.token))
             };
 
-            console.log('data from googleAuth', data);
-
             return data;
         } catch (error: any) {
             return rejectWithValue({ message: error.message || "smth weng wrong in googleAuth" })
@@ -95,39 +85,40 @@ export const googleAuth = createAsyncThunk(
     }
 )
 
-export const getMe = createAsyncThunk(
+export const getMe = createAsyncThunk<GetMeResponse, void, { rejectValue: ApiError }>(
     'user/getMe',
-    async () => {
+    async (_, { rejectWithValue }) => {
         try {
-            const { data } = await api.get(`${BASE_URL}/users/get-me`);
+            const { data } = await api.get<GetMeResponse>(`${BASE_URL}/users/get-me`);
 
             return data;
-        } catch (error) {
-            console.log(`error is in getMe asyncThunk ${error}`);
+        } catch (error: any) {
+            return rejectWithValue({ message: error.message || "smth weng wrong in getMe" })
         }
     }
 );
 
-export const getUserById = createAsyncThunk(
+export const getUserById = createAsyncThunk<GetUserByIdResponse, { id: string }, { rejectValue: ApiError }>(
     'user/getUserById',
-    async ({ id }: { id: string | undefined }) => {
+    async ({ id }, { rejectWithValue }) => {
         try {
-            const { data } = await api.get(`${BASE_URL}/users/get-user-by-id/${id}`);
+            const { data } = await api.get<GetUserByIdResponse>(`${BASE_URL}/users/get-user-by-id/${id}`);
 
             return data;
-        } catch (error) {
-            console.log(`error is in getMe asyncThunk ${error}`);
+        } catch (error: any) {
+            return rejectWithValue({ message: error.message || "smth weng wrong in getUserById" })
         }
     }
 )
 
-export const updateUser = createAsyncThunk(
+export const updateUser = createAsyncThunk<UpdateUserResponse, { formData: FormData; id: string; role: Role }, { rejectValue: ApiError }>(
     'user/updateUser',
-    async ({ formData, id, role }: { formData: FormData, id: string | undefined, role: Role }, { rejectWithValue }) => {
+    async ({ formData, id, role }, { rejectWithValue }) => {
         try {
-            const { data } = await api.put(`${BASE_URL}/${role}s/update-${role}/${id}`, formData, {
-                headers: { "Content-Type": "multipart/form-data" }
-            });
+            const { data } = await api.put<UpdateUserResponse>(`${BASE_URL}/${role}s/update-${role}/${id}`,
+                formData,
+                { headers: { "Content-Type": "multipart/form-data" } }
+            );
 
             return data;
         } catch (error: any) {
@@ -136,11 +127,11 @@ export const updateUser = createAsyncThunk(
     }
 );
 
-export const removeUser = createAsyncThunk(
+export const removeUser = createAsyncThunk<RemoveUserResponse, { id: string; role: string }, { rejectValue: ApiError }>(
     'user/removeUser',
-    async ({ id, role }: { id: string | undefined, role: string }, { rejectWithValue, dispatch }) => {
+    async ({ id, role }, { rejectWithValue, dispatch }) => {
         try {
-            const { data } = await api.delete(`${BASE_URL}/${role}s/delete-${role}/${id}`);
+            const { data } = await api.delete<RemoveUserResponse>(`${BASE_URL}/${role}s/delete-${role}/${id}`);
             dispatch(clearToken());
 
             return data;
@@ -150,47 +141,44 @@ export const removeUser = createAsyncThunk(
     }
 );
 
-export const removeUserByAdmin = createAsyncThunk(
+export const removeUserByAdmin = createAsyncThunk<RemoveUserResponse, { id: string }, { rejectValue: ApiError }>(
     'user/removeUserById',
-    async ({ id }: { id: string | undefined }, { rejectWithValue }) => {
+    async ({ id }, { rejectWithValue }) => {
         try {
-            const { data } = await api.delete(`${BASE_URL}/users/remove-user`, {
+            const { data } = await api.delete<RemoveUserResponse>(`${BASE_URL}/users/remove-user`, {
                 data: {
                     id
                 }
             });
 
-            console.log('data from removeUserByAdmin - redux', data)
             return data;
         } catch (error: any) {
-            return rejectWithValue({ message: error.message || "smth weng wrong in removeUserById" })
+            return rejectWithValue({ message: error.message || "smth weng wrong in removeUserByAdmin" })
         }
     }
 )
 
-export const getAllUsers = createAsyncThunk(
+export const getAllUsers = createAsyncThunk<GetAllUsersResponse, void, { rejectValue: ApiError }>(
     'user/getAllUsers',
     async (_, { rejectWithValue }) => {
         try {
-            const { data } = await api.get(`${BASE_URL}/users/get-all-users`);
+            const { data } = await api.get<GetAllUsersResponse>(`${BASE_URL}/users/get-all-users`);
 
             return data;
         } catch (error: any) {
-            return rejectWithValue({ message: error.message || "smth weng wrong in removeUser" })
+            return rejectWithValue({ message: error.message || "smth weng wrong in getAllUsers" })
         }
     }
 );
 
-export const addParentToChild = createAsyncThunk(
+export const addParentToChild = createAsyncThunk<AddParentToChildResponse, { parentId: string; studentId: string }, { rejectValue: ApiError }>(
     'user/addParentToChild',
-    async ({ parentId, studentId }: { parentId: string, studentId: string }, { rejectWithValue }) => {
+    async ({ parentId, studentId }, { rejectWithValue }) => {
         try {
-            const { data } = await api.put(`${BASE_URL}/parents/add-parent-to-child`, {
+            const { data } = await api.put<AddParentToChildResponse>(`${BASE_URL}/parents/add-parent-to-child`, {
                 parentId,
                 studentId
             });
-
-            console.log('data addParentToChild', data);
 
             return data;
         } catch (error: any) {
@@ -199,16 +187,14 @@ export const addParentToChild = createAsyncThunk(
     }
 );
 
-export const removeParentToChild = createAsyncThunk(
+export const removeParentToChild = createAsyncThunk<RemoveParentToChildResponse, { parentId: string; studentId: string }, { rejectValue: ApiError }>(
     'user/removeParentToChild',
-    async ({ parentId, studentId }: { parentId: string, studentId: string }, { rejectWithValue }) => {
+    async ({ parentId, studentId }, { rejectWithValue }) => {
         try {
-            const { data } = await api.put(`${BASE_URL}/parents/remove-parent-from-child`, {
+            const { data } = await api.put<RemoveParentToChildResponse>(`${BASE_URL}/parents/remove-parent-from-child`, {
                 parentId,
                 studentId
             });
-
-            console.log('data removeParentToChild', data);
 
             return data;
         } catch (error: any) {
@@ -230,10 +216,10 @@ export const userSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(registerUser.pending, (state, action) => {
+            .addCase(registerUser.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(registerUser.fulfilled, (state, action) => {
+            .addCase(registerUser.fulfilled, (state, action: PayloadAction<AuthResponse>) => {
                 state.currentUser = action.payload.user;
                 state.loading = false;
                 state.message = action.payload.message;
@@ -241,13 +227,13 @@ export const userSlice = createSlice({
             })
             .addCase(registerUser.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.error.message;
+                state.message = action.payload?.message;
             })
 
-            .addCase(loginUser.pending, (state, action) => {
+            .addCase(loginUser.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(loginUser.fulfilled, (state, action) => {
+            .addCase(loginUser.fulfilled, (state, action: PayloadAction<AuthResponse>) => {
                 state.message = action.payload.message;
                 state.currentUser = action.payload.user;
                 state.loading = false;
@@ -255,139 +241,144 @@ export const userSlice = createSlice({
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.error.message
+                state.message = action.payload?.message
             })
 
-            .addCase(googleAuth.pending, (state, action) => {
+            .addCase(googleAuth.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(googleAuth.fulfilled, (state, action) => {
+            .addCase(googleAuth.fulfilled, (state, action: PayloadAction<AuthResponse>) => {
                 state.message = action.payload.message;
                 state.currentUser = action.payload.user;
-                state.users?.push(action.payload.user)
+                if (state.users) {
+                    state.users.push(action.payload.user);
+                }
                 state.loading = false;
                 state.role = action.payload.role;
             })
             .addCase(googleAuth.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.error.message
+                state.message = action.payload?.message
             })
 
-            .addCase(getMe.pending, (state, action) => {
+            .addCase(getMe.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(getMe.fulfilled, (state, action) => {
+            .addCase(getMe.fulfilled, (state, action: PayloadAction<GetMeResponse>) => {
                 state.message = action.payload.message;
                 state.currentUser = action.payload.user;
                 state.loading = false;
             })
             .addCase(getMe.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.error.message
+                state.message = action.payload?.message
             })
 
-            .addCase(getUserById.pending, (state, action) => {
+            .addCase(getUserById.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(getUserById.fulfilled, (state, action) => {
+            .addCase(getUserById.fulfilled, (state, action: PayloadAction<GetUserByIdResponse>) => {
                 state.message = action.payload.message;
                 state.loading = false;
             })
             .addCase(getUserById.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.error.message
+                state.message = action.payload?.message
             })
 
-            .addCase(updateUser.pending, (state, action) => {
+            .addCase(updateUser.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(updateUser.fulfilled, (state, action) => {
+            .addCase(updateUser.fulfilled, (state, action: PayloadAction<UpdateUserResponse>) => {
                 state.message = action.payload.message;
                 state.currentUser = action.payload.user;
                 state.loading = false;
             })
             .addCase(updateUser.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.error.message
+                state.message = action.payload?.message
             })
 
-            .addCase(removeUser.pending, (state, action) => {
+            .addCase(removeUser.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(removeUser.fulfilled, (state, action) => {
+            .addCase(removeUser.fulfilled, (state, action: PayloadAction<RemoveUserResponse>) => {
                 state.message = action.payload.message;
                 state.currentUser = null;
                 state.loading = false;
             })
             .addCase(removeUser.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.error.message
+                state.message = action.payload?.message
             })
 
-            .addCase(removeUserByAdmin.pending, (state, action) => {
+            .addCase(removeUserByAdmin.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(removeUserByAdmin.fulfilled, (state, action) => {
+            .addCase(removeUserByAdmin.fulfilled, (state, action: PayloadAction<RemoveUserResponse>) => {
                 state.message = action.payload.message;
                 state.loading = false;
             })
             .addCase(removeUserByAdmin.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.error.message
+                state.message = action.payload?.message
             })
 
-            .addCase(getAllUsers.pending, (state, action) => {
+            .addCase(getAllUsers.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(getAllUsers.fulfilled, (state, action) => {
+            .addCase(getAllUsers.fulfilled, (state, action: PayloadAction<GetAllUsersResponse>) => {
                 state.message = action.payload.message;
                 state.users = action.payload.users;
                 state.loading = false;
             })
             .addCase(getAllUsers.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.error.message
+                state.message = action.payload?.message
             })
 
-            .addCase(addParentToChild.pending, (state, action) => {
+            .addCase(addParentToChild.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(addParentToChild.fulfilled, (state, action) => {
+            .addCase(addParentToChild.fulfilled, (state, action: PayloadAction<AddParentToChildResponse>) => {
                 state.message = action.payload.message;
 
                 if (state.currentUser && state.role === 'parent') {
-                    // if(state.role === 'student') {
-                    //     state.currentUser.parentIds.push(action.payload.result.childrenIds);
-                    // }
+                    const parent = state.currentUser as Parent;
 
-                    // console.log('action.payload.result', action.payload.result);
-                    state.currentUser.childrenIds.push(action.payload.result.childrenIds); // ? state.currentUser.childrenIds = action.payload.result.childrenIds
-                    state.currentUser.children = action.payload.result.children;
+                    parent.childrenIds = [...(parent.childrenIds || []), ...action.payload.result.childrenIds];
+                    parent.children = action.payload.result.children
+
+                    // state.currentUser.childrenIds.push(action.payload.result.childrenIds); // ? state.currentUser.childrenIds = action.payload.result.childrenIds
+                    // state.currentUser.children = action.payload.result.children;
                 }
                 state.loading = false;
             })
             .addCase(addParentToChild.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.error.message
+                state.message = action.payload?.message
             })
 
-            .addCase(removeParentToChild.pending, (state, action) => {
+            .addCase(removeParentToChild.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(removeParentToChild.fulfilled, (state, action) => {
+            .addCase(removeParentToChild.fulfilled, (state, action: PayloadAction<RemoveParentToChildResponse>) => {
                 state.message = action.payload.message;
 
                 if (state.currentUser && state.role === 'parent') {
-                    console.log('action.payload.parentToChild', action.payload.parentToChild);
-                    state.currentUser.childrenIds.filter(childrenIdsItem => childrenIdsItem !== action.payload.parentToChild.id);
-                    state.currentUser.children = action.payload.parentToChild.children;
-                    // state.currentUser.parentIds = state.currentUser.parentIds.filter(childrenIdsItem => childrenIdsItem !== action.payload.parentToChild.id)
+                    const parent = state.currentUser as Parent;
+
+                    parent.childrenIds = (parent.childrenIds || []).filter(childId => childId !== action.payload.parentToChild.id);
+                    parent.children = action.payload.parentToChild.children;
+
+                    // state.currentUser.childrenIds.filter(childrenIdsItem => childrenIdsItem !== action.payload.parentToChild.id);
+                    // state.currentUser.children = action.payload.parentToChild.children;
                 }
                 state.loading = false;
             })
             .addCase(removeParentToChild.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.error.message
+                state.message = action.payload?.message
             })
     }
 });

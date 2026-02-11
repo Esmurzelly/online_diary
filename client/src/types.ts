@@ -1,5 +1,3 @@
-import type { JSX } from "react";
-
 export interface User {
     id: string;
     name: string;
@@ -13,18 +11,19 @@ export interface User {
 }
 
 export interface Student extends User {
-    parentIds?: [],
+    parentIds?: string[],
     classId?: string | null,
-    grades: IGrade[];
+    grades?: IGrade[];
 }
 
 export interface Teacher extends User {
     schoolId?: string | null;
-    subjects: ISubject[];
+    subjects?: ISubject[];
 }
 
 export interface Parent extends User {
     childrenIds?: string[];
+    children?: Student[];
 }
 
 export interface AuthCredentials {
@@ -36,10 +35,13 @@ export interface RegisterData extends AuthCredentials {
     name: string;
 }
 
+export type Role = 'student' | 'teacher' | 'parent' | 'admin' | 'none';
+
 export interface AuthResponse {
-    user: User;
+    user: Student | Teacher | Parent;
     token: string;
     message: string | null;
+    role?: Role;
 }
 
 export interface AuthState {
@@ -74,15 +76,201 @@ export interface ISchool {
     teachers: Teacher[];
 }
 
+export type GradeValue = 1 | 2 | 3 | 4 | 5;
 
 export interface IGrade {
     id: string;
-    value: number;
+    value: GradeValue;
     date: Date;
     subjectId: string;
     subject: ISubject;
     studentId: string;
     student: Student;
-    comment: string;
+    comment?: string;
 }
 
+export interface IGetAllSchoolsAction {
+    allSchools: ISchool[];
+    message: string;
+}
+
+// ------------------ school Slice ---------------------------
+
+
+export interface ApiError {
+    message: string;
+}
+
+export interface GetSchoolByIdResponse {
+    schoolById: ISchool;
+    message: string;
+}
+
+export interface CreateSchoolResponse {
+    school: ISchool;
+    message: string;
+}
+
+export interface AddClassResponse {
+    data: IClass;
+    message: string;
+}
+
+export interface DeleteClassResponse {
+    removedClass: IClass;
+    message: string;
+}
+
+export interface AddTeacherResponse {
+    data: ISchool;
+    message: string;
+}
+
+// export interface AddTeacherResponseWithSchoolId extends AddTeacherResponse {
+//     schoolId: string
+// }
+
+export interface RemoveTeacherResponse {
+    data: Teacher;
+    message: string;
+}
+
+// ------------------ user Slice ---------------------------
+
+export interface GetMeResponse {
+    user: User | Student | Teacher | Parent;
+    message: string;
+}
+
+export interface GetUserByIdResponse {
+    user: User | Student | Teacher | Parent;
+    message: string;
+}
+
+export interface UpdateUserResponse {
+    user: User | Student | Teacher | Parent;
+    message: string;
+}
+
+export interface RemoveUserResponse {
+    message: string;
+}
+
+export interface GetAllUsersResponse {
+    users: (Student | Teacher | Parent)[];
+    message: string;
+}
+
+export interface AddParentToChildResponse {
+    message: string;
+    result: {
+        childrenIds: string[];
+        children: Student[];
+    };
+}
+
+export interface RemoveParentToChildResponse {
+    message: string;
+    parentToChild: {
+        id: string;
+        children: Student[];
+    };
+}
+
+// ------------------ teacher Slice ---------------------------
+
+export interface GetAllTeachersResponse {
+    allTeacher: Teacher[];
+    message: string;
+}
+
+// ------------------ student Slice ---------------------------
+
+
+export interface GetAllStudentsResponse {
+    allStudents: Student[];
+    message: string;
+}
+
+export interface GetStudentsFromOneClassResponse {
+    students: Student[];
+    message: string;
+}
+
+export interface SetGradeResponse {
+    grade: IGrade;
+    message: string;
+}
+
+export interface UpdateGradeResponse {
+    updatedGrade: IGrade;
+    message: string;
+}
+
+export interface RemoveGradeResponse {
+    grade: IGrade;
+    message: string;
+}
+
+// ------------------ class Slice ---------------------------
+
+export interface ClassItem {
+    id: string;
+    num: number | null;
+    letter: string | null;
+    schoolId: string | null;
+    students: Student[] | null;
+    subjects: ISubject[] | null;
+    school: ISchool | null,
+}
+
+export interface GetClassByIdResponse {
+    classItem: ClassItem;
+    message: string;
+}
+
+export interface AddStudentToClassResponse {
+    student: Student;
+    message: string;
+}
+
+export interface RemoveStudentFromClassResponse {
+    student: Student;
+    message: string;
+}
+
+export interface StudentsFromOneClassResponse {
+    students: Student[];
+    message: string;
+}
+
+export interface AddSubjectToClassResponse {
+    subject: ISubject;
+    message: string;
+}
+
+export interface RemoveSubjectFromClassResponse {
+    subject: ISubject;
+    message: string;
+}
+
+export interface AddTeacherToSubjectResponse {
+    teacherToSubject: {
+        teacherId: string;
+        teacher: {
+            subjects: ISubject[];
+        };
+    };
+    message: string;
+}
+
+export interface RemoveTeacherFromSubjectResponse {
+    teacherId: string;
+    removedSubjectFromTeacher: ISubject;
+    message: string;
+}
+
+export interface EditClassResponse {
+    editedClass: ClassItem;
+    message: string;
+}

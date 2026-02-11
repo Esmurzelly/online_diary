@@ -1,17 +1,7 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
 import { BASE_URL } from "@/constants";
 import api from "@/utils/axios";
-import type { ISchool, ISubject, Student } from '@/types';
-
-interface ClassItem {
-    id: string;
-    num: number | null;
-    letter: string | null;
-    schoolId: string | null;
-    students: Student[] | null;
-    subjects: ISubject[] | null;
-    school: ISchool | null,
-}
+import type { AddStudentToClassResponse, AddSubjectToClassResponse, AddTeacherToSubjectResponse, ApiError, ClassItem, EditClassResponse, GetClassByIdResponse, RemoveStudentFromClassResponse, RemoveSubjectFromClassResponse, RemoveTeacherFromSubjectResponse, StudentsFromOneClassResponse } from '@/types';
 
 interface InitialState {
     classItem: ClassItem | null;
@@ -27,11 +17,11 @@ const initialState: InitialState = {
     loading: false,
 };
 
-export const getClassById = createAsyncThunk(
+export const getClassById = createAsyncThunk<GetClassByIdResponse, { id: string }, { rejectValue: ApiError }>(
     'class/getClassById',
-    async ({ id }: { id: string | undefined }, { rejectWithValue }) => {
+    async ({ id }, { rejectWithValue }) => {
         try {
-            const { data } = await api.get(`${BASE_URL}/classes/get-class-by-id/${id}`);
+            const { data } = await api.get<GetClassByIdResponse>(`${BASE_URL}/classes/get-class-by-id/${id}`);
 
             return data;
         } catch (error: any) {
@@ -41,11 +31,11 @@ export const getClassById = createAsyncThunk(
     }
 );
 
-export const addStudentToTheClass = createAsyncThunk(
+export const addStudentToTheClass = createAsyncThunk<AddStudentToClassResponse, { studentId: string; classId: string }, { rejectValue: ApiError }>(
     'class/addStudentToTheClass',
-    async ({ studentId, classId }: { studentId: string, classId: string | undefined }, { rejectWithValue }) => {
+    async ({ studentId, classId }, { rejectWithValue }) => {
         try {
-            const { data } = await api.put(`${BASE_URL}/students/add-student-to-class`, {
+            const { data } = await api.put<AddStudentToClassResponse>(`${BASE_URL}/students/add-student-to-class`, {
                 studentId,
                 classId
             });
@@ -57,11 +47,11 @@ export const addStudentToTheClass = createAsyncThunk(
     }
 );
 
-export const removeStudentFromTheClass = createAsyncThunk(
+export const removeStudentFromTheClass = createAsyncThunk<RemoveStudentFromClassResponse, { studentId: string; classId: string }, { rejectValue: ApiError }>(
     'class/removeStudentToTheClass',
-    async ({ studentId, classId }: { studentId: string, classId: string | undefined }, { rejectWithValue }) => {
+    async ({ studentId, classId }, { rejectWithValue }) => {
         try {
-            const { data } = await api.put(`${BASE_URL}/students/remove-student-from-class`, {
+            const { data } = await api.put<RemoveStudentFromClassResponse>(`${BASE_URL}/students/remove-student-from-class`, {
                 studentId,
                 classId
             });
@@ -73,11 +63,11 @@ export const removeStudentFromTheClass = createAsyncThunk(
     }
 );
 
-export const studentsFromOneClass = createAsyncThunk(
+export const studentsFromOneClass = createAsyncThunk<StudentsFromOneClassResponse, { classId: string }, { rejectValue: ApiError }>(
     'class/studentsFromOneClass',
-    async ({ classId }: { classId: string | undefined }, { rejectWithValue }) => {
+    async ({ classId }, { rejectWithValue }) => {
         try {
-            const { data } = await api.get(`${BASE_URL}/students/get-students-from-one-class`, {
+            const { data } = await api.get<StudentsFromOneClassResponse>(`${BASE_URL}/students/get-students-from-one-class`, {
                 params: { classId }
             }
             );
@@ -90,11 +80,11 @@ export const studentsFromOneClass = createAsyncThunk(
     }
 );
 
-export const addSubjectToTheClass = createAsyncThunk(
+export const addSubjectToTheClass = createAsyncThunk<AddSubjectToClassResponse, { title: string; classId: string }, { rejectValue: ApiError }>(
     'class/addSubjectToTheClass',
-    async ({ title, classId }: { title: string | undefined, classId: string | undefined }, { rejectWithValue }) => {
+    async ({ title, classId }, { rejectWithValue }) => {
         try {
-            const { data } = await api.put(`${BASE_URL}/subjects/create-new-subject`, {
+            const { data } = await api.put<AddSubjectToClassResponse>(`${BASE_URL}/subjects/create-new-subject`, {
                 title,
                 classId
             });
@@ -106,11 +96,11 @@ export const addSubjectToTheClass = createAsyncThunk(
     }
 );
 
-export const removeSubjectFromTheClass = createAsyncThunk(
+export const removeSubjectFromTheClass = createAsyncThunk<RemoveSubjectFromClassResponse, { subjectId: string }, { rejectValue: ApiError }>(
     'class/removeSubjectFromTheClass',
-    async ({ subjectId }: { subjectId: string }, { rejectWithValue }) => {
+    async ({ subjectId }, { rejectWithValue }) => {
         try {
-            const { data } = await api.delete(`${BASE_URL}/subjects/delete-subject`, {
+            const { data } = await api.delete<RemoveSubjectFromClassResponse>(`${BASE_URL}/subjects/delete-subject`, {
                 data: {
                     subjectId
                 }
@@ -123,11 +113,11 @@ export const removeSubjectFromTheClass = createAsyncThunk(
     }
 );
 
-export const addTeacherToSubject = createAsyncThunk(
+export const addTeacherToSubject = createAsyncThunk<AddTeacherToSubjectResponse, { teacherId: string; subjectId: string }, { rejectValue: ApiError }>(
     'class/addTeacherToSubject',
-    async ({ teacherId, subjectId }: { teacherId: string, subjectId: string }, { rejectWithValue }) => {
+    async ({ teacherId, subjectId }, { rejectWithValue }) => {
         try {
-            const { data } = await api.put(`${BASE_URL}/subjects/teacher-to-subject`, {
+            const { data } = await api.put<AddTeacherToSubjectResponse>(`${BASE_URL}/subjects/teacher-to-subject`, {
                 teacherId,
                 subjectId
             });
@@ -139,11 +129,11 @@ export const addTeacherToSubject = createAsyncThunk(
     }
 );
 
-export const removeTeacherFromTheSubject = createAsyncThunk(
+export const removeTeacherFromTheSubject = createAsyncThunk<RemoveTeacherFromSubjectResponse, { teacherId: string; subjectId: string }, { rejectValue: ApiError }>(
     'class/removeTeacherFromTheSubject',
-    async ({ teacherId, subjectId }: { teacherId: string, subjectId: string }, { rejectWithValue }) => {
+    async ({ teacherId, subjectId }, { rejectWithValue }) => {
         try {
-            const { data } = await api.put(`${BASE_URL}/subjects/delete-teacher-from-subject`, {
+            const { data } = await api.put<RemoveTeacherFromSubjectResponse>(`${BASE_URL}/subjects/delete-teacher-from-subject`, {
                 teacherId,
                 subjectId
             });
@@ -156,17 +146,15 @@ export const removeTeacherFromTheSubject = createAsyncThunk(
     }
 );
 
-export const editClass = createAsyncThunk(
+export const editClass = createAsyncThunk<EditClassResponse, { classId: string; num?: number | null; letter?: string | null }, { rejectValue: ApiError }>(
     'class/editClass',
-    async ({ classId, num, letter }: { classId: string | null | undefined, num: number | null | undefined, letter: string | null | undefined }, { rejectWithValue }) => {
+    async ({ classId, num, letter }, { rejectWithValue }) => {
         try {
-            const { data } = await api.put(`${BASE_URL}/classes/edit-class`, {
+            const { data } = await api.put<EditClassResponse>(`${BASE_URL}/classes/edit-class`, {
                 classId,
                 num,
                 letter
             });
-
-            console.log('data from editClass - asyncThunk', data);
 
             return data;
         } catch (error: any) {
@@ -181,24 +169,25 @@ export const classSlice = createSlice({
     reducers: {},
     extraReducers: (builder) =>
         builder
-            .addCase(getClassById.pending, (state, action) => {
+            .addCase(getClassById.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(getClassById.fulfilled, (state, action) => {
+            .addCase(getClassById.fulfilled, (state, action: PayloadAction<GetClassByIdResponse>) => {
                 state.loading = false;
                 state.classItem = action.payload.classItem;
                 state.message = action.payload.message;
             })
             .addCase(getClassById.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.payload.message;
+                state.message = action.payload?.message || null;
             })
 
-            .addCase(addStudentToTheClass.pending, (state, action) => {
+            .addCase(addStudentToTheClass.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(addStudentToTheClass.fulfilled, (state, action) => {
+            .addCase(addStudentToTheClass.fulfilled, (state, action: PayloadAction<AddStudentToClassResponse>) => {
                 state.loading = false;
+
                 if (Array.isArray(state.classItem?.students)) {
                     state.classItem?.students?.push(action.payload.student);
                 } else {
@@ -210,13 +199,13 @@ export const classSlice = createSlice({
             })
             .addCase(addStudentToTheClass.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.payload.message;
+                state.message = action.payload?.message || null;
             })
 
-            .addCase(removeStudentFromTheClass.pending, (state, action) => {
+            .addCase(removeStudentFromTheClass.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(removeStudentFromTheClass.fulfilled, (state, action) => {
+            .addCase(removeStudentFromTheClass.fulfilled, (state, action: PayloadAction<RemoveStudentFromClassResponse>) => {
                 state.loading = false;
                 if (state.classItem?.students) {
                     state.classItem.students = state.classItem?.students?.filter(
@@ -228,79 +217,69 @@ export const classSlice = createSlice({
             })
             .addCase(removeStudentFromTheClass.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.payload.message;
+                state.message = action.payload?.message || null;
             })
 
-            .addCase(studentsFromOneClass.pending, (state, action) => {
+            .addCase(studentsFromOneClass.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(studentsFromOneClass.fulfilled, (state, action) => {
+            .addCase(studentsFromOneClass.fulfilled, (state, action: PayloadAction<StudentsFromOneClassResponse>) => {
                 state.loading = false;
-                state.classItem!.students = action.payload.students;
+                if (state.classItem) {
+                    state.classItem.students = action.payload.students;
+                }
                 state.message = action.payload.message;
             })
             .addCase(studentsFromOneClass.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.payload.message;
+                state.message = action.payload?.message || null;
             })
 
-            .addCase(addSubjectToTheClass.pending, (state, action) => {
+            .addCase(addSubjectToTheClass.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(addSubjectToTheClass.fulfilled, (state, action) => {
+            .addCase(addSubjectToTheClass.fulfilled, (state, action: PayloadAction<AddSubjectToClassResponse>) => {
                 state.loading = false;
-                if (Array.isArray(state.classItem!.subjects)) {
-                    state.classItem!.subjects?.push(action.payload.subject);
+                
+                if (Array.isArray(state.classItem?.subjects)) {
+                    state.classItem.subjects?.push(action.payload.subject);
                 } else {
                     state.classItem!.subjects = [action.payload.subject];
                 }
-                state.message = action.payload.message;
+                state.message = action.payload?.message || null;
             })
             .addCase(addSubjectToTheClass.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.payload.message;
+                state.message = action.payload?.message || null;
             })
 
-            .addCase(removeSubjectFromTheClass.pending, (state, action) => {
+            .addCase(removeSubjectFromTheClass.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(removeSubjectFromTheClass.fulfilled, (state, action) => {
+            .addCase(removeSubjectFromTheClass.fulfilled, (state, action: PayloadAction<RemoveSubjectFromClassResponse>) => {
                 state.loading = false;
-                state.classItem!.subjects = state.classItem?.subjects?.filter(subjectItem => subjectItem.id !== action.payload.subject.id);
+                if(state.classItem?.subjects) {
+                    state.classItem.subjects = state.classItem?.subjects?.filter(subjectItem => subjectItem.id !== action.payload.subject.id);
+                }
                 state.message = action.payload.message;
             })
             .addCase(removeSubjectFromTheClass.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.payload.message;
+                state.message = action.payload?.message || null;
             })
 
-            .addCase(editClass.pending, (state, action) => {
+            .addCase(editClass.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(editClass.fulfilled, (state, action) => {
+            .addCase(editClass.fulfilled, (state, action: PayloadAction<EditClassResponse>) => {
                 state.loading = false;
                 state.classItem = action.payload.editedClass;
                 state.message = action.payload.message;
             })
             .addCase(editClass.rejected, (state, action) => {
                 state.loading = false;
-                state.message = action.payload.message;
+                state.message = action.payload?.message || null;
             })
-
-    // .addCase(addTeacherToSubject.pending, (state, action) => {
-    //     state.loading = true;
-    // })
-    // .addCase(addTeacherToSubject.fulfilled, (state, action) => {
-    //     state.loading = false;
-    //     // ? sta
-    //     console.log('action.payload in addTeacherToSubject in classSlice - extraRedux', action.payload);
-    //     state.message = action.payload.message;
-    // })
-    // .addCase(addTeacherToSubject.rejected, (state, action) => {
-    //     state.loading = false;
-    //     state.message = action.payload.message;
-    // })
 });
 
-export const { } = classSlice.actions;
 export default classSlice.reducer;
