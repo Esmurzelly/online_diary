@@ -10,15 +10,13 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import Moment from 'react-moment';
 import { toast } from 'react-toastify';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
 import { averageGrade } from '@/utils/averageGrade';
+import Loader from '@/components/items/Loader';
+import type { IGrade, ISubject } from '@/types';
+import GradePopover from '@/components/items/gradePopover';
 
-type Props = {}
-
-const MarksPage = (props: Props) => {
+const MarksPage: React.FC = () => {
     const { currentUser, loading, message, role } = useSelector((state: RootState) => state.user);
 
     useEffect(() => {
@@ -30,10 +28,10 @@ const MarksPage = (props: Props) => {
     }
 
     if (loading) {
-        return <div>Loading...</div>
+        return <Loader />
     }
 
-        return (
+    return (
         <div className='w-full'>
             <h1>Your marks</h1>
 
@@ -53,49 +51,29 @@ const MarksPage = (props: Props) => {
                 </TableHeader>
 
                 <TableBody>
-                    {currentUser && currentUser.class && currentUser.class.subjects.map(subjectItem => (
-                        <TableRow key={subjectItem.id}>
-                            <TableCell className='h-10'>{subjectItem.title}</TableCell>
+                    {currentUser && currentUser.class && currentUser.class.subjects.map((subjectItem: ISubject) => {
+                        const grades: IGrade[] = 'grades' in currentUser ? (currentUser.grades ?? []) : [];
 
-                            <TableCell className='flex gap-2'>
-                                {currentUser.grades.filter(gradeItem => gradeItem.subjectId === subjectItem.id).map(gradeItemTwo =>
-                                    <Popover key={gradeItemTwo.id}>
-                                        <PopoverTrigger asChild>
-                                            <Button className={`w-7 cursor-pointer ${gradeItemTwo.value === 5 ? 'bg-red-600' : "bg-green-500"}`} variant="outline">{gradeItemTwo.value}</Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-full">
-                                            <div className="grid gap-4">
-                                                <div className="space-y-2">
-                                                    <h4 className="leading-none font-medium">Info</h4>
-                                                    <p className="text-muted-foreground text-sm">
-                                                        <span className='font-bold'>comment: </span>
-                                                        {gradeItemTwo.comment}
-                                                    </p>
+                        return (
+                            <TableRow key={subjectItem.id}>
+                                <TableCell className='h-10'>{subjectItem.title}</TableCell>
 
-                                                    <p className="text-muted-foreground text-sm">
-                                                        <span className='font-bold'>date: </span>
-                                                        <Moment format='DD/MM/YYYY' date={new Date(gradeItemTwo.date)} />
-                                                    </p>
+                                <TableCell className='flex gap-2'>
+                                    {grades.filter((gradeItem: IGrade) => gradeItem.subjectId === subjectItem.id).map((gradeItemTwo: IGrade) =>
+                                        <GradePopover grade={gradeItemTwo} />
+                                    )}
+                                </TableCell>
 
-                                                    {/* <p className="text-muted-foreground text-sm">
-                                                        <span className='font-bold'>teacher: </span>
-                                                        
-                                                    </p> */}
-                                                </div>
-                                            </div>
-                                        </PopoverContent>
-                                    </Popover>
-                                )}
-                            </TableCell>
-
-                            <TableCell>{averageGrade(currentUser.grades, 2, subjectItem.id)}</TableCell>
-                            <TableCell>{averageGrade(currentUser.grades, 2, subjectItem.id)}</TableCell>
-                            <TableCell>{averageGrade(currentUser.grades, 2, subjectItem.id)}</TableCell>
-                            <TableCell>{averageGrade(currentUser.grades, 2, subjectItem.id)}</TableCell>
-                            <TableCell>{averageGrade(currentUser.grades, 2, subjectItem.id)}</TableCell>
-                            <TableCell className='text-right'>{averageGrade(currentUser.grades, 0, subjectItem.id)}</TableCell>
-                        </TableRow>
-                    ))}
+                                <TableCell>{averageGrade(grades, 2, subjectItem.id)}</TableCell>
+                                <TableCell>{averageGrade(grades, 2, subjectItem.id)}</TableCell>
+                                <TableCell>{averageGrade(grades, 2, subjectItem.id)}</TableCell>
+                                <TableCell>{averageGrade(grades, 2, subjectItem.id)}</TableCell>
+                                <TableCell>{averageGrade(grades, 2, subjectItem.id)}</TableCell>
+                                <TableCell className='text-right'>{averageGrade(grades, 0, subjectItem.id)}</TableCell>
+                            </TableRow>
+                        )
+                    }
+                    )}
                 </TableBody>
             </Table>
         </div>

@@ -7,7 +7,7 @@ import api from "@/utils/axios";
 
 interface InitialState {
     users: Student[] | Teacher[] | Parent[] | null;
-    currentUser: User | null;
+    currentUser: User | Student | null;
     message?: string | null;
     loading: boolean,
     role: Role | undefined | null,

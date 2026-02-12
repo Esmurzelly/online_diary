@@ -6,6 +6,7 @@ export interface User {
     avatarUrl?: string | null;
     phone?: string | null;
     address?: string | null,
+    class?: IClass,
     createdAt: Date | string | null,
     updatedAt: Date | string | null
 }
@@ -56,7 +57,8 @@ export interface IClass {
     id: string;
     letter: string;
     num: number;
-    schoolId: string
+    schoolId: string;
+    subjects: ISubject[];
 }
 
 export interface ISubject {

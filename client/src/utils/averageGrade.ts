@@ -1,4 +1,6 @@
-export const averageGrade = (array: [], fixedNum: number, subjectId: string) => {
+import type { IGrade } from "@/types";
+
+export const averageGrade = (array: IGrade[], fixedNum: number, subjectId: string) => {
     const initialValue = 0;
 
     const sortedArray = array.filter(arrayItem => arrayItem.subjectId === subjectId);
