@@ -63,6 +63,7 @@ export interface ISubject {
     id: string;
     title: string;
     teacherId: string | null;
+    teacher?: Teacher;
     classId: string;
 }
 

@@ -1,5 +1,3 @@
-import React, { useEffect } from 'react'
-import { Button } from '@/components/ui/button'
 import { MdArrowRightAlt } from 'react-icons/md'
 import { IoBookOutline } from 'react-icons/io5'
 import { LiaUniversitySolid } from "react-icons/lia";
@@ -12,9 +10,7 @@ import { FaShieldAlt } from "react-icons/fa";
 import { CiBookmarkCheck } from "react-icons/ci";
 import { Link } from 'react-router-dom';
 
-type Props = {}
-
-const Home = (props: Props) => {
+const Home: React.FC = () => {
   return (
     <section className="flex flex-col min-w-full">
       <div className="bg-linear-to-b from-primary-light to-secondary-dark text-center py-5!">
@@ -84,7 +80,6 @@ const Home = (props: Props) => {
                 </div>
               </div>
             </div>
-
 
             <div className="relative w-[200px] py-10! sm:w-4/5 md:w-3/5 lg:w-2/5 mx-auto! animate-bounce">
               <div className="aspect-square rounded-3xl bg-linear-to-br from-primary/20 to-secondary/30 flex items-center justify-center">

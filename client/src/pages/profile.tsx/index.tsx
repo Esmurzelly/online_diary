@@ -419,10 +419,10 @@ const Profile = (props: Props) => {
                     {currentUser && currentUser?.classId ? (
                         <div className="text-lg flex items-center justify-between w-full">
                             <div className="">
-                                <p className='font-medium'>Class {currentUser.class.num} {currentUser.class.letter}</p>
-                                <p className='text-sm'>school's title: {currentUser.class.school.title}</p>
+                                <p className='font-medium'>Class {currentUser.class?.num} {currentUser.class?.letter}</p>
+                                <p className='text-sm'>school's title: {currentUser.class?.school.title}</p>
                             </div>
-                            <Link className='flex items-center text-sm rounded-xl gap-1 bg-primary-light px-2! py-1!' to={`/class/${currentUser.class.id}`}>View class <FiExternalLink /></Link>
+                            <Link className='flex items-center text-sm rounded-xl gap-1 bg-primary-light px-2! py-1!' to={`/class/${currentUser.class?.id}`}>View class <FiExternalLink /></Link>
                         </div>
                     )
                         : "without class"}

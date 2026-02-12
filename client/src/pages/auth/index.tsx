@@ -1,13 +1,9 @@
-import React, { useEffect, useState } from 'react'
-import LoginComponent from '../login'
-import { Button } from "@/components/ui/button"
-import RegisterComponent from '../register'
+import React, { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -27,17 +23,35 @@ import { PiStudent } from "react-icons/pi";
 import { GiTeacher } from "react-icons/gi";
 import { RiParentFill } from "react-icons/ri";
 import { RiAdminLine } from "react-icons/ri";
-
-type Props = {}
+import LoginComponent from '@/components/items/login';
+import RegisterComponent from '@/components/items/register';
 
 type Role = 'student' | 'teacher' | 'parent' | 'admin' | 'none';
 
-const Auth = (props: Props) => {
+interface RoleOption {
+  value: Role;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  disabled?: boolean;
+};
+
+const ROLE_OPTIONS: RoleOption[] = [
+  { value: 'student', label: 'Student', icon: PiStudent },
+  { value: 'teacher', label: 'Teacher', icon: GiTeacher },
+  { value: 'parent', label: 'Parent', icon: RiParentFill },
+  { value: 'admin', label: 'Admin', icon: RiAdminLine },
+];
+
+
+const Auth: React.FC = () => {
   const [role, setRole] = useState<Role>('none');
 
-  const handleChange = (state: Role) => {
-    setRole(state);
-    toast.info(`role is ${state}`)
+  const handleChange = (selectedRole: Role) => {
+    setRole(selectedRole);
+
+    if (selectedRole !== 'none') {
+      toast.info(`Selected role: ${selectedRole}`);
+    };
   };
 
   return (
@@ -55,23 +69,14 @@ const Auth = (props: Props) => {
               <SelectValue placeholder="Role" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">Choose the role</SelectItem>
-              <SelectItem className='h-8! border rounded-none pl-2! cursor-pointer' value="student">
-                <PiStudent />
-                Student
-              </SelectItem>
-              <SelectItem className='h-8! border rounded-none pl-2! cursor-pointer' value="teacher">
-                <GiTeacher />
-                Teacher
-              </SelectItem>
-              <SelectItem className='h-8! border rounded-none pl-2! cursor-pointer' value="parent">
-                <RiParentFill />
-                Parent
-              </SelectItem>
-              <SelectItem className='h-8! border rounded-none pl-2! cursor-pointer' value="admin">
-                <RiAdminLine />
-                Admin
-              </SelectItem>
+              <SelectItem className="cursor-not-allowed opacity-50" disabled value="none">Choose the role</SelectItem>
+
+              {ROLE_OPTIONS.map(({ value, label, icon: Icon }) => (
+                <SelectItem key={value} value={value} className='h-8! border rounded-none pl-2! cursor-pointer'>
+                  <Icon className="w-4 h-4" />
+                  <span>{label}</span>
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
@@ -123,6 +128,7 @@ const Auth = (props: Props) => {
             </Tabs>
           </div>
         </div>
+
         <p className='text-center mx-auto! mt-3! w-3/4 text-xs sm:text-sm'>By continuing, you agree to our Terms of Service and Privacy Policy</p>
       </div>
     </div>

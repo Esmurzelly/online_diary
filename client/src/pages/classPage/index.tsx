@@ -6,22 +6,17 @@ import { useAppDispatch } from '@/redux/store';
 import { useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify';
-import { v4 as uuidv4 } from 'uuid';
 import {
     Select,
     SelectContent,
-    SelectGroup,
     SelectItem,
-    SelectLabel,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
-    TableFooter,
     TableHead,
     TableHeader,
     TableRow,
@@ -32,29 +27,36 @@ import { useForm } from 'react-hook-form';
 import { FiPlus, FiSave } from 'react-icons/fi';
 import { MdOutlinePlayLesson, MdPeople } from 'react-icons/md';
 import { FaRegTrashAlt } from 'react-icons/fa';
-import { RxCross2 } from 'react-icons/rx';
 import { IoBookOutline } from 'react-icons/io5';
+import Loader from '@/components/items/Loader';
+import SubjectRow from '@/components/items/subjectRow';
 
-type Props = {}
+interface ClassFormData {
+    numberGrade: number;
+    letter: string;
+}
 
-const ClassPage = (props: Props) => {
+const ClassPage: React.FC = () => {
     const { id } = useParams();
     const dispatch = useAppDispatch();
+
     const { classItem, loading: classLoading, message: classMessage } = useSelector((state: RootState) => state.class);
     const { studentsList, loading: studentLoading } = useSelector((state: RootState) => state.student);
     const { teacherList, message: teacherMessage } = useSelector((state: RootState) => state.teacher);
     const { role } = useSelector((state: RootState) => state.user);
-    const [selectedSubject, setSelectedSubject] = useState<string>();
-    const [selectedStudent, setSelectedStudent] = useState<string>();
-    const [selectedTeacher, setSelectedTeacher] = useState<string>();
-    const [showChangeField, setShowChangeField] = useState(false);
+
+    const [selectedSubject, setSelectedSubject] = useState<string>('');
+    const [selectedStudent, setSelectedStudent] = useState<string>('');
+    const [selectedTeacher, setSelectedTeacher] = useState<string | undefined>('');
+
     const {
         register,
         handleSubmit,
         formState: { errors }
-    } = useForm();
+    } = useForm<ClassFormData>();
 
-    const classSubjectTitleSet = new Set(classItem?.subjects?.map(subjectEl => subjectEl.title));
+    const classSubjectTitleSet = new Set(classItem?.subjects?.map(subjectEl => subjectEl.title) || []);
+
     const availableSubjects = SUBJECTS.filter(
         subjectItem => !classSubjectTitleSet.has(subjectItem)
     );
@@ -68,52 +70,63 @@ const ClassPage = (props: Props) => {
     }, [teacherMessage]);
 
     useEffect(() => {
-        dispatch(getClassById({ id }));
-        dispatch(getAllStudents());
-        // dispatch(studentsFromOneClass({ classId: classItem?.id }));
+        if (id) {
+            dispatch(getClassById({ id }));
+            dispatch(getAllStudents());
+        }
     }, []);
 
-    useEffect(() => {
-        console.log('selectedTeacher', selectedTeacher);
-    }, [selectedTeacher])
-
-    const handleTeacherChange = (state: string) => {
-        setSelectedTeacher(state);
+    const handleTeacherChange = (teacherId: string) => {
+        setSelectedTeacher(teacherId);
     };
 
-    const handleSubjectChange = (state: string) => {
-        setSelectedSubject(state);
+    const handleSubjectChange = (subject: string) => {
+        setSelectedSubject(subject);
     };
 
-    const handleStudentChange = (state: string) => {
-        setSelectedStudent(state);
+    const handleStudentChange = (studentId: string) => {
+        setSelectedStudent(studentId);
     };
 
     const handleAddStudent = async () => {
+        if (!selectedStudent || !id) {
+            toast.error('Please select a student');
+            return;
+        }
+
         try {
-            if (selectedStudent) {
-                await dispatch(addStudentToTheClass({ studentId: selectedStudent, classId: id })).unwrap();
-                await dispatch(getAllStudents());
-            }
+            await dispatch(addStudentToTheClass({ studentId: selectedStudent, classId: id })).unwrap();
+            await dispatch(getAllStudents());
+            setSelectedStudent('');
         } catch (error) {
-            console.log('error in handleAddStudent', error)
+            console.log('error in handleAddStudent', error);
+            toast.error('Failed to add student');
         }
     }
 
     const handleRemoveStudent = async (studentId: string) => {
+        if (!id) return;
+
         try {
             await dispatch(removeStudentFromTheClass({ studentId, classId: id })).unwrap();
             await dispatch(getAllStudents());
         } catch (error) {
             console.log('error in handleRemoveStudent', error);
+            toast.error('Failed to remove student');
         }
     };
 
     const handleAddSubject = async () => {
+        if (!selectedSubject || !id) {
+            toast.error('Please select a subject');
+            return;
+        }
+
         try {
             await dispatch(addSubjectToTheClass({ title: selectedSubject, classId: id })).unwrap();
         } catch (error) {
             console.log('error in handleAddSubject', error);
+            toast.error('Failed to add subject');
         }
     }
 
@@ -122,50 +135,57 @@ const ClassPage = (props: Props) => {
             await dispatch(removeSubjectFromTheClass({ subjectId })).unwrap();
         } catch (error) {
             console.log('error in handleRemoveSubject', error);
+            toast.error('Failed to remove subject');
         }
     };
 
     const handleLinkTeacher = async (teacherItemId: string, subjectItemId: string) => {
+        if (!id) return;
+
         try {
             await dispatch(addTeacherToSubject({ teacherId: teacherItemId, subjectId: subjectItemId }));
             setSelectedTeacher(undefined);
             await dispatch(getClassById({ id }));
         } catch (error) {
             console.log('error in handleLinkTeacher', error);
+            toast.error('Failed to link teacher');
         }
     }
 
     const handleUnlinkTeacher = async ({ teacherId, subjectId }: { teacherId: string, subjectId: string }) => {
+        if (!id) return;
+
         try {
             await dispatch(removeTeacherFromTheSubject({ teacherId, subjectId }));
             setSelectedTeacher(undefined);
             await dispatch(getClassById({ id }));
         } catch (error) {
             console.log('error in handleUnlinkTeacher', error);
+            toast.error('Failed to unlink teacher');
         }
     }
 
-    const handleChangeClass = async (formData: { numberGrade: number, letter: string }) => {
-        console.log('formData', formData);
+    const handleChangeClass = async (formData: ClassFormData) => {
+        if (!id || !classItem?.id) return;
+
         const changedNumber = Number(formData.numberGrade);
         const changedLetter = formData.letter;
 
         try {
-            const res = await dispatch(editClass({
+            await dispatch(editClass({
                 num: changedNumber,
                 letter: changedLetter,
                 classId: classItem?.id
             }));
             await dispatch(getClassById({ id }));
-
-            console.log('res from handleChangeClass - client', res);
         } catch (error) {
             console.log('error in handleChangeClass', error);
+            toast.error('Failed to update class');
         }
     }
 
     if (classLoading || studentLoading || !classItem) {
-        return <h1>Loading...</h1>
+        return <Loader />
     };
 
     return (
@@ -200,6 +220,7 @@ const ClassPage = (props: Props) => {
                                 className='bg-white outline w-full p-2! rounded-sm'
                                 defaultValue={classItem.num || ""}
                             />
+                            {/* @ts-ignore */}
                             {errors.mark && <span>{errors.mark.message}</span>}
                         </div>
 
@@ -212,6 +233,7 @@ const ClassPage = (props: Props) => {
                                 placeholder='Your letter'
                                 defaultValue={classItem.letter || ""}
                             />
+                            {/* @ts-ignore */}
                             {errors.mark && <span>{errors.letter.message}</span>}
                         </div>
 
@@ -257,52 +279,20 @@ const ClassPage = (props: Props) => {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {classItem.subjects?.map(subjectItem =>
-                                            <TableRow className='' key={`${classItem.id}_${uuidv4()}`}>
-                                                <TableCell className='max-w-[100px]'>
-                                                    <p className='text-sm h-full text-wrap'>{subjectItem.title}</p>
-                                                </TableCell>
-
-                                                <TableCell className="flex flex-col items-start gap-2 p-2!">
-                                                    {
-                                                        subjectItem?.teacher
-                                                            ? <Link className='font-semibold' to={`/profile/${subjectItem?.teacher.id}`}>{subjectItem?.teacher?.name} {subjectItem?.teacher?.surname}</Link>
-                                                            : <RxCross2 className='text-center w-4/5' />
-                                                    }
-
-                                                    {role === 'admin' && (
-                                                        <div className='w-4/5 flex flex-col gap-3'>
-                                                            <Select onValueChange={handleTeacherChange}>
-                                                                <SelectTrigger className="w-full bg-secondary-light p-1! cursor-pointer">
-                                                                    <SelectValue placeholder="Select a teacher" />
-                                                                </SelectTrigger>
-                                                                <SelectContent>
-                                                                    <SelectGroup>
-                                                                        <SelectLabel>Teachers</SelectLabel>
-                                                                        {teacherList && teacherList.filter(teacherItem => teacherItem.schoolId === classItem.schoolId).map((teacherItem) =>
-                                                                            <SelectItem key={teacherItem.id} value={teacherItem.id} className='p-2! cursor-pointer'>
-                                                                                {teacherItem.name} {teacherItem.surname}
-                                                                            </SelectItem>)}
-                                                                    </SelectGroup>
-                                                                </SelectContent>
-                                                            </Select>
-
-                                                            {subjectItem?.teacher?.name
-                                                                ? <button className='flex items-center justify-center text-center gap-3 cursor-pointer font-medium bg-primary-light text-primary-dark p-2! rounded-lg' onClick={() => handleUnlinkTeacher({ teacherId: subjectItem.teacherId, subjectId: subjectItem.id })}>Unlink</button>
-                                                                : <button className='flex items-center justify-center text-center gap-3 cursor-pointer font-medium bg-primary-light text-primary-dark p-2! rounded-lg' onClick={() => handleLinkTeacher(selectedTeacher, subjectItem.id)}>Link to teacher</button>
-                                                            }
-                                                        </div>
-                                                    )}
-
-                                                </TableCell>
-
-                                                {role === 'admin' &&
-                                                    <TableCell className='text-right'>
-                                                        <Button className='cursor-pointer' onClick={() => handleRemoveSubject(subjectItem.id)} variant={'ghost'}>
-                                                            <FaRegTrashAlt className='text-red-700' />
-                                                        </Button>
-                                                    </TableCell>}
-                                            </TableRow>
+                                        {classItem.subjects?.map(subject =>
+                                            <SubjectRow
+                                                key={subject.id}
+                                                subjectItem={subject}
+                                                classItem={classItem}
+                                                role={role}
+                                                teacherList={teacherList || []}
+                                                selectedTeacher={selectedTeacher}
+                                                onTeacherChange={handleTeacherChange}
+                                                onLinkTeacher={handleLinkTeacher}
+                                                // @ts-ignore
+                                                onUnlinkTeacher={handleUnlinkTeacher}
+                                                onRemoveSubject={handleRemoveSubject}
+                                            />
                                         )}
                                     </TableBody>
                                 </Table>
@@ -360,8 +350,6 @@ const ClassPage = (props: Props) => {
                         </div>
                     </div>
                 </div>
-
-
             </div>
         </div>
     )
