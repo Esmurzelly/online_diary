@@ -1,5 +1,5 @@
+import React, { useEffect, useMemo } from 'react';
 import type { RootState } from '@/redux/rootReducer'
-import React, { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
@@ -16,34 +16,38 @@ import { IoIosBookmarks } from "react-icons/io";
 import { SiGoogleclassroom } from "react-icons/si";
 import { FaSchool } from "react-icons/fa";
 import { GoLinkExternal } from "react-icons/go";
+import Loader from '@/components/items/Loader';
+import type { Teacher } from '@/types';
 
-type Props = {}
+const Subjects: React.FC = () => {
+    const user = useSelector((state: RootState) => state.user);
 
-const Subjects = (props: Props) => {
-    const { currentUser, loading, message, role } = useSelector((state: RootState) => state.user);
+    const subjectsOfTeacher = useMemo(() => {
+        // @ts-ignore
+        if (!user || !('subjects' in user.currentUser)) return null;
 
-    const numberOfClasses = currentUser?.subjects ? currentUser?.subjects.map(tempEl => tempEl.classId) : [];
+        const teacher = user.currentUser as Teacher;
+        return teacher.subjects
+    }, [user]);
 
     useEffect(() => {
-        if (message) toast(message);
-    }, [message]);
+        if (user.message) toast(user.message);
+    }, [user.message]);
 
-    if (loading) {
-        return <h1>Loading...</h1>
+    if (user.loading || !user.currentUser || !subjectsOfTeacher) {
+        return <Loader />
     }
 
-    if (!currentUser) {
-        return <h1>No user!</h1>
-    }
+    const numberOfClasses = (user.currentUser as Teacher)?.subjects ? subjectsOfTeacher.map(tempEl => tempEl.classId) : [];
 
-    if(!currentUser.subjects) {
+    if (!subjectsOfTeacher) {
         return "No access"
     }
 
     return (
         <div className='w-full p-5!'>
             <div className="bg-white rounded-2xl p-3! shadow-xl">
-                <h1 className='flex items-center gap-2 font-semibold text-primary-dark'><IoIosBookmarks className='text-primary-light w-5 h-5' /> All Subjects ({currentUser.subjects.length})</h1>
+                <h1 className='flex items-center gap-2 font-semibold text-primary-dark'><IoIosBookmarks className='text-primary-light w-5 h-5' /> All Subjects ({subjectsOfTeacher.length})</h1>
                 <Table className='mt-5!'>
                     <TableCaption>A list of your own subjects.</TableCaption>
                     <TableHeader>
@@ -56,7 +60,7 @@ const Subjects = (props: Props) => {
                     </TableHeader>
 
                     <TableBody>
-                        {currentUser.subjects.map(subjectItem => <TableRow className='' key={subjectItem.id}>
+                        {subjectsOfTeacher.map(subjectItem => <TableRow className='' key={subjectItem.id}>
                             <TableCell className='py-5!'>
                                 <div className="flex items-center gap-2 text-primary-dark">
                                     <IoIosBookmarks className='text-primary-light w-3 h-3' />
@@ -74,7 +78,7 @@ const Subjects = (props: Props) => {
                             <TableCell className='py-5!'>
                                 <div className="flex items-center gap-2 text-primary-dark">
                                     <FaSchool className='text-primary-light w-3 h-3' />
-                                    {subjectItem.teacher.school.title}
+                                    {subjectItem.teacher && subjectItem.teacher.school.title}
                                 </div>
                             </TableCell>
 
@@ -92,16 +96,16 @@ const Subjects = (props: Props) => {
             <div className="mt-10! flex flex-col md:flex-row items-center justify-between gap-5 w-full">
                 <div className="bg-white rounded-2xl p-3! shadow-xl flex items-center gap-5 w-full">
                     <IoIosBookmarks className='text-primary-light w-10 h-10' />
-                    
+
                     <div className="">
-                        <p className='font-semibold text-2xl'>{currentUser.subjects.length}</p>
+                        <p className='font-semibold text-2xl'>{subjectsOfTeacher.length}</p>
                         <p className='text-sm mt-1!'>Total Subjects</p>
                     </div>
                 </div>
 
                 <div className="bg-white rounded-2xl p-3! shadow-xl flex items-center gap-5 w-full">
                     <SiGoogleclassroom className='text-primary-light w-10 h-10' />
-                    
+
                     <div className="">
                         <p className='font-semibold text-2xl'>{new Set(numberOfClasses).size}</p>
                         <p className='text-sm mt-1!'>Classes</p>

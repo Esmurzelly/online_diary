@@ -14,10 +14,9 @@ import { GoLinkExternal } from "react-icons/go";
 import { MdEmail } from "react-icons/md";
 import { IoLocationSharp } from "react-icons/io5";
 import { FaPhoneAlt } from "react-icons/fa";
+import Loader from '@/components/items/Loader'
 
-type Props = {}
-
-const School = (props: Props) => {
+const School: React.FC = () => {
     const { schoolList, loading, message } = useSelector((state: RootState) => state.school);
     const [showSchools, setShowSchools] = useState(false);
     const dispatch = useAppDispatch();
@@ -30,15 +29,12 @@ const School = (props: Props) => {
 
     const onSubmit: SubmitHandler<ISchool> = async (data) => {
         try {
-            const res = await dispatch(createSchool(data));
-            console.log('res from onSubmit', res);
-
-            dispatch(getAllSchools());
+            await dispatch(createSchool(data)).unwrap();
+            await dispatch(getAllSchools()).unwrap();
         } catch (error) {
             console.log(`error in onSubmit - ${error}`);
         }
     }
-
 
     useEffect(() => {
         if (message) toast(message);
@@ -49,7 +45,7 @@ const School = (props: Props) => {
     }, []);
 
     if (loading) {
-        return <h1>Loading...</h1>
+        return <Loader />
     }
 
     return (
@@ -124,7 +120,7 @@ const School = (props: Props) => {
             {schoolList && schoolList?.length > 0
                 ? <div className='mt-5!'>
                     <h1 className='flex items-center gap-1 font-medium text-xl'>All Schools ({schoolList.length})</h1>
-                    <Button className='cursor-pointer' onClick={() => setShowSchools(state => !state)} variant={'outline'}>{showSchools ? "Hide" : "Show"} schools</Button>
+                    <Button className='cursor-pointer px-2!' onClick={() => setShowSchools(state => !state)} variant={'outline'}>{showSchools ? "Hide" : "Show"} schools</Button>
 
                     {showSchools && <ul className='flex flex-col md:flex-row md:flex-wrap gap-2 items-start'>
                         {schoolList.map(schoolEl =>

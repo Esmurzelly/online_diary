@@ -1,17 +1,16 @@
+import React, { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { RootState } from '@/redux/rootReducer';
 import { addClassToSchool, addTeacherToTheSchool, deleteClass, getSchoolById, removeTeacherFromTheSchool } from '@/redux/school/schoolSlice';
 import { useAppDispatch } from '@/redux/store';
 import { getAllTeachers } from '@/redux/teacher/teacherSlice';
-import type { ISchool } from '@/types';
-import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify';
 import { FaPhoneAlt, FaSchool, FaTrashAlt } from "react-icons/fa";
-import { GoLinkExternal, GoPlus } from "react-icons/go";
+import { GoPlus } from "react-icons/go";
 import { MdEmail } from "react-icons/md";
 import { IoLocationSharp } from "react-icons/io5";
 import { SiGoogleclassroom } from 'react-icons/si';
@@ -20,20 +19,18 @@ import {
     TableBody,
     TableCaption,
     TableCell,
-    TableFooter,
     TableHead,
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
 import { GiTeacher } from 'react-icons/gi';
+import Loader from '@/components/items/Loader';
 
-type Props = {}
-
-const SchoolId = (props: Props) => {
+const SchoolId: React.FC = () => {
     const { id } = useParams();
     const dispatch = useAppDispatch();
     const [showClasses, setShowClasses] = useState(false);
-    const [selectedTeacher, setSelectedTeacher] = useState<string | null>();
+    const [selectedTeacher, setSelectedTeacher] = useState<string | undefined>();
     const { teacherList } = useSelector((state: RootState) => state.teacher);
     const { loading, message, currentSchool } = useSelector((state: RootState) => state.school);
     const {
@@ -44,6 +41,8 @@ const SchoolId = (props: Props) => {
     } = useForm<{ num: number, letter: string }>();
 
     useEffect(() => {
+        if (!id) return;
+
         dispatch(getSchoolById({ id }));
         dispatch(getAllTeachers());
     }, []);
@@ -53,8 +52,10 @@ const SchoolId = (props: Props) => {
     }, [message]);
 
     const handleAddClassToSchool = async (data: { num: number, letter: string }) => {
+        if (!currentSchool?.id || !id) return;
+
         try {
-            const res = await dispatch(addClassToSchool({
+            await dispatch(addClassToSchool({
                 letter: data.letter,
                 num: Number(data.num),
                 schoolId: currentSchool?.id
@@ -70,6 +71,8 @@ const SchoolId = (props: Props) => {
     }
 
     const handleDeleteClass = async ({ id }: { id: string }) => {
+        if (!id || !currentSchool?.id) return;
+
         try {
             await dispatch(deleteClass({ id }));
             dispatch(getSchoolById({ id: currentSchool?.id }));
@@ -83,28 +86,29 @@ const SchoolId = (props: Props) => {
     };
 
     const handleAddTeacher = async () => {
+        if (!id || !currentSchool?.id) return;
+
         if (selectedTeacher) {
-            await dispatch(addTeacherToTheSchool({ teacherId: selectedTeacher, schoolId: id }))
+            await dispatch(addTeacherToTheSchool({ teacherId: selectedTeacher, schoolId: id })).unwrap();
             dispatch(getSchoolById({ id: currentSchool?.id }));
-            setSelectedTeacher(null);
+            setSelectedTeacher(undefined);
         }
     };
 
     const handleRemoveTeacherFromSchool = async (teacherId: string) => {
+        if (!id || !currentSchool?.id) return;
+
         try {
-            const res = await dispatch(removeTeacherFromTheSchool({ schoolId: id, teacherId })).unwrap();
-            console.log('res from handleRemoveTeacherFromSchool - client func', res);
+            await dispatch(removeTeacherFromTheSchool({ schoolId: id, teacherId })).unwrap();
             dispatch(getSchoolById({ id: currentSchool?.id }));
-            setSelectedTeacher(null);
+            setSelectedTeacher(undefined);
 
         } catch (error) {
             console.log('error in handleRemoveTeacherFromSchool', error)
         }
     }
 
-    if (loading) {
-        <h1>Loading...</h1>
-    }
+    if (loading || !currentSchool) return <Loader />
 
     return (
         <div className='w-full p-5! pt-3!'>
@@ -117,17 +121,17 @@ const SchoolId = (props: Props) => {
                 <div className="col-start-1 row-start-2 flex flex-col md:flex-row md:justify-between gap-2">
                     <div className="flex items-center justify-start gap-3 text-primary-light">
                         <MdEmail className='w-4 h-4' />
-                        <p className='text-sm'>{currentSchool.email}</p>
+                        <p className='text-sm'>{currentSchool?.email}</p>
                     </div>
 
                     <div className="flex items-center justify-start gap-3 text-primary-light">
                         <IoLocationSharp className='w-4 h-4' />
-                        <p className='text-sm'>{currentSchool.address}</p>
+                        <p className='text-sm'>{currentSchool?.address}</p>
                     </div>
 
                     <div className="flex items-center justify-start gap-3 text-primary-light">
                         <FaPhoneAlt className='w-4 h-4' />
-                        <p className='text-sm'>{currentSchool.phone}</p>
+                        <p className='text-sm'>{currentSchool?.phone}</p>
                     </div>
                 </div>
             </div>
@@ -212,11 +216,14 @@ const SchoolId = (props: Props) => {
 
                 <div className="flex items-center mt-4! gap-3">
                     <Select value={selectedTeacher} onValueChange={handleTeacherChange}>
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full cursor-pointer">
                             <SelectValue placeholder="Select a teacher" />
                         </SelectTrigger>
                         <SelectContent>
-                            {teacherList?.filter(teacher => !teacher.schoolId)?.map(teacherItem => <SelectItem key={teacherItem.id} value={teacherItem.id}>{teacherItem.name} {teacherItem.surname}</SelectItem>)}
+                            {teacherList?.filter(teacher => !teacher.schoolId)?.map(teacherItem =>
+                                <SelectItem className='p-2!' key={teacherItem.id} value={teacherItem.id}>
+                                    {teacherItem.name} {teacherItem.surname}
+                                </SelectItem>)}
                         </SelectContent>
                     </Select>
                     <Button className='w-[100px] p-1! bg-primary-light cursor-pointer text-primary-dark hover:text-secondary-light' onClick={handleAddTeacher}>Add Teacher</Button>
@@ -246,51 +253,6 @@ const SchoolId = (props: Props) => {
                             </TableRow>)}
                     </TableBody>
                 </Table>
-            </div>
-
-
-            <div className="flex flex-row items-start justify-between gap-5">
-                {/* <div className="flex flex-col min-w-1/2">
-                    <div className="flex flex-col">
-                        <p>title: {currentSchool?.title}</p>
-                        <p>email: {currentSchool?.email}</p>
-                        <p>address: {currentSchool?.address}</p>
-                        <p>phone: {currentSchool?.phone}</p>
-                        <p>amount of classes: {currentSchool?.classes && currentSchool?.classes.length}</p>
-
-                        <Button onClick={() => setShowClasses(state => !state)} className='w-[200px]'>{showClasses ? "Hide" : "Show"} classes</Button>
-                    </div>
-
-
-
-                    {showClasses && <ul className='flex flex-col gap-3'>
-                        {currentSchool?.classes.map(classEl => <li key={classEl.id} className='bg-green-400 flex flex-row items-center justify-between'>
-                            <Link to={`/class/${classEl.id}`} className='text-2xl'>{classEl.num} {classEl.letter}</Link>
-                            <Button onClick={() => handleDeleteClass({ id: classEl.id })} className='w-[100px]' variant={'destructive'}>delete</Button>
-                        </li>)}
-                    </ul>}
-                </div> */}
-
-                {/* <div className="flex flex-col min-w-1/2 bg-red-600">
-                    <h1>teachers</h1>
-                    <ul className='h-full flex flex-col gap-3'>
-                        {currentSchool?.teachers && currentSchool.teachers.length >= 1 ?
-                            currentSchool.teachers.map(teacherItem =>
-                                <li key={teacherItem.id}>{teacherItem.name} {teacherItem.surname} <Button onClick={() => handleRemoveTeacherFromSchool(teacherItem.id)}>Delete</Button> </li>
-                            )
-                            : "No teachers"}
-                    </ul>
-
-                    <Select value={selectedTeacher} onValueChange={handleTeacherChange}>
-                        <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select a student" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {teacherList?.filter(teacher => !teacher.schoolId)?.map(teacherItem => <SelectItem key={teacherItem.id} value={teacherItem.id}>{teacherItem.name} {teacherItem.surname}</SelectItem>)}
-                        </SelectContent>
-                    </Select>
-                    <Button onClick={handleAddTeacher}>Add Teacher</Button>
-                </div> */}
             </div>
         </div>
     )

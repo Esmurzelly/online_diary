@@ -12,12 +12,14 @@ export interface User {
 }
 
 export interface Student extends User {
+    parents?: Parent[],
     parentIds?: string[],
     classId?: string | null,
     grades?: IGrade[];
 }
 
 export interface Teacher extends User {
+    school: ISchool;
     schoolId?: string | null;
     subjects?: ISubject[];
 }
@@ -58,7 +60,9 @@ export interface IClass {
     letter: string;
     num: number;
     schoolId: string;
-    subjects: ISubject[];
+    school?: ISchool;
+    subjects?: ISubject[];
+    students?: Student[];
 }
 
 export interface ISubject {
@@ -67,6 +71,7 @@ export interface ISubject {
     teacherId: string | null;
     teacher?: Teacher;
     classId: string;
+    class: IClass;
 }
 
 export interface ISchool {

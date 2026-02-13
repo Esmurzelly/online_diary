@@ -1,6 +1,10 @@
 import type { IGrade } from "@/types";
 
-export const averageGrade = (array: IGrade[], fixedNum: number, subjectId: string) => {
+export const averageGrade = (array: IGrade[] | undefined, fixedNum: number, subjectId: string | undefined) => {
+    if(!array || !fixedNum || !subjectId) {
+        return;
+    }
+
     const initialValue = 0;
 
     const sortedArray = array.filter(arrayItem => arrayItem.subjectId === subjectId);

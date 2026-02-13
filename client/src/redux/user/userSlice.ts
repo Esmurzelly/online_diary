@@ -251,6 +251,7 @@ export const userSlice = createSlice({
                 state.message = action.payload.message;
                 state.currentUser = action.payload.user;
                 if (state.users) {
+                    // @ts-ignore
                     state.users.push(action.payload.user);
                 }
                 state.loading = false;

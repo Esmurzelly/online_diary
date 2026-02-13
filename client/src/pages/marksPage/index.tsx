@@ -51,7 +51,7 @@ const MarksPage: React.FC = () => {
                 </TableHeader>
 
                 <TableBody>
-                    {currentUser && currentUser.class && currentUser.class.subjects.map((subjectItem: ISubject) => {
+                    {currentUser && currentUser.class && currentUser.class.subjects && currentUser.class.subjects.map((subjectItem: ISubject) => {
                         const grades: IGrade[] = 'grades' in currentUser ? (currentUser.grades ?? []) : [];
 
                         return (

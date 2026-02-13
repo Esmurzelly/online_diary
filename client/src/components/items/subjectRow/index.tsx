@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { TableCell, TableRow } from '@/components/ui/table';
-import type { IClass, ISubject, Role, Teacher } from '@/types';
+import type { ISubject, Role, Teacher } from '@/types';
 import React from 'react';
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { FiPlus } from 'react-icons/fi';

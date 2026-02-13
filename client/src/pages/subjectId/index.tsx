@@ -1,12 +1,11 @@
+import React, { useEffect, useMemo, useState } from 'react';
 import { getClassById } from '@/redux/class/classSlice';
 import type { RootState } from '@/redux/rootReducer';
 import { useAppDispatch } from '@/redux/store';
-import React, { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { Calendar } from "@/components/ui/calendar"
 import { getAllStudentsFromOneClass, removeGrade, setGrade, updateGrade } from '@/redux/student/studentSlice';
-import SetGradeForm from '@/components/items/setGradeForm';
 import Moment from 'react-moment';
 
 import {
@@ -14,7 +13,6 @@ import {
     TableBody,
     TableCaption,
     TableCell,
-    TableFooter,
     TableHead,
     TableHeader,
     TableRow,
@@ -51,98 +49,128 @@ import { IoBookOutline, IoCalendarSharp } from 'react-icons/io5';
 import { MdOutlineSchool } from 'react-icons/md';
 import { FaSchool } from 'react-icons/fa';
 import { FiSave } from 'react-icons/fi';
-import type { Student } from '@/types';
+import type { Student, Teacher } from '@/types';
 import { useForm } from 'react-hook-form';
+import { toast } from 'react-toastify';
+import Loader from '@/components/items/Loader';
 
-type Props = {}
+interface GradeFormData {
+    mark: number;
+    comment?: string;
+}
 
-const SubjectId = (props: Props) => {
-    const { id } = useParams();
-    const { subjects: subjectsOfTeacher, id: currentUserId } = useSelector((state: RootState) => state.user.currentUser);
-    const { num, letter, school } = useSelector((state: RootState) => state.class.classItem);
-    const { student, studentsList } = useSelector((state: RootState) => state.student);
+const SubjectId: React.FC = () => {
+    const { id } = useParams(); // id of subject from URL
+    const dispatch = useAppDispatch();
+
+    const currentUser = useSelector((state: RootState) => state.user.currentUser);
+    const classItem = useSelector((state: RootState) => state.class.classItem);
+    const { studentsList, loading } = useSelector((state: RootState) => state.student);
+
     const [date, setDate] = useState<Date | undefined>(new Date());
 
-    const currentSubject = subjectsOfTeacher.filter(subjectItem => subjectItem.id === id);
-    const currentClassId = currentSubject[0].classId;
+    const currentSubject = useMemo(() => {
+        if (!currentUser || !('subjects' in currentUser)) return null;
+        const teacher = currentUser as Teacher;
+        return teacher.subjects?.find(subject => subject.id === id)
+    }, [currentUser, id]);
 
-    const [changedValue, setChangedValue] = useState<number | undefined>();
+    const currentClassId = currentSubject?.classId;
+    // const currentClassId = currentSubject[0].classId;
+
+    const [changedValue, setChangedValue] = useState<number | string | undefined>();
     const [changedComment, setChangedComment] = useState<string>();
     const [selectedStudent, setSelectedStudent] = useState<Student | undefined>();
 
-    const dispatch = useAppDispatch();
-
     const {
         register,
-        watch,
         resetField,
         handleSubmit,
         formState: { errors }
-    } = useForm();
+    } = useForm<GradeFormData>();
 
-    const getClassByIdFunction = async () => {
+    const fetchData = async () => {
+        if (!currentClassId) {
+            console.error('No class ID available');
+            return;
+        };
+
         try {
             await dispatch(getClassById({ id: currentClassId })).unwrap();
             await dispatch(getAllStudentsFromOneClass({ classId: currentClassId })).unwrap();
         } catch (error) {
-            console.log('error in getClassByIdFunction', error);
+            console.error('Error fetching class data:', error);
+            toast.error('Failed to load class data');
         }
-    }
+    };
+
     useEffect(() => {
-        getClassByIdFunction();
-    }, []);
+        fetchData();
+    }, [currentClassId, dispatch]);
 
     const onUpdateGrade = async (studentId: string, gradeId: string) => {
+        if (!currentUser?.id || !id) return;
+
         try {
             if (changedValue || changedComment) {
-                const res = await dispatch(updateGrade({
+                await dispatch(updateGrade({
                     comment: changedComment,
                     value: Number(changedValue),
-                    teacherId: currentUserId,
+                    teacherId: currentUser.id,
                     studentId,
                     subjectId: id,
                     gradeId
                 })).unwrap();
-                console.log('res from onUpdateGrade - client', res);
             }
         } catch (error) {
-            console.log('error in onUpdateGrade', error)
+            console.error('Error updating grade:', error);
+            toast.error('Failed to update grade');
         }
     }
 
     const onDeleteGrade = async (studentId: string, gradeId: string) => {
+        if (!currentUser?.id || !id || !currentClassId) return;
+
         try {
             await dispatch(removeGrade({
-                teacherId: currentUserId,
+                teacherId: currentUser?.id,
                 gradeId,
                 studentId,
                 subjectId: id
-            }));
+            })).unwrap();
 
             await dispatch(getClassById({ id: currentClassId })).unwrap();
         } catch (error) {
-            console.log('error in onDeleteGrade', error)
+            console.error('Error deleting grade:', error);
+            toast.error('Failed to delete grade');
         }
     };
+    const onSetMarkToStudent = async (data: GradeFormData) => {
+        if (!currentSubject || !currentUser?.id || !selectedStudent) {
+            toast.error('Please select a student');
+            return;
+        }
 
-    const onSetMarkToStudent = async (data) => {
         try {
-            const res = await dispatch(setGrade({
+            await dispatch(setGrade({
                 value: data.mark,
-                comment: data.comment,
+                comment: data.comment || "",
                 dateTime: date,
                 studentId: selectedStudent.id,
-                subjectId: currentSubject[0].id,
-                teacherId: currentUserId,
+                subjectId: currentSubject.id,
+                teacherId: currentUser.id,
             }));
-
-            console.log('res client', res);
 
             resetField("mark");
             resetField("comment");
         } catch (error) {
-            console.log('error in setMrkToStudent', error);
+            console.error('Error setting grade:', error);
+            toast.error('Failed to add grade');
         }
+    };
+
+    if (loading || !currentUser) {
+        return <Loader />
     }
 
     return (
@@ -152,10 +180,10 @@ const SubjectId = (props: Props) => {
                     <IoBookOutline className='w-15 h-15 bg-secondary-dark/75 rounded-2xl text-black p-2!' />
 
                     <div className="flex flex-col items-start gap-1">
-                        <p className='font-medium text-2xl'>{currentSubject[0].title}</p>
+                        <p className='font-medium text-2xl'>{currentSubject?.title}</p>
                         <div className="flex items-center gap-5">
-                            <p className='flex items-center gap-2'><MdOutlineSchool className='w-4' /> {num}{letter}</p>
-                            <p className='flex items-center gap-2'><FaSchool className='w-4' /> {school.title}</p>
+                            <p className='flex items-center gap-2'><MdOutlineSchool className='w-4' /> {classItem?.num}{classItem?.letter}</p>
+                            <p className='flex items-center gap-2'><FaSchool className='w-4' /> {classItem?.school && classItem?.school.title}</p>
                         </div>
                     </div>
                 </div>
@@ -171,7 +199,10 @@ const SubjectId = (props: Props) => {
                             <div className="flex flex-col gap-2 w-full">
                                 <h1 className='font-medium'>Student</h1>
 
-                                <Select>
+                                <Select value={selectedStudent?.id} onValueChange={(value) => {
+                                    const student = studentsList?.find(s => s.id === value);
+                                    setSelectedStudent(student);
+                                }}>
                                     <SelectTrigger className="cursor-pointer w-full bg-secondary-light p-2!">
                                         <SelectValue placeholder="Select a student" />
                                     </SelectTrigger>
@@ -182,7 +213,7 @@ const SubjectId = (props: Props) => {
                                                 studentEl => <SelectItem
                                                     key={studentEl.id}
                                                     value={studentEl.id}
-                                                    onClick={() => setSelectedStudent(studentEl)}
+                                                    // onClick={() => setSelectedStudent(studentEl)}
                                                     className='cursor-pointer p-2!'
                                                 >
                                                     {studentEl.name} {studentEl.surname}
@@ -242,7 +273,7 @@ const SubjectId = (props: Props) => {
 
                     <div className="flex xl:flex-3 flex-col items-start justify-start bg-white rounded-2xl shadow-xl p-5! mt-5! xl:mt-0! gap-5">
                         <div className="">
-                            <h1 className='font-medium text-xl flex items-center gap-2'><FiSave className='w-6 text-primary-light' /> Students ({studentsList?.length})</h1>
+                            <h1 className='font-medium text-xl flex items-center gap-2'><FiSave className='w-6 text-primary-light' /> Students ({classItem?.students?.length})</h1>
                             <p className='text-sm mt-2!'>Student grades and summaries</p>
                         </div>
 
@@ -263,11 +294,11 @@ const SubjectId = (props: Props) => {
                             </TableHeader>
                             <TableBody>
                                 <Dialog>
-                                    {studentsList?.map(studentItem => {
-                                        const sortedGrades = useMemo(() => {
-                                            return [...(studentItem.grades.filter(gradeItem => gradeItem.subjectId === id) ?? [])]
-                                                .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-                                        }, [studentItem.grades]);
+                                    {studentsList && studentsList.length > 0 && studentsList?.map(studentItem => {
+                                        if (!studentItem.grades || !id) return null;
+
+                                        const sortedGrades = [...(studentItem.grades?.filter(gradeItem => gradeItem.subjectId === id) ?? [])]
+                                            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
                                         return <TableRow key={studentItem.id}>
                                             <TableCell className='py-5!'>{studentItem.name}</TableCell>
@@ -303,16 +334,18 @@ const SubjectId = (props: Props) => {
                                                                         done.
                                                                     </DialogDescription>
                                                                 </DialogHeader>
+
                                                                 <div className="grid gap-4">
                                                                     <div className="grid gap-3">
                                                                         <Label htmlFor="value">Grade</Label>
-                                                                        <Input id="value" name="value" className='p-2!' onChange={e => setChangedValue(e.target.value)} defaultValue={gradeItem.value} />
+                                                                        <Input id="value" name="value" className='p-2!' onChange={(e: React.ChangeEvent<HTMLInputElement>) => setChangedValue(e.target.value)} defaultValue={gradeItem.value} />
                                                                     </div>
                                                                     <div className="grid gap-3">
                                                                         <Label htmlFor="comment">Comment</Label>
-                                                                        <Input id="comment" name="comment" className='p-2!' onChange={e => setChangedComment(e.target.value)} defaultValue={gradeItem.comment} />
+                                                                        <Input id="comment" name="comment" className='p-2!' onChange={(e: React.ChangeEvent<HTMLInputElement>) => setChangedComment(e.target.value)} defaultValue={gradeItem.comment} />
                                                                     </div>
                                                                 </div>
+
                                                                 <DialogFooter>
                                                                     <DialogClose asChild>
                                                                         <Button className='w-[150px] cursor-pointer' variant="outline">Cancel</Button>

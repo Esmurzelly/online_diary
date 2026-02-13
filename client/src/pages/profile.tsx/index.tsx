@@ -22,8 +22,10 @@ import { MdOutlineEmail, MdOutlineLocalPhone, MdOutlineSchool } from "react-icon
 import { FiExternalLink } from "react-icons/fi";
 import { RiParentFill } from "react-icons/ri";
 import { FaAddressBook } from "react-icons/fa";
-
-type Props = {}
+import Loader from '@/components/items/Loader';
+import ButtonMailto from '@/components/items/buttonMailTo';
+import ButtonPhoneTo from '@/components/items/buttonPhoneTo';
+import type { Parent, Student, Teacher } from '@/types';
 
 type FormValues = {
     email: string;
@@ -35,149 +37,152 @@ type FormValues = {
     avatarUrl: string;
 }
 
-const Profile = (props: Props) => {
-    const { currentUser, role, message, users } = useSelector((state: RootState) => state.user);
-    const { schoolList } = useSelector((state: RootState) => state.school);
+const Profile: React.FC = () => {
+    const { currentUser, role, message, users, loading } = useSelector((state: RootState) => state.user);
+
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+
     const [showChildren, setShowChildren] = useState(false);
     const [childId, setChildId] = useState<string | undefined>();
+    const [showUsers, setShowUsers] = useState<boolean>(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+    const filePickerRef = useRef<HTMLInputElement>(null);
 
     const {
         handleSubmit,
         register,
         watch,
-        formState: { errors }
     } = useForm<FormValues>({
         defaultValues: {
-            name: currentUser?.name,
-            surname: currentUser?.surname,
+            name: currentUser?.name || "",
+            surname: currentUser?.surname || "",
             password: "",
-            email: currentUser?.email,
-            phone: currentUser?.phone,
-            address: currentUser?.address
-        }
+            email: currentUser?.email || "",
+            phone: currentUser?.phone || "",
+            address: currentUser?.address || "",
+        },
     });
-    const dispatch = useAppDispatch();
-    const navigate = useNavigate();
-    const [showUsers, setShowUsers] = useState<boolean>(false);
-
-    const filePicekerRef = useRef<HTMLInputElement>(null);
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     const handleAvatarClick = () => {
-        console.log(filePicekerRef.current)
-        filePicekerRef.current?.click();
+        filePickerRef.current?.click();
     };
 
-
-    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const reader = new FileReader();
         const selectedFile = e.target.files?.[0];
 
-        if (selectedFile) {
+        if (!selectedFile || !currentUser?.id || !role) return;
+
+        try {
             reader.readAsDataURL(selectedFile);
             setSelectedFile(selectedFile);
 
             const formData = new FormData();
             formData.append("avatar", selectedFile);
 
-            dispatch(updateUser({ formData, id: currentUser?.id, role })).unwrap();
+            await dispatch(updateUser({ formData, id: currentUser?.id, role })).unwrap();
+            await dispatch(getMe()).unwrap();
+        } catch (error) {
+            console.error('Error updating avatar:', error);
+            toast.error('Failed to update avatar');
         }
 
-        // reader.onload = (readerEvent) => {
-        //     if (selectedFile.type.includes("image")) {
-        //         console.log("readerEvent.target.result", readerEvent.target.result);
-        //     }
-        // };
-
-        // console.log('selectedFile', selectedFile) // ok!
-        // console.log('filePicekerRef', filePicekerRef); // ok!
-    }
+    };
 
     const handleDeleteUser = async () => {
+        if (!currentUser?.id || !role) return;
+
         try {
-            const res = await dispatch(removeUser({ id: currentUser?.id, role }));
-            console.log('res from client - remvoeUser', res);
+            await dispatch(removeUser({ id: currentUser?.id, role })).unwrap();
 
-            if (res.payload?.message === "Request failed with status code 404") {
-                console.log("ERRRORORROOR")
-                return;
-            }
-
+            toast.success('Account deleted successfully');
             navigate('/auth');
         } catch (error) {
-            console.log(`error in handleDeleteUser - ${error}`);
+            console.error('Error deleting user:', error);
+            toast.error('Failed to delete account');
         }
-    }
+    };
 
-    const handleSubmitForm: SubmitHandler<FormValues> = async () => {
-        console.log('tututuu')
+    const handleSubmitForm: SubmitHandler<FormValues> = async (data) => {
+        if (!currentUser?.id || !role) return;
+
         try {
             const formData = new FormData();
             formData.append("name", watch('name'));
             formData.append("surname", watch('surname'));
             formData.append("email", watch('email'));
-            formData.append("phone", watch('phone'));
-            formData.append("address", watch('address'));
+
+            if (data.phone) formData.append('phone', data.phone);
+            if (data.address) formData.append('address', data.address);
 
             if (watch('password') && watch('password').length > 0) {
                 formData.append("password", watch('password'));
             }
 
-            // console.log("FORMDATA from client ->", [...formData.entries()]); // ok!
-            // console.log('selectedFile', selectedFile); // ok!
-
-            const res = await dispatch(updateUser({ formData, id: currentUser?.id, role }));
-            console.log('res from form in client', res);
+            await dispatch(updateUser({ formData, id: currentUser?.id, role })).unwrap();
+            await dispatch(getMe()).unwrap();
         } catch (error) {
-            console.log(`error in handleSubmit - ${error}`);
+            console.error('Error updating profile:', error);
+            toast.error('Failed to update profile');
         }
     };
 
     const handleFetchUsers = async () => {
         try {
-            const res = await dispatch(getAllUsers());
+            await dispatch(getAllUsers()).unwrap();
             setShowUsers(state => !state);
         } catch (error) {
-            console.log(`error in handleFetchUsers - ${error}`);
+            console.error('Error fetching users:', error);
+            toast.error('Failed to fetch users');
         }
-    }
+    };
 
-    const handleDeleteUserByAdmin = async ({ id }: { id: string | undefined }) => {
+    const handleDeleteUserByAdmin = async ({ id }: { id: string }) => {
         try {
-            await dispatch(removeUserByAdmin({ id }));
-            dispatch(getAllUsers());
+            await dispatch(removeUserByAdmin({ id })).unwrap();
+            await dispatch(getAllUsers()).unwrap();
         } catch (error) {
-            console.log(`error in handleDeleteUserByAdmin - ${error}`);
+            console.error('Error deleting user:', error);
+            toast.error('Failed to delete user');
         }
-    }
+    };
 
     const onAddParentToChild = async (studentId: string) => {
+        if (!currentUser?.id || !childId) {
+            toast.error('Please select a child');
+            return;
+        }
+
         try {
             await dispatch(addParentToChild({
                 parentId: currentUser?.id,
                 studentId,
-            }));
+            })).unwrap();
         } catch (error) {
-            console.log(`error in onAddParentToChild - ${error}`);
-        }
-    }
-
-    const onRemoveParentToChild = async (studentId: string) => {
-        try {
-            const res = await dispatch(removeParentToChild({
-                parentId: currentUser?.id,
-                studentId,
-            }));
-
-            console.log('res in onAddParentToChild', res);
-        } catch (error) {
-            console.log(`error in onAddParentToChild - ${error}`);
+            console.error('Error adding child:', error);
+            toast.error('Failed to add child');
         }
     };
 
-    const handleUserIdChange = (studentId: string | undefined) => {
+    const onRemoveParentToChild = async (studentId: string) => {
+        if (!currentUser?.id) return;
+
+        try {
+            await dispatch(removeParentToChild({
+                parentId: currentUser?.id,
+                studentId,
+            })).unwrap()
+        } catch (error) {
+            console.error('Error removing child:', error);
+            toast.error('Failed to remove child');
+        }
+    };
+
+    const handleUserIdChange = (studentId: string) => {
         setChildId(studentId)
-    }
+    };
 
     useEffect(() => {
         if (message) {
@@ -186,12 +191,24 @@ const Profile = (props: Props) => {
     }, [message]);
 
     useEffect(() => {
-        dispatch(getAllSchools()).unwrap();
+        dispatch(getAllSchools());
     }, []);
 
-    if (!currentUser) {
-        return <h1>Loading...</h1>
-    }
+    if (!currentUser || loading) {
+        return <Loader />
+    };
+
+    const isStudent = (user: typeof currentUser): user is Student => {
+        return 'classId' in user && 'grades' in user
+    };
+
+    const isParent = (user: typeof currentUser): user is Parent => {
+        return 'childrenIds' in user && 'children' in user;
+    };
+
+    const isTeacher = (user: typeof currentUser): user is Teacher => {
+        return 'schoolId' in user && 'subjects' in user;
+    };
 
     return (
         <div className='w-full h-screen flex flex-col items-center gap-3 font-inter px-8! py-3!'>
@@ -217,13 +234,13 @@ const Profile = (props: Props) => {
                                         Change your data here
                                     </p>
                                 </div>
+
                                 <div className="grid gap-2">
                                     <div className="grid grid-cols-3 items-center gap-4">
                                         <Label htmlFor="name">Name</Label>
                                         <Input
                                             id="name"
                                             type='text'
-                                            defaultValue={currentUser?.name}
                                             className="col-span-2 h-8"
                                             {...register("name")}
                                         />
@@ -233,7 +250,6 @@ const Profile = (props: Props) => {
                                         <Input
                                             id="password"
                                             type='text'
-                                            defaultValue={''}
                                             className="col-span-2 h-8"
                                             {...register("password")}
                                         />
@@ -243,7 +259,6 @@ const Profile = (props: Props) => {
                                         <Input
                                             id="surname"
                                             type='text'
-                                            defaultValue={currentUser?.surname}
                                             className="col-span-2 h-8"
                                             {...register("surname")}
                                         />
@@ -253,7 +268,6 @@ const Profile = (props: Props) => {
                                         <Input
                                             id="email"
                                             type='email'
-                                            defaultValue={currentUser?.email}
                                             className="col-span-2 h-8"
                                             {...register("email")}
                                         />
@@ -262,7 +276,6 @@ const Profile = (props: Props) => {
                                         <Label htmlFor="adress">Adress</Label>
                                         <Input
                                             id="adress"
-                                            defaultValue={currentUser?.address}
                                             className="col-span-2 h-8"
                                             {...register("address")}
                                         />
@@ -271,27 +284,13 @@ const Profile = (props: Props) => {
                                         <Label htmlFor="phone">Phone</Label>
                                         <Input
                                             id="phone"
-                                            defaultValue={currentUser?.phone}
                                             className="col-span-2 h-8"
                                             {...register("phone")}
                                         />
                                     </div>
-                                    {/* <div className="grid grid-cols-3 items-center gap-4">
-                                        <Label htmlFor="avatar">Avatar</Label>
-                                        <Button type='button' className='cursor-pointer' onClick={handleAvatarClick}>Change avatar</Button>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            hidden
-                                            ref={filePicekerRef}
-                                            onChange={handleAvatarChange}
-                                        />
-                                    </div> */}
-
                                 </div>
                             </div>
-                            {/* <Button onClick={() => console.log('change temp button')} className='cursor-pointer z-50' type='button' disabled={role === undefined || role === 'none' || role === null || !role}>Change temp</Button> */}
-                            <Button className='cursor-pointer' type='submit' disabled={role === undefined || role === 'none' || role === null || !role}>Change Data</Button>
+                            <Button className='cursor-pointer px-2!' type='submit' disabled={role === undefined || role === 'none' || role === null || !role}>Change Data</Button>
                         </form>
                     </PopoverContent>
                 </Popover>
@@ -300,41 +299,43 @@ const Profile = (props: Props) => {
             <div className="flex flex-col min-w-full text-xl items-center justify-between gap-2 bg-white rounded-2xl shadow-xl p-5!">
                 {
                     currentUser?.avatarUrl
-                        ? <Avatar onClick={handleAvatarClick} className='size-28'>
-                            <AvatarImage src={`http://localhost:3000${currentUser?.avatarUrl}`} />
+                        ? <Avatar onClick={handleAvatarClick} className='size-28 cursor-pointer'>
+                            <AvatarImage src={`http://localhost:3000${currentUser.avatarUrl}`} />
                             <AvatarFallback>avatarUrl</AvatarFallback>
                         </Avatar>
-                        : <div onClick={handleAvatarClick} className="flex items-center justify-center uppercase text-white text-3xl bg-secondary-dark w-28 h-28 rounded-full">
-                            {currentUser.name ? currentUser.name.split('')[0] : "A"}
-                            {currentUser.name ? currentUser.surname.split('')[0] : "A"}
+
+                        : <div onClick={handleAvatarClick} className="flex items-center justify-center uppercase cursor-pointer text-white text-3xl bg-secondary-dark w-28 h-28 rounded-full">
+                            {currentUser.name?.[0] || "A"}
+                            {currentUser.surname?.[0] || "A"}
                         </div>
                 }
                 <input
                     type="file"
                     accept="image/*"
                     hidden
-                    ref={filePicekerRef}
+                    ref={filePickerRef}
                     onChange={handleAvatarChange}
                 />
-                <p>{currentUser?.name} {currentUser?.surname}</p>
+                <p>{currentUser.name} {currentUser.surname}</p>
 
-                <p className='bg-secondary-dark text-secondary-light px-4! py-1! rounded-3xl text-sm capitalize'>{role}</p>
-                <p className='flex items-center gap-2 text-secondary-dark text-lg'><MdOutlineEmail /> {currentUser?.email}</p>
-                <p className='flex items-center gap-2 text-secondary-dark text-lg'><MdOutlineLocalPhone /> {currentUser?.phone || "no phone"}</p>
-                <p className='flex items-center gap-2 text-secondary-dark text-lg'><FaAddressBook /> {currentUser?.address || "no address"}</p>
+                <div className="space-y-2! text-center">
+                    <p className='bg-secondary-dark text-secondary-light px-4! py-1! rounded-3xl text-sm capitalize'>{role}</p>
+                    <ButtonMailto Icon={MdOutlineEmail} label={currentUser?.email} mailto={`mailto:${currentUser?.email}`} />
+                    <ButtonPhoneTo Icon={MdOutlineLocalPhone} label={currentUser?.phone || "no phone"} tel={`tel:${currentUser?.phone}`} />
+                    <p className='flex items-center gap-2 text-secondary-dark text-lg'><FaAddressBook /> {currentUser?.address || "no address"}</p>
+                </div>
 
                 {role === 'teacher' && <Link className='flex items-center text-sm rounded-xl gap-1 bg-primary-light px-4! py-1!' to={`/subjects`}>Subjects</Link>}
             </div>
 
-
-            {role === 'parent' &&
+            {isParent(currentUser) && (
                 <div className="flex flex-col min-w-full text-xl items-center justify-between gap-2 bg-white rounded-2xl shadow-xl p-5!">
                     <div className="text-xl w-full">
                         <h1 className='flex items-center gap-2 mb-1!'><RiParentFill className='text-primary-light' /> Children</h1>
                         <p className='text-sm'>Connected children accounts</p>
 
                         <div className="">
-                            <div className='flex flex-col items-start items-center gap-2'>
+                            <div className='flex flex-col items-start gap-2'>
                                 <Button className='px-2! cursor-pointer' onClick={() => setShowChildren(state => !state)}>{showChildren ? "Hide" : "Show"} children</Button>
 
                                 {showChildren &&
@@ -347,8 +348,7 @@ const Profile = (props: Props) => {
                                                 <SelectGroup>
                                                     <SelectLabel>Parents</SelectLabel>
 
-                                                    {/* mutable array? */}
-                                                    {users?.filter(userEl => userEl.parentIds).map(userEl =>
+                                                    {users?.filter((userEl: Student) => userEl.parentIds).map(userEl =>
                                                         <SelectItem key={userEl.id} className='w-full py-2! px-1!' value={userEl.id}>
                                                             {userEl.name}
                                                         </SelectItem>)}
@@ -356,6 +356,7 @@ const Profile = (props: Props) => {
                                             </SelectContent>
                                         </Select>
 
+                                        {/* @ts-ignore */}
                                         <Button className='px-2! cursor-pointer' onClick={() => onAddParentToChild(childId)} variant={'outline'}>Add Child</Button>
                                     </div>
                                 }
@@ -364,8 +365,8 @@ const Profile = (props: Props) => {
                     </div>
 
                     <div className='flex flex-col items-start w-full gap-3'>
-                        {currentUser && currentUser?.children && currentUser?.children.length > 0 ? (
-                            currentUser?.children.map(childrenEl => (
+                        {currentUser && currentUser.children && currentUser.children.length > 0 ? (
+                            currentUser.children.map(childrenEl => (
                                 <div key={childrenEl.id} className="flex text-sm items-center gap-2 justify-between w-full">
                                     <Avatar className=''>
                                         <AvatarImage src={`http://localhost:3000${childrenEl?.avatarUrl}`} />
@@ -388,9 +389,9 @@ const Profile = (props: Props) => {
                         ) : "no parents"}
                     </div>
                 </div>
-            }
+            )}
 
-            {role === 'teacher' && <div className="flex flex-col min-w-full text-xl items-center justify-between gap-4 bg-white rounded-2xl shadow-xl p-5!">
+            {isTeacher(currentUser) && <div className="flex flex-col min-w-full text-xl items-center justify-between gap-4 bg-white rounded-2xl shadow-xl p-5!">
                 <div className="text-xl w-full">
                     <h1 className='flex items-center gap-2 mb-1!'><MdOutlineSchool className='text-primary-light' /> Teacher's Information</h1>
                     <p className='text-sm'>Your current classes info</p>
@@ -408,8 +409,7 @@ const Profile = (props: Props) => {
                 )}
             </div>}
 
-
-            {role === 'student' && <div className="flex flex-col min-w-full text-xl items-center justify-between gap-4 bg-white rounded-2xl shadow-xl p-5!">
+            {isStudent(currentUser) && <div className="flex flex-col min-w-full text-xl items-center justify-between gap-4 bg-white rounded-2xl shadow-xl p-5!">
                 <div className="text-xl w-full">
                     <h1 className='flex items-center gap-2 mb-1!'><MdOutlineSchool className='text-primary-light' /> Class Information</h1>
                     <p className='text-sm'>Your current class assignment</p>
@@ -420,47 +420,43 @@ const Profile = (props: Props) => {
                         <div className="text-lg flex items-center justify-between w-full">
                             <div className="">
                                 <p className='font-medium'>Class {currentUser.class?.num} {currentUser.class?.letter}</p>
-                                <p className='text-sm'>school's title: {currentUser.class?.school.title}</p>
+                                <p className='text-sm'>school's title: {currentUser.class && currentUser.class.school && currentUser.class?.school.title}</p>
                             </div>
                             <Link className='flex items-center text-sm rounded-xl gap-1 bg-primary-light px-2! py-1!' to={`/class/${currentUser.class?.id}`}>View class <FiExternalLink /></Link>
                         </div>
                     )
                         : "without class"}
-
                 </div>
 
                 <Link className='w-full flex items-center justify-center text-sm rounded-xl gap-1 bg-primary-light px-2! py-1!' to={'/marks'}>See your marks</Link>
             </div>}
 
-
-            {role === 'student' && (
-                <div className="flex flex-col min-w-full text-xl items-center justify-between gap-2 bg-white rounded-2xl shadow-xl p-5!">
-                    <div className="text-xl w-full">
-                        <h1 className='flex items-center gap-2 mb-1!'><RiParentFill className='text-primary-light' /> Parents / Guardians</h1>
-                        <p className='text-sm'>Connected parent accounts</p>
-                    </div>
-
-                    <div className='flex flex-col items-start w-full gap-3'>
-                        {currentUser && currentUser?.parents && currentUser?.parents.length > 0 ? (
-                            currentUser?.parents.map(parentEl => (
-                                <div key={parentEl.id} className="flex text-sm items-center gap-2 justify-between w-full">
-                                    <Avatar className=''>
-                                        <AvatarImage src={`http://localhost:3000${currentUser?.avatarUrl}`} />
-                                        <AvatarFallback>avatarUrl</AvatarFallback>
-                                    </Avatar>
-
-                                    <div className="flex flex-col items-start">
-                                        <h1>{parentEl.name} {parentEl.surname}</h1>
-                                        <p>{parentEl.email}</p>
-                                    </div>
-
-                                    <Link className='flexbg-secondary-light px-4! py-2! rounded-2xl text-black' to={`/profile/${parentEl.id}`}>View parent</Link>
-                                </div>
-                            ))
-                        ) : "no parents"}
-                    </div>
+            {isStudent(currentUser) && <div className="flex flex-col min-w-full text-xl items-center justify-between gap-2 bg-white rounded-2xl shadow-xl p-5!">
+                <div className="text-xl w-full">
+                    <h1 className='flex items-center gap-2 mb-1!'><RiParentFill className='text-primary-light' /> Parents / Guardians</h1>
+                    <p className='text-sm'>Connected parent accounts</p>
                 </div>
-            )}
+
+                <div className='flex flex-col items-start w-full gap-3'>
+                    {currentUser && currentUser?.parents && currentUser?.parents.length > 0 ? (
+                        currentUser?.parents.map(parentEl => (
+                            <div key={parentEl.id} className="flex text-sm items-center gap-2 justify-between w-full">
+                                <Avatar className=''>
+                                    <AvatarImage src={`http://localhost:3000${parentEl?.avatarUrl}`} />
+                                    <AvatarFallback>avatarUrl</AvatarFallback>
+                                </Avatar>
+
+                                <div className="flex flex-col items-start">
+                                    <h1>{parentEl.name} {parentEl.surname}</h1>
+                                    <p>{parentEl.email}</p>
+                                </div>
+
+                                <Link className='flexbg-secondary-light px-4! py-2! rounded-2xl text-black' to={`/profile/${parentEl.id}`}>View parent</Link>
+                            </div>
+                        ))
+                    ) : "no parents"}
+                </div>
+            </div>}
 
             {role === 'admin' && (
                 <>
