@@ -1,5 +1,11 @@
 version: '3.8'
 services:
+  frontend:
+    build: client/
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
   server:
     build: server/
     ports:

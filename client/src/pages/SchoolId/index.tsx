@@ -33,6 +33,7 @@ const SchoolId: React.FC = () => {
     const [selectedTeacher, setSelectedTeacher] = useState<string | undefined>();
     const { teacherList } = useSelector((state: RootState) => state.teacher);
     const { loading, message, currentSchool } = useSelector((state: RootState) => state.school);
+    const { role } = useSelector((state: RootState) => state.user);
     const {
         register,
         handleSubmit,
@@ -136,11 +137,11 @@ const SchoolId: React.FC = () => {
                 </div>
             </div>
 
-            <form className="bg-white rounded-2xl p-3! mt-3! shadow-xl" onSubmit={handleSubmit(handleAddClassToSchool)}>
+            {role === 'admin' && <form className="bg-white rounded-2xl p-3! mt-3! shadow-xl" onSubmit={handleSubmit(handleAddClassToSchool)}>
                 <div className="flex flex-col gap-2">
                     <div className="">
                         <h1 className='flex items-center gap-1 font-medium text-xl'><SiGoogleclassroom className='w-6 h-6 text-primary-light' /> Create New School</h1>
-                        <p className='text-sm'>Add a new school to the system</p>
+                        <p className='text-sm'>Add a new class to the school</p>
                     </div>
 
                     <div className="flex flex-row gap-5">
@@ -174,7 +175,7 @@ const SchoolId: React.FC = () => {
                     <GoPlus className='w-6 h-6' />
                     <p>Create Class</p>
                 </Button>
-            </form>
+            </form>}
 
             <div className="bg-white rounded-2xl p-3! mt-3! shadow-xl">
                 <div className="flex items-center gap-3">
@@ -235,7 +236,7 @@ const SchoolId: React.FC = () => {
                         <TableRow>
                             <TableHead className='text-primary-light'>Name</TableHead>
                             <TableHead className='text-primary-light'>Surname</TableHead>
-                            <TableHead className="text-right text-primary-light">Actions</TableHead>
+                            {role === 'admin' && <TableHead className="text-right text-primary-light">Actions</TableHead>}
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -247,9 +248,9 @@ const SchoolId: React.FC = () => {
 
                                 <TableCell className='py-3!'>{teacherEl.surname}</TableCell>
 
-                                <TableCell className='text-right flex justify-end py-3!'>
+                                {role === 'admin' && <TableCell className='text-right flex justify-end py-3!'>
                                     <FaTrashAlt className='cursor-pointer text-red-600 w-8 h-8' onClick={() => handleRemoveTeacherFromSchool(teacherEl.id)} />
-                                </TableCell>
+                                </TableCell>}
                             </TableRow>)}
                     </TableBody>
                 </Table>

@@ -38,7 +38,7 @@ const School: React.FC = () => {
 
     useEffect(() => {
         if (message) toast(message);
-    }, [message]);
+    }, []);
 
     useEffect(() => {
         dispatch(getAllSchools());

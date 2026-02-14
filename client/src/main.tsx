@@ -1,29 +1,33 @@
-import { StrictMode } from 'react'
+import { lazy, StrictMode, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import { Provider } from 'react-redux'
 import { persistor, store } from './redux/store.ts'
 import { PersistGate } from 'redux-persist/integration/react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import Auth from './pages/auth/index.tsx'
-import Layout from './components/items/layout/layout.tsx'
-import UserProfile from './pages/userProfile/index.tsx'
-import Home from './pages/home/index.tsx'
 import { ToastContainer } from 'react-toastify'
-import Profile from './pages/profile.tsx/index.tsx'
 import 'react-toastify/dist/ReactToastify.css';
-import School from './pages/school/index.tsx'
-import SchoolId from './pages/SchoolId/index.tsx'
-import Subjects from './pages/subjects/index.tsx'
-import SubjectId from './pages/subjectId/index.tsx'
-import MarksPage from './pages/marksPage/index.tsx'
-import ClassPage from './pages/classPage/index.tsx'
+import Layout from './components/items/layout/layout.tsx'
 import ProtectedRoute from './components/items/protectedRoute/index.tsx'
+import Loader from './components/items/Loader/index.tsx'
+
+const AuthComponent = lazy(() => import('@/pages/auth/index.tsx'));
+const UserProfileComponent = lazy(() => import('@/pages/userProfile/index.tsx'));
+const HomeComponent = lazy(() => import('@/pages/home/index.tsx'));
+const ProfileComponent = lazy(() => import('@/pages/profile/index.tsx'));
+const SchoolComponent = lazy(() => import('@/pages/school/index.tsx'));
+const SchoolIdComponent = lazy(() => import('@/pages/SchoolId/index.tsx'));
+const SubjectsComponent = lazy(() => import('@/pages/subjects/index.tsx'));
+const SubjectIdComponent = lazy(() => import('@/pages/subjectId/index.tsx'));
+const MarkPageComponent = lazy(() => import('@/pages/marksPage/index.tsx'));
+const ClassPageComponent = lazy(() => import('@/pages/classPage/index.tsx'));
 
 const router = createBrowserRouter([
   {
     path: '/auth',
-    element: <Auth />
+    element: <Suspense fallback={<Loader />}>
+      <AuthComponent />
+    </Suspense>
   },
   {
     path: '/',
@@ -31,37 +35,51 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <Home />
+        element: <Suspense fallback={<Loader />}>
+          <HomeComponent />
+        </Suspense>
       },
       {
         path: "/profile",
-        element: <Profile />,
+        element: <Suspense fallback={<Loader />}>
+          <ProfileComponent />
+        </Suspense>
       },
       {
         path: "/profile/:id",
-        element: <UserProfile />
+        element: <Suspense fallback={<Loader />}>
+          <UserProfileComponent />
+        </Suspense>
       },
       {
         "path": "/school",
         element: (
           <ProtectedRoute allowRoles={["admin"]}>
-            <School />
+            <Suspense fallback={<Loader />}>
+              <SchoolComponent />
+            </Suspense>
           </ProtectedRoute>
         )
       },
       {
         path: "/school/:id",
-        element: <SchoolId />
+        element: <Suspense fallback={<Loader />}>
+          <SchoolIdComponent />
+        </Suspense>
       },
       {
         path: "/class/:id",
-        element: <ClassPage />
+        element: <Suspense fallback={<Loader />}>
+          <ClassPageComponent />
+        </Suspense>
       },
       {
         path: "/subjects",
         element: (
           <ProtectedRoute allowRoles={["admin", "teacher"]}>
-            <Subjects />
+            <Suspense fallback={<Loader />}>
+              <SubjectsComponent />
+            </Suspense>
           </ProtectedRoute>
         )
       },
@@ -69,13 +87,17 @@ const router = createBrowserRouter([
         path: "/subject/:id",
         element: (
           <ProtectedRoute allowRoles={["admin", "teacher"]}>
-            <SubjectId />
+            <Suspense fallback={<Loader />}>
+              <SubjectIdComponent />
+            </Suspense>
           </ProtectedRoute>
         )
       },
       {
         path: "/marks",
-        element: <MarksPage />
+        element: <Suspense fallback={<Loader />}>
+          <MarkPageComponent />
+        </Suspense>
       },
     ]
   }

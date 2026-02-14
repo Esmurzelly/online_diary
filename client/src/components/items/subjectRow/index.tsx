@@ -35,14 +35,14 @@ const SubjectRow: React.FC<SubjectRowProps> = ({
 
     return (
         <TableRow key={subjectItem.id}>
-            <TableCell className="max-w-[100px]">
+            <TableCell className="max-w-[100px] py-5!">
                 <p className="text-sm h-full text-wrap">{subjectItem.title}</p>
             </TableCell>
 
-            <TableCell className="flex flex-col items-start gap-2 p-2!">
+            <TableCell className="flex flex-col items-start gap-2 py-5!">
                 {hasTeacher ? (
                     <Link
-                        className="font-semibold hover:underline"
+                        className="font-semibold hover:underline text-sm h-full text-wrap"
                         to={`/profile/${subjectItem.teacher?.id}`}
                     >
                         {subjectItem.teacher?.name} {subjectItem.teacher?.surname}

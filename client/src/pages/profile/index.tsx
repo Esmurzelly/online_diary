@@ -184,11 +184,11 @@ const Profile: React.FC = () => {
         setChildId(studentId)
     };
 
-    useEffect(() => {
-        if (message) {
-            toast(message)
-        }
-    }, [message]);
+    // useEffect(() => {
+    //     if (message) {
+    //         toast(message)
+    //     }
+    // }, []);
 
     useEffect(() => {
         dispatch(getAllSchools());

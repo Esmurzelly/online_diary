@@ -5,19 +5,14 @@ import type { RootState } from '@/redux/rootReducer';
 import { useAppDispatch } from '@/redux/store';
 import { logOut } from '@/redux/user/userSlice';
 import { useSelector } from 'react-redux';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { RxAvatar, RxHamburgerMenu } from "react-icons/rx";
 import { RxCross2 } from "react-icons/rx";
 import Modal from '../modal';
-import { useLocation } from 'react-router-dom';
 import { FaHome, FaSchool } from 'react-icons/fa';
 import NavItem from '../navItem';
-import { MdPlayLesson } from 'react-icons/md';
-import { IoBookOutline } from 'react-icons/io5';
 
-type Props = {}
-
-const Header = (props: Props) => {
+const Header: React.FC = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [isTopOfPage, setIsTopOfPage] = useState<boolean>(true);
   const headerRef = useRef<HTMLDivElement>(null);

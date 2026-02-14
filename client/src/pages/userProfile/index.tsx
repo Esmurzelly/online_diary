@@ -22,7 +22,7 @@ const UserProfile: React.FC = () => {
   useEffect(() => {
     // @ts-ignore
     dispatch(getUserById({ id })).then(el => setUser(el?.payload?.user));
-    if (message) toast(message);
+    // if (message) toast(message);
   }, []);
 
   if (loading || !user) {
@@ -31,7 +31,7 @@ const UserProfile: React.FC = () => {
 
   return (
     <div className='w-full h-screen flex flex-col items-center gap-3 font-inter px-8! py-3! overflow-x-hidden'>
-      <h1>userProfile</h1>
+      <h1>User profile</h1>
 
       <div className="flex flex-col min-w-full text-xl items-center justify-between gap-2 bg-white rounded-2xl shadow-xl p-5!">
         {

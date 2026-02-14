@@ -61,13 +61,13 @@ const ClassPage: React.FC = () => {
         subjectItem => !classSubjectTitleSet.has(subjectItem)
     );
 
-    useEffect(() => {
-        if (classMessage) toast(classMessage);
-    }, [classMessage]);
+    // useEffect(() => {
+    //     if (classMessage) toast(classMessage);
+    // }, []);
 
-    useEffect(() => {
-        if (teacherMessage) toast(teacherMessage);
-    }, [teacherMessage]);
+    // useEffect(() => {
+    //     if (teacherMessage) toast(teacherMessage);
+    // }, []);
 
     useEffect(() => {
         if (id) {
@@ -269,13 +269,12 @@ const ClassPage: React.FC = () => {
                             </>
                             }
 
-                            <div className="flex flex-col grow mt-3!">
+                            <div className="flex flex-col grow">
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead>Subject</TableHead>
                                             <TableHead>Teacher</TableHead>
-                                            <TableHead className='text-right'>Action</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -338,11 +337,11 @@ const ClassPage: React.FC = () => {
                                         <TableRow key={studentItem.id}>
                                             <TableCell className='py-5!'><Link to={`/profile/${studentItem.id}`}>{studentItem.name}</Link></TableCell>
                                             <TableCell className='py-5!'><Link to={`/profile/${studentItem.id}`}>{studentItem.surname}</Link></TableCell>
-                                            <TableCell className='text-right py-5!'>
+                                            {role === 'teacher' || role === 'admin' && <TableCell className='text-right py-5!'>
                                                 <Button className='cursor-pointer' onClick={() => handleRemoveStudent(studentItem.id)} variant={'ghost'}>
                                                     <FaRegTrashAlt className='text-red-700' />
                                                 </Button>
-                                            </TableCell>
+                                            </TableCell>}
                                         </TableRow>
                                     )}
                                 </TableBody>

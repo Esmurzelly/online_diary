@@ -77,7 +77,7 @@ const LoginComponent = ({ role }: Props) => {
                     />
                 </div>
 
-                <Button className='w-full mt-3! bg-primary-light text-primary-dark h-12' disabled={!role || role === undefined} type='submit'>Sign in</Button>
+                <button className='w-full mt-3! cursor-pointer rounded-sm hover:bg-primary-light bg-primary-light/70 text-primary-dark h-12' disabled={!role || role === undefined} type='submit'>Sign in</button>
             </form>
         </div>
     )

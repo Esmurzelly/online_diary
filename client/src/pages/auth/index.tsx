@@ -59,7 +59,7 @@ const Auth: React.FC = () => {
       <div className="flex flex-col gap-7">
         <div className="flex flex-col gap-2 items-center text-center">
           <img src={'/logo.png'} className='w-32' alt="LogoPng" />
-          <h1 className='text-2xl'>Online Diary</h1>
+          <h1 className='text-2xl'>"Online Diary"</h1>
           <p className='text-xl'>School Management Platform</p>
         </div>
 

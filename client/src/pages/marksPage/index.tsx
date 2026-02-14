@@ -21,7 +21,7 @@ const MarksPage: React.FC = () => {
 
     useEffect(() => {
         if (message) toast(message)
-    }, [message]);
+    }, []);
 
     if (role !== 'student') {
         return <div>No access</div>

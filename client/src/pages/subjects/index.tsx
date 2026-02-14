@@ -30,9 +30,9 @@ const Subjects: React.FC = () => {
         return teacher.subjects
     }, [user]);
 
-    useEffect(() => {
-        if (user.message) toast(user.message);
-    }, [user.message]);
+    // useEffect(() => {
+    //     if (user.message) toast(user.message);
+    // }, [user.message]);
 
     if (user.loading || !user.currentUser || !subjectsOfTeacher) {
         return <Loader />

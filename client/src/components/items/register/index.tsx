@@ -62,31 +62,31 @@ const RegisterComponent = ({ role }: Props) => {
         }
     }
 
+    if(role === 'admin') {
+        return <h1>Signing up for Admins is restricted</h1>
+    }
+
     return (
         <div className='flex flex-col gap-4'>
             <form className='mt-5' onSubmit={handleSubmit(handleSubmitForm)}>
                 <div className='flex flex-col'>
-                    {role !== 'admin' &&
-                        <div className='flex flex-col'>
-                            <FormField
-                                title='Name'
-                                Icon={MdDriveFileRenameOutline}
-                                inputType='text'
-                                register={register}
-                                registerName='name'
-                                errorType={errors.name}
-                            />
+                    <FormField
+                        title='Name'
+                        Icon={MdDriveFileRenameOutline}
+                        inputType='text'
+                        register={register}
+                        registerName='name'
+                        errorType={errors.name}
+                    />
 
-                            <FormField
-                                title='Surname'
-                                Icon={MdOutlineDriveFileRenameOutline}
-                                inputType='text'
-                                register={register}
-                                registerName='surname'
-                                errorType={errors.surname}
-                            />
-                        </div>
-                    }
+                    <FormField
+                        title='Surname'
+                        Icon={MdOutlineDriveFileRenameOutline}
+                        inputType='text'
+                        register={register}
+                        registerName='surname'
+                        errorType={errors.surname}
+                    />
 
                     <FormField
                         title='Email'
@@ -107,7 +107,7 @@ const RegisterComponent = ({ role }: Props) => {
                     />
                 </div>
 
-                <Button className='w-full mt-3! bg-primary-light text-primary-dark h-12' disabled={!role || role === undefined} type='submit'>Sign up</Button>
+                <button className='w-full mt-3! cursor-pointer rounded-sm hover:bg-primary-light bg-primary-light/70 text-primary-dark h-12' disabled={!role || role === undefined} type='submit'>Sign up</button>
             </form>
         </div>
     )
